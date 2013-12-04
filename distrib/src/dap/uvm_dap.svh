@@ -26,6 +26,7 @@
 
 // Set/Get DAPS
  `include "dap/uvm_set_get_dap_base.svh"
+ `include "dap/uvm_simple_lock_dap.svh"
  `include "dap/uvm_get_to_lock_dap.svh"
  `include "dap/uvm_set_before_get_dap.svh"
 

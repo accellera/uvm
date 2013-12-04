@@ -40,9 +40,10 @@ class test extends uvm_test;
 
     p = process::self();
     p.srandom(100);
+
     d = new;
     void'(d.randomize());
-    $display("Pass1 d.x: %h",d.x);
+    $display("Pass1 d.x: 0x%h",d.x);
     result = d.x;
 
 
@@ -66,7 +67,6 @@ class test extends uvm_test;
 
     p.srandom(100);
 
-
     `uvm_info_context_begin("TEST_A", "Message A...", UVM_LOW, urm1)
       `uvm_message_add_tag("color", "red")
       `uvm_message_add_int(my_int, UVM_DEC, "attr_int")
@@ -79,16 +79,16 @@ class test extends uvm_test;
     my_obj.bar = "bar";
 
     `uvm_info_context_begin("TEST_B", "Message B...", UVM_LOW, urm1)
-      `uvm_message_add_tag("color", "white")
-      `uvm_message_add_string(my_string, "attr_string")
-      `uvm_message_add_object(my_obj, "attr_obj")
-    `uvm_info_context_end
+    `uvm_message_add_tag("color", "white")
+    `uvm_message_add_string(my_string, "attr_string")
+	`uvm_message_add_object(my_obj, "attr_obj")
+	`uvm_info_context_end
 
     d = new;
     void'(d.randomize());
-    $display("Pass2 d.x: %h",d.x);
+    $display("Pass2 d.x: 0x%h",d.x);
     if (d.x != result) begin
-      `uvm_error("Bad Result", $sformatf("Expected d.x=%0d, but got %0d",result,d.x))
+      `uvm_error("Bad Result", $sformatf("Expected d.x=0x%0x, but got 0x%0x",result,d.x))
       error = 1;
     end
   end

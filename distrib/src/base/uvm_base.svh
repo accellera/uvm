@@ -62,6 +62,9 @@
   `include "base/uvm_printer.svh"
   `include "base/uvm_comparer.svh"
   `include "base/uvm_packer.svh"
+  `include "base/uvm_links.svh"
+  `include "base/uvm_tr_database.svh"
+  `include "base/uvm_tr_stream.svh"
   `include "base/uvm_recorder.svh"
 
   // Event interface

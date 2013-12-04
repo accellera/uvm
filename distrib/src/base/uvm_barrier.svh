@@ -37,7 +37,7 @@ class uvm_barrier extends uvm_object;
   local  int       num_waiters;
   local  bit       at_threshold;
   local  bit       auto_reset;
-  local  uvm_event m_event;
+  local  uvm_event#() m_event;
 
 
   // Function: new
@@ -45,11 +45,9 @@ class uvm_barrier extends uvm_object;
   // Creates a new barrier object.
 
   function new (string name="", int threshold=0);
-    uvm_event e;
     super.new(name);
-    e = new({"barrier_",name});
+    m_event = new({"barrier_",name});
     this.threshold = threshold;
-    m_event = e;
     num_waiters = 0;
     auto_reset = 1;
     at_threshold = 0;

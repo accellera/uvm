@@ -487,17 +487,6 @@ class uvm_report_message extends uvm_object;
   protected uvm_action _action; 
   protected UVM_FILE _file;
 
-  // Variable- tr_handle
-  //
-  // This variable is the tr_handle (or transaction id) for the message that is
-  // assigned by the uvm_recorder when the message's action contains 
-  // UVM_RM_RECORD.
-
-  protected int _tr_handle;
-
-  // Not documented.
-  static protected int _ro_stream_handles[uvm_report_handler];
-
   // Not documented.
   protected uvm_report_message_element_container _report_message_element_container;
 
@@ -509,7 +498,6 @@ class uvm_report_message extends uvm_object;
 
   function new(string name = "uvm_report_message");
     super.new(name);
-    _tr_handle = -1;
     _report_message_element_container = new();
   endfunction
 
@@ -525,11 +513,13 @@ class uvm_report_message extends uvm_object;
     string rand_state;
 
     p = process::self();
+
     if (p != null)
       rand_state = p.get_randstate();
     new_report_message = new(name);
     if (p != null)
       p.set_randstate(rand_state);
+
   endfunction
 
 
@@ -611,25 +601,8 @@ class uvm_report_message extends uvm_object;
     _id = report_message.get_id();
     _message = report_message.get_message();
     _verbosity = report_message.get_verbosity();
-    _tr_handle = report_message._tr_handle;
 
     _report_message_element_container.copy(report_message._report_message_element_container);
-  endfunction
-
-
-  // Not documented.
-  virtual function int m_get_stream_id(uvm_recorder recorder);
-
-    if(!_ro_stream_handles.exists(_report_handler)) begin
-      string l_scope, l_name;
-      l_scope = _report_handler.get_name();
-      l_name = _report_object.get_name();
-      _ro_stream_handles[_report_handler] = 
-        recorder.create_stream(l_name, "MESSAGES", l_scope);
-    end
-
-    return _ro_stream_handles[_report_handler];
-
   endfunction
 
 
@@ -872,36 +845,8 @@ class uvm_report_message extends uvm_object;
 
 
   //----------------------------------------------------------------------------
-  // Group:  Message Recording
+  // Group-  Message Recording
   //----------------------------------------------------------------------------
-
-
-  // Function: record_message
-  // 
-  // This method causes the message to be recorded using the supplied recorder.
-  // If no recorder is provided, the uvm_default_recorder is used.  When this
-  // method returns, the tr_handle of the message is populated.
-  //
-
-  virtual function void record_message(uvm_recorder recorder);
-  
-    int l_stream_id;
-
-    if(recorder == null) 
-      recorder = uvm_default_recorder;
-
-    l_stream_id = m_get_stream_id(recorder);
-
-    // Use uvm_report_message-ID-#
-    _tr_handle = recorder.begin_tr(get_type_name(), l_stream_id,
-      get_name(), _id, _message, $time);
-
-    recorder.tr_handle = _tr_handle;
-    this.record(recorder);
-    recorder.end_tr(_tr_handle, $time);
-
-  endfunction
-
 
   // Not documented.
   virtual function void m_record_message(uvm_recorder recorder);

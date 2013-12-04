@@ -23,6 +23,7 @@
 typedef class uvm_event;
 typedef class uvm_event_pool;
 typedef class uvm_component;
+typedef class uvm_parent_child_link;
     
 //------------------------------------------------------------------------------
 //
@@ -39,7 +40,7 @@ typedef class uvm_component;
 // is deprecated. Its subtype, <uvm_sequence_item>, shall be used as the
 // base class for all user-defined transaction types. 
 // 
-// The intended use of this API is via a <uvm_driver> to call <uvm_component::accept_tr>,
+// The intended use of this API is via a <uvm_driver #(REQ,RSP)> to call <uvm_component::accept_tr>,
 // <uvm_component::begin_tr>, and <uvm_component::end_tr> during the course of
 // sequence item execution. These methods in the component base class will
 // call into the corresponding methods in this class to set the corresponding
@@ -52,7 +53,7 @@ typedef class uvm_component;
 // While convenient, it is generally the responsibility of drivers to mark a
 // transaction's progress during execution.  To allow the driver or layering sequence
 // to control sequence item timestamps, events, and recording, you must call
-// <uvm_seq_item_pull_port #(REQ,RSP)::disable_auto_item_recording> at the begining
+// <uvm_sqr_if_base#(REQ,RSP)::disable_auto_item_recording> at the begining
 // of the run_phase() method.
 //
 // Users may also use the transaction's event pool, <events>,
@@ -133,7 +134,7 @@ virtual class uvm_transaction extends uvm_object;
   // Function: accept_tr
   //
   // Calling ~accept_tr~ indicates that the transaction item has been received by
-  // a consumer component. Typically a <uvm_driver> would call <uvm_component::accept_tr>,
+  // a consumer component. Typically a <uvm_driver #(REQ,RSP)> would call <uvm_component::accept_tr>,
   // which calls this method-- upon return from a get_next_item(), get(), or peek()
   // call on its sequencer port, <uvm_driver::seq_item_port>.
   //
@@ -173,7 +174,7 @@ virtual class uvm_transaction extends uvm_object;
   // the child of another transaction. Generally, a consumer component begins
   // execution of a transactions it receives. 
   //
-  // Typically a <uvm_driver> would call <uvm_component::begin_tr>, which
+  // Typically a <uvm_driver #(REQ,RSP)> would call <uvm_component::begin_tr>, which
   // calls this method, before actual execution of a sequence item transaction.
   // Sequence items received by a driver are always a child of a parent sequence.
   // In this case, begin_tr obtains the parent handle and delegates to <begin_child_tr>.
@@ -236,7 +237,7 @@ virtual class uvm_transaction extends uvm_object;
   // recording is enabled. The meaning of the handle is implementation specific.
 
   extern function integer begin_child_tr (time begin_time=0, 
-                                          integer parent_handle=0);
+                                               integer parent_handle=0);
 
 
   // Function: do_begin_tr
@@ -257,7 +258,7 @@ virtual class uvm_transaction extends uvm_object;
   // You must have previously called <begin_tr> or <begin_child_tr> for this
   // call to be successful.
   //
-  // Typically a <uvm_driver> would call <uvm_component::end_tr>, which
+  // Typically a <uvm_driver #(REQ,RSP)> would call <uvm_component::end_tr>, which
   // calls this method, upon completion of a sequence item transaction.
   // Sequence items received by a driver are always a child of a parent sequence.
   // In this case, begin_tr obtain the parent handle and delegate to <begin_child_tr>.
@@ -307,17 +308,12 @@ virtual class uvm_transaction extends uvm_object;
 
   extern function void disable_recording ();
 
-
   // Function: enable_recording
+  // Turns on recording to the ~stream~ specified.
   //
-  // Turns on recording to the stream specified by stream, whose interpretation
-  // is implementation specific. The optional ~recorder~ argument specifies
-  //
-  // If transaction recording is on, then a call to record is made when the
-  // transaction is started and when it is ended.
-
-  extern function void enable_recording (string stream, uvm_recorder recorder=null);
-
+  // If transaction recording is on, then a call to ~record~ is made when the
+  // transaction is ended.
+  extern function void enable_recording (uvm_tr_stream stream);
 
   // Function: is_recording_enabled
   //
@@ -423,7 +419,7 @@ virtual class uvm_transaction extends uvm_object;
   // For more information, see the general discussion for <uvm_transaction>.
   // See <uvm_event> for details on the event API.
   //
-  uvm_event begin_event;
+  uvm_event#() begin_event;
 
   // Variable: end_event
   //
@@ -444,7 +440,7 @@ virtual class uvm_transaction extends uvm_object;
   //|  item.end_event.wait_on();
   //|  ...
   // 
-  uvm_event end_event;
+  uvm_event#() end_event;
 
   //----------------------------------------------------------------------------
   //
@@ -459,8 +455,7 @@ virtual class uvm_transaction extends uvm_object;
 
 
   extern protected function integer m_begin_tr (time    begin_time=0, 
-                                                integer parent_handle=0,
-                                                bit     has_parent=0);
+                                                integer parent_handle=0);
 
   local integer m_transaction_id = -1;
 
@@ -469,10 +464,8 @@ virtual class uvm_transaction extends uvm_object;
   local time    accept_time=-1;
 
   local uvm_component initiator;
-  local integer       stream_handle=0;
-  local integer       tr_handle=0;
-  local bit           record_enable;
-  local uvm_recorder  m_recorder;
+  local uvm_tr_stream stream_handle;
+  local uvm_recorder      tr_recorder;
 
 endclass
 
@@ -533,7 +526,7 @@ endfunction
 // ---------
 
 function bit uvm_transaction::is_active();
-  return (tr_handle != 0);
+  return (end_time == -1);
 endfunction
 
 
@@ -615,8 +608,7 @@ function void uvm_transaction::do_copy (uvm_object rhs);
   end_time = txn.end_time;
   initiator = txn.initiator;
   stream_handle = txn.stream_handle;
-  tr_handle = txn.tr_handle;
-  record_enable = txn.record_enable;
+  tr_recorder = txn.tr_recorder;
 endfunction  
 
 // do_record
@@ -639,7 +631,10 @@ endfunction
 // ---------
 
 function integer uvm_transaction::get_tr_handle ();
-  return tr_handle;
+   if (tr_recorder != null)
+     return tr_recorder.get_handle();
+   else 
+     return 0;
 endfunction
 
 
@@ -647,38 +642,22 @@ endfunction
 // -----------------
 
 function void uvm_transaction::disable_recording ();
-  record_enable = 0;
+   this.stream_handle = null;
 endfunction
 
 
 // enable_recording
 // ----------------
 
-function void uvm_transaction::enable_recording (string stream, uvm_recorder recorder=null);
-  string scope;
-  int lastdot;
-  for(lastdot=stream.len()-1; lastdot>0; --lastdot)
-    if(stream[lastdot] == ".") break;
-
-  if(lastdot) begin
-    scope = stream.substr(0, lastdot-1);
-    stream = stream.substr(lastdot+1, stream.len()-1);
-  end
-
-  if (recorder == null)
-    recorder = uvm_default_recorder;
-  m_recorder = recorder;
-
-  this.stream_handle = m_recorder.create_stream(stream, "TVM", scope);
-  record_enable = 1;
-endfunction
-
-
+function void uvm_transaction::enable_recording (uvm_tr_stream stream);
+   this.stream_handle = stream;
+endfunction : enable_recording
+   
 // is_recording_enabled
 // --------------------
 
 function bit uvm_transaction::is_recording_enabled ();
-  return record_enable;
+  return (this.stream_handle != null);
 endfunction
 
 
@@ -686,7 +665,7 @@ endfunction
 // ---------
 
 function void uvm_transaction::accept_tr (time accept_time = 0);
-  uvm_event e;
+  uvm_event#() e;
 
   if(accept_time != 0)
     this.accept_time = accept_time;
@@ -704,7 +683,7 @@ endfunction
 // -----------
 
 function integer uvm_transaction::begin_tr (time begin_time=0); 
-  return m_begin_tr(begin_time, 0, 0);
+  return m_begin_tr(begin_time);
 endfunction
 
 // begin_child_tr
@@ -713,51 +692,63 @@ endfunction
 //Use a parent handle of zero to link to the parent after begin
 function integer uvm_transaction::begin_child_tr (time begin_time=0,
                                                   integer parent_handle=0); 
-  return m_begin_tr(begin_time, parent_handle, 1);
+  return m_begin_tr(begin_time, parent_handle);
 endfunction
 
 // m_begin_tr
 // -----------
 
 function integer uvm_transaction::m_begin_tr (time begin_time=0, 
-                                              integer parent_handle=0, 
-                                              bit has_parent=0);
-  if(begin_time != 0)
-    this.begin_time = begin_time;
-  else
-    this.begin_time = $realtime;
+                                              integer parent_handle=0);
+   time tmp_time = (begin_time == 0) ? $realtime : begin_time;
+   uvm_recorder parent_recorder;
+
+   if (parent_handle != 0)
+     parent_recorder = uvm_recorder::get_recorder_from_handle(parent_handle);
    
-  // May want to establish predecessor/successor relation 
-  // (don't free handle until then)
-  if(record_enable) begin 
+   // If we haven't ended the previous record, end it.
+   if (tr_recorder != null)
+     // Don't free the handle, someone else may be using it...
+     end_tr(tmp_time);
 
-    if(m_recorder.check_handle_kind("Transaction", tr_handle)==1)
-      end_tr(); 
+   // May want to establish predecessor/successor relation 
+   // (don't free handle until then)
+   if(is_recording_enabled()) begin 
+      uvm_tr_database db = stream_handle.get_db();
+      
+      this.end_time = -1;
+      this.begin_time = tmp_time;
+      
+      if(parent_recorder == null)
+        tr_recorder = stream_handle.open_recorder(get_type_name(),
+                                                  this.begin_time,
+                                                  "Begin_No_Parent, Link");
+      else begin
+         tr_recorder = stream_handle.open_recorder(get_type_name(),
+                                                   this.begin_time,
+                                                   "Begin_End, Link");
 
-    if(!has_parent)
-      tr_handle = m_recorder.begin_tr("Begin_No_Parent, Link", 
-                    stream_handle, get_type_name(),"","",this.begin_time);
-    else begin
-      tr_handle = m_recorder.begin_tr("Begin_End, Link", 
-                    stream_handle, get_type_name(),"","",this.begin_time);
-      if(parent_handle)
-        m_recorder.link_tr(parent_handle, tr_handle, "child");
-    end
+         if (tr_recorder != null)
+           db.establish_link(uvm_parent_child_link::get_link(parent_recorder, tr_recorder));
+      end
 
-    m_recorder.tr_handle = tr_handle;
+      if (tr_recorder != null)
+        m_begin_tr = tr_recorder.get_handle();
+      else
+        m_begin_tr = 0;
+   end
+   else begin
+      tr_recorder = null;
+      this.end_time = -1;
+      this.begin_time = tmp_time;
 
-    if(m_recorder.check_handle_kind("Transaction", tr_handle)!=1)
-      `uvm_warning("UVM/TRANSACTION/HANDLE",$sformatf("tr handle %0d not valid!",tr_handle))
+      m_begin_tr = 0;
+   end
+   
+   do_begin_tr(); //execute callback before event trigger
+   
+   begin_event.trigger();
 
-  end
-  else 
-    tr_handle = 0;
-
-  do_begin_tr(); //execute callback before event trigger
-
-  begin_event.trigger();
- 
-  return tr_handle;
 endfunction
 
 
@@ -765,29 +756,25 @@ endfunction
 // ------
 
 function void uvm_transaction::end_tr (time end_time=0, bit free_handle=1);
+   this.end_time = (end_time == 0) ? $realtime : end_time;
 
-  if(end_time != 0)
-    this.end_time = end_time;
-  else
-    this.end_time = $realtime;
+   do_end_tr(); // Callback prior to actual ending of transaction
 
-  do_end_tr(); // Callback prior to actual ending of transaction
+   if(is_recording_enabled() && (tr_recorder != null)) begin
+      record(tr_recorder);
 
-  if(is_active()) begin
-    m_recorder.tr_handle = tr_handle;
-    record(m_recorder);
-  
-  m_recorder.end_tr(tr_handle,this.end_time);
+      tr_recorder.close(this.end_time);
 
-    if(free_handle && m_recorder.check_handle_kind("Transaction", tr_handle)==1) 
-    begin  
-      // once freed, can no longer link to
-      m_recorder.free_tr(tr_handle);
-    end
-    tr_handle = 0;
-  end
+      if(free_handle) 
+        begin  
+           // once freed, can no longer link to
+           tr_recorder.free();
+        end
+   end // if (is_active())
 
-  end_event.trigger();
+   tr_recorder = null;
+
+   end_event.trigger();
 endfunction
 
 

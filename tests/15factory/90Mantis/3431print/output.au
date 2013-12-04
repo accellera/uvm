@@ -10,7 +10,7 @@ Type Overrides:
   --------------  ---------------------------
   packet          mypacket
   mypacket        myreallybigtypenamepacket
-All types registered with the factory: 49 total
+All types registered with the factory: 57 total
 (types without type names will not be printed)
   Type Name
   ---------

@@ -136,7 +136,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   protected uvm_sequence_state m_sequence_state;
             int                m_next_transaction_id = 1;
   local     int                m_priority = -1;
-            int                m_tr_handle;
+            uvm_recorder       m_tr_recorder;
             int                m_wait_for_grant_semaphore;
 
   // Each sequencer will assign a sequence id.  When a sequence is talking to multiple
@@ -217,8 +217,11 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Can be used to associate sub-sequences and sequence items as
   // child transactions when calling <uvm_component::begin_child_tr>.
 
-  function int get_tr_handle();
-    return m_tr_handle;
+  function integer get_tr_handle();
+     if (m_tr_recorder != null)
+       return m_tr_recorder.get_handle();
+     else
+       return 0;
   endfunction
 
 
@@ -282,12 +285,19 @@ class uvm_sequence_base extends uvm_sequence_item;
     m_priority           = this_priority;
 
     if (m_sequencer != null) begin
-        if (m_parent_sequence == null) begin
-          m_tr_handle = m_sequencer.begin_tr(this, get_name());
-        end else begin
-          m_tr_handle = m_sequencer.begin_child_tr(this, m_parent_sequence.m_tr_handle, 
-                                                   get_root_sequence_name());
-        end
+       integer handle;
+       uvm_tr_stream stream;
+       if (m_parent_sequence == null) begin
+          stream = m_sequencer.get_tr_stream(get_name(), "Transactions");
+          handle = m_sequencer.begin_tr(this, get_name());
+          m_tr_recorder = uvm_recorder::get_recorder_from_handle(handle);
+       end else begin
+          stream = m_sequencer.get_tr_stream(get_root_sequence_name(), "Transactions");
+          handle = m_sequencer.begin_child_tr(this, 
+                                              (m_parent_sequence.m_tr_recorder == null) ? 0 : m_parent_sequence.m_tr_recorder.get_handle(), 
+                                              get_root_sequence_name());
+          m_tr_recorder = uvm_recorder::get_recorder_from_handle(handle);
+       end
     end
 
     // Ensure that the sequence_id is intialized in case this sequence has been stopped previously
@@ -926,7 +936,9 @@ class uvm_sequence_base extends uvm_sequence_item;
     sequencer.wait_for_grant(this, set_priority);
 
     if (sequencer.is_auto_item_recording_enabled()) begin
-      void'(sequencer.begin_child_tr(item, m_tr_handle, item.get_root_sequence_name()));
+      void'(sequencer.begin_child_tr(item, 
+                                     (m_tr_recorder == null) ? 0 : m_tr_recorder.get_handle(), 
+                                     item.get_root_sequence_name(), "Transactions"));
     end
     
     pre_do(1);

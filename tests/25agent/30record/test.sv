@@ -73,10 +73,28 @@ module test;
          $write("!! UVM TEST FAILED !!\n");
     endfunction
 
-  endclass
+  endclass // test
+   
+class my_simple_item extends simple_item;
+   int unsigned x = 'hdeadbeef;
+ function new (string name = "simple_item");
+    super.new(name);
+ endfunction : new
+   function void post_generate();
+      addr=x;
+      data=x;
+
+      x = x ^ (x << 2);
+      $display("foo");
+      
+   endfunction // post_generate
+   `uvm_object_utils(my_simple_item)
+endclass // my_simple_item
+
 
   initial begin
     uvm_default_printer=uvm_default_tree_printer;
+     simple_item::type_id::set_type_override(my_simple_item::get_type());
 
     run_test("test");
   end

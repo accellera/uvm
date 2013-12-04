@@ -27,6 +27,8 @@
 #include <string.h>
 #include <stdio.h>
 
+static void m_uvm_error(const char *ID, const char *msg, ...);
+static void m_uvm_get_object_handle(const char* path, vhpiHandleT *handle,int *language);
 
 // static print buffer
 static char m_uvm_temp_print_buffer[1024];
@@ -35,17 +37,12 @@ static char m_uvm_temp_print_buffer[1024];
  * UVM HDL access C code.
  *
  */
-static int is_verilog(char* path)
+static void m_uvm_get_object_handle(const char* path, vhpiHandleT *handle,int *language)
 {
-  vhpiHandleT r = vhpi_handle_by_name(path, 0);
+  *handle = vhpi_handle_by_name(path, 0);
 
-  if(r == 0)
-    {
-      return 1;
-    }
-
-  if(vhpi_get(vhpiLanguageP, r) == vhpiVerilog) return 1;
-  else return 0;
+  if(*handle)
+	  *language = vhpi_get(vhpiLanguageP, *handle);
 }
 
 
@@ -86,15 +83,8 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
   if(r == 0)
     {
-      sprintf(m_uvm_temp_print_buffer, 
-	      "set: unable to locate hdl path (%s)\n Either the name is incorrect, or you may not have PLI/ACC visibility to that name", 
+      m_uvm_error("UVM/DPI/HDL_SET","set: unable to locate hdl path (%s)\n Either the name is incorrect, or you may not have PLI/ACC visibility to that name",
 	      path);
-      m_uvm_report_dpi(M_UVM_ERROR,
-                       (char*) "UVM/DPI/HDL_SET",
-                       &m_uvm_temp_print_buffer[0],
-                       M_UVM_NONE,
-                       (char*) __FILE__,
-                       __LINE__);
       return 0;
     }
   else
@@ -142,13 +132,8 @@ static int uvm_hdl_set_vhdl(char* path, p_vpi_vecval value, PLI_INT32 flag)
   size = vhpi_get(vhpiSizeP, r);
   if(size > maxsize)
     {
-      sprintf(m_uvm_temp_print_buffer,"hdl path %s is %0d bits, but the current maximum size is %0d. You may redefine it using the compile-time flag: -define UVM_HDL_MAX_WIDTH=<value>", path, size,maxsize);
-      m_uvm_report_dpi(M_UVM_ERROR,
-                       (char*) "UVM/DPI/VHDL_SET",
-                       &m_uvm_temp_print_buffer[0],
-                       M_UVM_NONE,
-                       (char*) __FILE__,
-                       __LINE__);
+      m_uvm_error("UVM/DPI/VHDL_SET","hdl path %s is %0d bits, but the current maximum size is %0d. You may redefine it using the compile-time flag: -define UVM_HDL_MAX_WIDTH=<value>", path, size,maxsize);
+
       tf_dofinish();
     }
   chunks = (size-1)/32 + 1;
@@ -191,13 +176,7 @@ static int uvm_hdl_set_vhdl(char* path, p_vpi_vecval value, PLI_INT32 flag)
       }
     default:
       {
-	sprintf(m_uvm_temp_print_buffer,"Failed to set value to hdl path %s (unexpected type: %0d)", path, value_s.format);
-	m_uvm_report_dpi(M_UVM_ERROR,
-			 (char*) "UVM/DPI/VHDL_SET",
-			 &m_uvm_temp_print_buffer[0],
-			 M_UVM_NONE,
-			 (char*) __FILE__,
-			 __LINE__);
+	m_uvm_error("UVM/DPI/VHDL_SET","Failed to set value to hdl path %s (unexpected type: %0d)", path, value_s.format);
 	tf_dofinish();
 	return 0;
       }
@@ -228,13 +207,7 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
   if(r == 0)
     {
-      sprintf(m_uvm_temp_print_buffer,"unable to locate hdl path (%s)\n Either the name is incorrect, or you may not have PLI/ACC visibility to that name",path);
-      m_uvm_report_dpi(M_UVM_ERROR,
-                       (char*) "UVM/DPI/VLOG_GET",
-                       &m_uvm_temp_print_buffer[0],
-                       M_UVM_NONE,
-                       (char*) __FILE__,
-                       __LINE__);
+      m_uvm_error("UVM/DPI/VLOG_GET","unable to locate hdl path (%s)\n Either the name is incorrect, or you may not have PLI/ACC visibility to that name",path);
       // Exiting is too harsh. Just return instead.
       // tf_dofinish();
       return 0;
@@ -247,14 +220,8 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
       size = vpi_get(vpiSize, r);
       if(size > maxsize)
 	{
-	  sprintf(m_uvm_temp_print_buffer,"hdl path '%s' is %0d bits, but the maximum size is %0d.  You can increase the maximum via a compile-time flag: +define+UVM_HDL_MAX_WIDTH=<value>",
+	  m_uvm_error("UVM/DPI/VLOG_GET","hdl path '%s' is %0d bits, but the maximum size is %0d.  You can increase the maximum via a compile-time flag: +define+UVM_HDL_MAX_WIDTH=<value>",
 		  path,size,maxsize);
-	  m_uvm_report_dpi(M_UVM_ERROR,
-			   (char*) "UVM/DPI/VLOG_GET",
-			   &m_uvm_temp_print_buffer[0],
-			   M_UVM_NONE,
-			   (char*) __FILE__,
-			   __LINE__);
 	  //tf_dofinish();
 
 	  vpi_release_handle(r);
@@ -292,13 +259,7 @@ static int uvm_hdl_get_vhdl(char* path, p_vpi_vecval value)
   size = vhpi_get(vhpiSizeP, r);
   if(size > maxsize)
     {
-      sprintf(m_uvm_temp_print_buffer,"hdl path %s is %0d bits, but the maximum size is %0d, redefine using -define UVM_HDL_MAX_WIDTH=<value>", path, size,maxsize);
-      m_uvm_report_dpi(M_UVM_ERROR,
-                       (char*) "UVM/DPI/HDL_SET",
-                       &m_uvm_temp_print_buffer[0],
-                       M_UVM_NONE,
-                       (char*) __FILE__,
-                       __LINE__);
+	  m_uvm_error("UVM/DPI/HDL_SET","hdl path %s is %0d bits, but the maximum size is %0d, redefine using -define UVM_HDL_MAX_WIDTH=<value>", path, size,maxsize);
       tf_dofinish();
     }
   chunks = (size-1)/32 + 1;
@@ -310,13 +271,7 @@ static int uvm_hdl_get_vhdl(char* path, p_vpi_vecval value)
 
   if(vhpi_check_error(0) != 0) 
     {
-      sprintf(m_uvm_temp_print_buffer,"Failed to get value from hdl path %s",path);
-      m_uvm_report_dpi(M_UVM_ERROR,
-                       (char*) "UVM/DPI/VHDL_GET",
-                       &m_uvm_temp_print_buffer[0],
-                       M_UVM_NONE,
-                       (char*) __FILE__,
-                       __LINE__);
+	  m_uvm_error("UVM/DPI/VHDL_GET","Failed to get value from hdl path %s",path);
       tf_dofinish();
       return 0;
     }
@@ -418,13 +373,8 @@ static int uvm_hdl_get_vhdl(char* path, p_vpi_vecval value)
       }
     default:
       {
-	sprintf(m_uvm_temp_print_buffer,"Failed to get value from hdl path %s (unexpected type: %0d)", path, value_s.format);
-	m_uvm_report_dpi(M_UVM_ERROR,
-			 (char*) "UVM/DPI/VHDL_GET",
-			 &m_uvm_temp_print_buffer[0],
-			 M_UVM_NONE,
-			 (char*) __FILE__,
-			 __LINE__);
+    	  m_uvm_error("UVM/DPI/VHDL_GET","Failed to get value from hdl path %s (unexpected type: %0d)", path, value_s.format);
+
 	tf_dofinish();
 	return 0;
       }
@@ -441,24 +391,40 @@ static int uvm_hdl_get_vhdl(char* path, p_vpi_vecval value)
  */
 int uvm_hdl_check_path(char *path)
 {
-  vpiHandle r;
-  r = vpi_handle_by_name(path, 0);
+  vhpiHandleT handle;
+  int language;
 
-  if(r == 0)
-    return 0;
-  else 
-    return 1;
+  m_uvm_get_object_handle(path,&handle,&language);
+
+  return (handle!=0);
 }
 
-
+static void m_uvm_error(const char *id, const char *msg, ...) {
+		va_list argptr;
+		va_start(argptr,msg);
+		vsprintf(m_uvm_temp_print_buffer,msg, argptr);
+		va_end(argptr);
+	    m_uvm_report_dpi(M_UVM_ERROR,
+			 (char *) id,
+			 &m_uvm_temp_print_buffer[0],
+			 M_UVM_NONE,
+			 (char*) __FILE__,
+			 __LINE__);
+}
 /*
  * Given a path, look the path name up using the PLI
  * or the FLI, and return its 'value'.
  */
 int uvm_hdl_read(char *path, p_vpi_vecval value)
 {
-  if(is_verilog(path)) return uvm_hdl_get_vlog(path, value, vpiNoDelay);
-  else return uvm_hdl_get_vhdl(path, value);
+		vhpiHandleT handle;
+		int language;
+		m_uvm_get_object_handle(path,&handle,&language);
+		switch(language) {
+			case vhpiVerilog:  return uvm_hdl_get_vlog(path, value, vpiNoDelay);
+			case vhpiVHDL: return uvm_hdl_get_vhdl(path, value);
+			default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path);
+		}
 }
 
 /*
@@ -467,8 +433,14 @@ int uvm_hdl_read(char *path, p_vpi_vecval value)
  */
 int uvm_hdl_deposit(char *path, p_vpi_vecval value)
 {
-  if(is_verilog(path)) return uvm_hdl_set_vlog(path, value, vpiNoDelay);
-  else return uvm_hdl_set_vhdl(path, value, vhpiDepositPropagate);
+	vhpiHandleT handle;
+	int language;
+	m_uvm_get_object_handle(path,&handle,&language);
+	switch(language) {
+		case vhpiVerilog:  return uvm_hdl_set_vlog(path, value, vpiNoDelay);
+		case vhpiVHDL: return uvm_hdl_set_vhdl(path, value, vhpiDepositPropagate);
+		default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path); return 0;
+	}
 }
 
 
@@ -478,8 +450,14 @@ int uvm_hdl_deposit(char *path, p_vpi_vecval value)
  */
 int uvm_hdl_force(char *path, p_vpi_vecval value)
 {
-  if(is_verilog(path)) return uvm_hdl_set_vlog(path, value, vpiForceFlag);
-  else return uvm_hdl_set_vhdl(path, value, vhpiForcePropagate);
+	vhpiHandleT handle;
+	int language;
+	m_uvm_get_object_handle(path,&handle,&language);
+	switch(language) {
+		case vhpiVerilog:  return uvm_hdl_set_vlog(path, value, vpiForceFlag);
+		case vhpiVHDL: return uvm_hdl_set_vhdl(path, value, vhpiForcePropagate);
+		default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path); return 0;
+	}
 }
 
 
@@ -489,13 +467,14 @@ int uvm_hdl_force(char *path, p_vpi_vecval value)
  */
 int uvm_hdl_release_and_read(char *path, p_vpi_vecval value)
 {
-  if(is_verilog(path)) {
-    uvm_hdl_set_vlog(path, value, vpiReleaseFlag);
-    return uvm_hdl_get_vlog(path, value, vpiNoDelay);
-  } else {
-    uvm_hdl_set_vhdl(path, value, vhpiReleaseKV);
-    return uvm_hdl_get_vhdl(path, value);
-  }
+	vhpiHandleT handle;
+	int language;
+	m_uvm_get_object_handle(path,&handle,&language);
+	switch(language) {
+		case vhpiVerilog:      uvm_hdl_set_vlog(path, value, vpiReleaseFlag); return uvm_hdl_get_vlog(path, value, vpiNoDelay);
+		case vhpiVHDL:    uvm_hdl_set_vhdl(path, value, vhpiReleaseKV); return uvm_hdl_get_vhdl(path, value);
+		default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path); return 0;
+	}
 }
 
 /*
@@ -504,8 +483,13 @@ int uvm_hdl_release_and_read(char *path, p_vpi_vecval value)
  */
 int uvm_hdl_release(char *path)
 {
-  s_vpi_vecval value;
-  if(is_verilog(path)) return uvm_hdl_set_vlog(path, &value, vpiReleaseFlag);
-  else return uvm_hdl_set_vhdl(path, &value, vhpiReleaseKV);
+	s_vpi_vecval value;
+	vhpiHandleT handle;
+	int language;
+	m_uvm_get_object_handle(path,&handle,&language);
+	switch(language) {
+		case vhpiVerilog:  return uvm_hdl_set_vlog(path, &value, vpiReleaseFlag);
+		case vhpiVHDL: return uvm_hdl_set_vhdl(path, &value, vhpiReleaseKV);
+		default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path); return 0;
+	}
 }
-

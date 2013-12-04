@@ -89,7 +89,7 @@ virtual class uvm_printer;
 
   // Function: print_field
   //
-  // Prints an integral field of 4096 (or less) bits.
+  // Prints an integral field (up to 4096 bits).
   //
   // name  - The name of the field. 
   // value - The value of the field.
@@ -109,17 +109,17 @@ virtual class uvm_printer;
 
   // backward compatibility
   virtual function void print_int (string          name, 
-                                     uvm_bitstream_t value, 
-                                     int             size, 
-                                     uvm_radix_enum  radix=UVM_NORADIX,
-                                     byte            scope_separator=".",
-                                     string          type_name="");
+                                   uvm_bitstream_t value, 
+                                   int    size, 
+                                   uvm_radix_enum radix=UVM_NORADIX,
+                                   byte   scope_separator=".",
+                                   string type_name="");
     print_field (name, value, size, radix, scope_separator, type_name);
   endfunction
 
   // Function: print_field_int
   //
-  // Prints an integral field of 64 (or less) bits.
+  // Prints an integral field (up to 64 bits).
   //
   // name  - The name of the field. 
   // value - The value of the field.
@@ -129,14 +129,12 @@ virtual class uvm_printer;
   // scope_separator - is used to find the leaf name since many printers only
   //           print the leaf name of a field.  Typical values for the separator
   //           are . (dot) or [ (open bracket).
-
-  extern virtual function void print_field_int (string          name, 
+  extern virtual function void print_field_int (string name,
                                                 uvm_integral_t value, 
                                                 int    size, 
                                                 uvm_radix_enum radix=UVM_NORADIX,
                                                 byte   scope_separator=".",
                                                 string type_name="");
-
 
   // Function: print_object
   //
@@ -888,10 +886,10 @@ endfunction
 
 function void uvm_printer::print_field_int (string name,
                                             uvm_integral_t value, 
-                                            int    size, 
+                                            int          size, 
                                             uvm_radix_enum radix=UVM_NORADIX,
-                                            byte   scope_separator=".",
-                                            string type_name="");
+                                            byte         scope_separator=".",
+                                            string       type_name="");
   
   uvm_printer_row_info row_info;
   string sz_str, val_str;
@@ -916,7 +914,7 @@ function void uvm_printer::print_field_int (string name,
     radix = knobs.default_radix;
 
   val_str = uvm_integral_to_string (value, size, radix,
-                                  knobs.get_radix_str(radix));
+                                    knobs.get_radix_str(radix));
 
   row_info.level = m_scope.depth();
   row_info.name = adjust_name(name,scope_separator);
@@ -935,7 +933,7 @@ endfunction
 function void uvm_printer::print_time (string name,
                                        time value,
                                        byte scope_separator=".");
-  print_field(name, value, 64, UVM_TIME, scope_separator);
+  print_field_int(name, value, 64, UVM_TIME, scope_separator);
 endfunction
 
 

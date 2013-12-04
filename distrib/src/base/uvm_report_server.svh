@@ -88,6 +88,14 @@ virtual class uvm_report_server extends uvm_object;
         // returns the set of severities's already used by this uvm_report_server
         pure virtual function void get_severity_set(output uvm_severity q[$]);
 
+        // Function: set_message_database
+        // sets the <uvm_tr_database> used for recording messages
+        pure virtual function void set_message_database(uvm_tr_database database);
+
+        // Function: get_message_database
+        // returns the <uvm_tr_database> used for recording messages
+        pure virtual function uvm_tr_database get_message_database();
+
         // Function: do_copy
         // copies all message statistic severity,id counts to the dest uvm_report_server
         // the copy is cummulative (only items from the source are transfered, already existing entries are not deleted,
@@ -112,6 +120,7 @@ virtual class uvm_report_server extends uvm_object;
                                 set_id_count(q[s],rhs_.get_id_count(q[s]));
                 end
 
+                set_message_database(rhs_.get_message_database());
                 set_max_quit_count(rhs_.get_max_quit_count());
                 set_quit_count(rhs_.get_quit_count());
         endfunction
@@ -197,7 +206,9 @@ class uvm_default_report_server extends uvm_report_server;
   bit max_quit_overridable = 1;
   local int m_severity_count[uvm_severity_type];
   protected int m_id_count[string];
-
+   protected uvm_tr_database m_message_db;
+   protected uvm_tr_stream m_streams[string][string]; // ro.name,rh.name
+   
 
   // Variable: enable_report_id_count_summary
   //
@@ -454,6 +465,28 @@ class uvm_default_report_server extends uvm_report_server;
       m_id_count[id] = 1;
   endfunction
 
+  //----------------------------------------------------------------------------
+  // Group: message recording
+  //
+  // The ~uvm_default_report_server~ will record messages into the message
+  // database, using one transaction per message, and one stream per report
+  // object/handler pair.
+  //
+  //----------------------------------------------------------------------------
+
+   // Function: set_message_database
+   // sets the <uvm_tr_database> used for recording messages
+   virtual function void set_message_database(uvm_tr_database database);
+      m_message_db = database;
+   endfunction : set_message_database
+
+   // Function: get_message_database
+   // returns the <uvm_tr_database> used for recording messages
+   //
+   virtual function uvm_tr_database get_message_database();
+      return m_message_db;
+   endfunction : get_message_database
+
 
   virtual function void get_severity_set(output uvm_severity q[$]);
     foreach(m_severity_count[idx])
@@ -487,6 +520,7 @@ class uvm_default_report_server extends uvm_report_server;
   virtual function void process_report_message(uvm_report_message report_message);
 
     uvm_report_handler l_report_handler = report_message.get_report_handler();
+    	process p = process::self();
     bit report_ok = 1;
 
     // Set the report server for this message
@@ -550,10 +584,10 @@ class uvm_default_report_server extends uvm_report_server;
       // no need to compose when neither UVM_DISPLAY nor UVM_LOG is set
       if (report_message.get_action() & (UVM_LOG|UVM_DISPLAY))
         m = svr.compose_report_message(report_message);
+
       svr.execute_report_message(report_message, m);
 
 `endif
-
     end
 
   endfunction
@@ -572,7 +606,9 @@ class uvm_default_report_server extends uvm_report_server;
  
   virtual function void execute_report_message(uvm_report_message report_message,
                                                string composed_message);
-
+                                               
+                                               process p = process::self();
+                                               
     // Update counts 
     incr_severity_count(report_message.get_severity());
     incr_id_count(report_message.get_id());
@@ -582,7 +618,40 @@ class uvm_default_report_server extends uvm_report_server;
 
     // UVM_RM_RECORD action
     if(report_message.get_action() & UVM_RM_RECORD) begin
-      report_message.record_message(uvm_default_recorder);
+       uvm_tr_stream stream;
+       uvm_report_object ro = report_message.get_report_object();
+       uvm_report_handler rh = report_message.get_report_handler();
+
+       // Check for pre-existing stream
+       if (m_streams.exists(ro.get_name()) && (m_streams[ro.get_name()].exists(rh.get_name())))
+         stream = m_streams[ro.get_name()][rh.get_name()];
+
+       // If no pre-existing stream (or for some reason pre-existing stream was null)
+       if (stream == null) begin
+          uvm_tr_database db;
+
+          // Grab the database
+          db = get_message_database();
+
+          // If database is null, use the default database
+          if (db == null) begin
+             uvm_coreservice_t cs = uvm_coreservice_t::get();
+             db = cs.get_default_tr_database();
+          end
+          if (db != null) begin
+             // Open the stream.  Name=report object name, scope=report handler name, type=MESSAGES
+             stream = db.open_stream(ro.get_name(), rh.get_name(), "MESSAGES");
+             // Save off the openned stream
+             m_streams[ro.get_name()][rh.get_name()] = stream;
+          end
+       end
+       if (stream != null) begin
+          uvm_recorder recorder = stream.open_recorder(report_message.get_name(),,report_message.get_type_name());
+             if (recorder != null) begin
+             report_message.record(recorder);
+             recorder.free();
+          end
+       end
     end
 
     // DISPLAY action
