@@ -89,11 +89,17 @@ typedef logic signed [63:0] uvm_integral_t;
 // UVM_BIN       - Selects binary (%b) format
 // UVM_DEC       - Selects decimal (%d) format
 // UVM_UNSIGNED  - Selects unsigned decimal (%u) format
+// UVM_UNFORMAT2 - Selects unformatted 2 value data (%u) format
+// UVM_UNFORMAT4 - Selects unformatted 4 value data (%z) format
 // UVM_OCT       - Selects octal (%o) format
 // UVM_HEX       - Selects hexidecimal (%h) format
 // UVM_STRING    - Selects string (%s) format
 // UVM_TIME      - Selects time (%t) format
 // UVM_ENUM      - Selects enumeration value (name) format
+// UVM_REAL      - Selects real (%g) in exponential or decimal format,
+//                 whichever format results in the shorter printed output
+// UVM_REAL_DEC  - Selects real (%f) in decimal format
+// UVM_REAL_EXP  - Selects real (%e) in exponential format
 
 typedef enum {
    UVM_BIN       = 'h1000000,
