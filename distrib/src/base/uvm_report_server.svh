@@ -520,6 +520,7 @@ class uvm_default_report_server extends uvm_report_server;
   virtual function void process_report_message(uvm_report_message report_message);
 
     uvm_report_handler l_report_handler = report_message.get_report_handler();
+    	process p = process::self();
     bit report_ok = 1;
 
     // Set the report server for this message
@@ -583,10 +584,10 @@ class uvm_default_report_server extends uvm_report_server;
       // no need to compose when neither UVM_DISPLAY nor UVM_LOG is set
       if (report_message.get_action() & (UVM_LOG|UVM_DISPLAY))
         m = svr.compose_report_message(report_message);
+
       svr.execute_report_message(report_message, m);
 
 `endif
-
     end
 
   endfunction
@@ -605,7 +606,9 @@ class uvm_default_report_server extends uvm_report_server;
  
   virtual function void execute_report_message(uvm_report_message report_message,
                                                string composed_message);
-
+                                               
+                                               process p = process::self();
+                                               
     // Update counts 
     incr_severity_count(report_message.get_severity());
     incr_id_count(report_message.get_id());
@@ -635,7 +638,6 @@ class uvm_default_report_server extends uvm_report_server;
              uvm_coreservice_t cs = uvm_coreservice_t::get();
              db = cs.get_default_tr_database();
           end
-
           if (db != null) begin
              // Open the stream.  Name=report object name, scope=report handler name, type=MESSAGES
              stream = db.open_stream(ro.get_name(), rh.get_name(), "MESSAGES");
@@ -643,10 +645,9 @@ class uvm_default_report_server extends uvm_report_server;
              m_streams[ro.get_name()][rh.get_name()] = stream;
           end
        end
-
        if (stream != null) begin
           uvm_recorder recorder = stream.open_recorder(report_message.get_name(),,report_message.get_type_name());
-          if (recorder != null) begin
+             if (recorder != null) begin
              report_message.record(recorder);
              recorder.free();
           end

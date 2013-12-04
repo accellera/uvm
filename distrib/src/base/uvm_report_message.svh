@@ -513,11 +513,13 @@ class uvm_report_message extends uvm_object;
     string rand_state;
 
     p = process::self();
+
     if (p != null)
       rand_state = p.get_randstate();
     new_report_message = new(name);
     if (p != null)
       p.set_randstate(rand_state);
+
   endfunction
 
 

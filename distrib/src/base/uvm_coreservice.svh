@@ -146,8 +146,17 @@ class uvm_default_coreservice_t extends uvm_coreservice_t;
         local uvm_tr_database tr_database;
         virtual function uvm_tr_database get_default_tr_database();
            if (tr_database == null) begin
-              uvm_text_tr_database tx_db = new("default_tr_database");
-              tr_database = tx_db;
+	           process p = process::self();
+	           uvm_text_tr_database tx_db;
+	           string s;
+	           if(p)
+	           	s = p.get_randstate();
+	           	
+	           tx_db = new("default_tr_database");
+               tr_database = tx_db;
+              
+              if(p)
+              	p.set_randstate(s);
            end
            return tr_database;
         endfunction : get_default_tr_database

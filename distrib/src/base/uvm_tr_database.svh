@@ -151,13 +151,14 @@ virtual class uvm_tr_database extends uvm_object;
 
          open_stream = do_open_stream(name, scope, type_name);
 
-         if (p != null)
-           p.set_randstate(s);
 
          if (open_stream != null) begin
             m_streams[open_stream] = 1;
             open_stream.m_do_open(this, scope, type_name);
          end
+         
+         if (p != null)
+           p.set_randstate(s);
 
       end
    endfunction : open_stream
@@ -362,8 +363,8 @@ class uvm_text_tr_database extends uvm_tr_database;
    //
    // Text-Backend implementation of <uvm_tr_database::open_stream>
    protected virtual function uvm_tr_stream do_open_stream(string name,
-                                                           string scope="",
-                                                           string type_name="");
+                                                           string scope,
+                                                           string type_name);
       uvm_text_tr_stream m_stream = uvm_text_tr_stream::type_id::create(name);
       return m_stream;
    endfunction : do_open_stream

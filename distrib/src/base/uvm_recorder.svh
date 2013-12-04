@@ -120,6 +120,16 @@ virtual class uvm_recorder extends uvm_object;
 
   uvm_recursion_policy_enum policy = UVM_DEFAULT_POLICY;
 
+   // Variable- m_ids_by_recorder
+   // An associative array of integers, indexed by uvm_recorders.  This
+   // provides a unique 'id' or 'handle' for each recorder, which can be
+   // used to identify the recorder.
+   //
+   // By default, neither ~m_ids_by_recorder~ or ~m_recorders_by_id~ are
+   // used.  Recorders are only placed in the arrays when the user
+   // attempts to determine the id for a recorder.
+   local static integer m_ids_by_recorder[uvm_recorder];
+
 
   function new(string name = "uvm_recorder");
      super.new(name);
@@ -196,7 +206,11 @@ virtual class uvm_recorder extends uvm_object;
    //
    // This method will trigger a <do_free> call.
    function void free(time close_time = 0);
-      uvm_tr_stream stream;
+	   process p=process::self();
+	   string s;
+	
+       uvm_tr_stream stream;
+       
       if (!is_open() && !is_closed())
         return;
 
@@ -210,7 +224,11 @@ virtual class uvm_recorder extends uvm_object;
       stream = get_stream();
       
       m_is_closed = 0;
+      if(p)
+      	s=p.get_randstate();
       m_stream_dap = new("stream_dap");
+      if(p)
+      	p.set_randstate(s);
       m_warn_null_stream = 1;
       if (m_ids_by_recorder.exists(this))
         m_free_id(m_ids_by_recorder[this]);
@@ -287,15 +305,6 @@ virtual class uvm_recorder extends uvm_object;
 
    // Group: Handles
 
-   // Variable- m_ids_by_recorder
-   // An associative array of integers, indexed by uvm_recorders.  This
-   // provides a unique 'id' or 'handle' for each recorder, which can be
-   // used to identify the recorder.
-   //
-   // By default, neither ~m_ids_by_recorder~ or ~m_recorders_by_id~ are
-   // used.  Recorders are only placed in the arrays when the user
-   // attempts to determine the id for a recorder.
-   local static integer m_ids_by_recorder[uvm_recorder];
 
    // Variable- m_recorders_by_id
    // A corollary to ~m_ids_by_recorder~, this indexes the recorders by their
@@ -966,7 +975,7 @@ class uvm_text_recorder extends uvm_recorder;
                                      integer numbits=$bits(uvm_bitstream_t));
       if (m_text_db.open_db()) begin
          $fdisplay(m_text_db.m_file, 
-                   "      SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0d   RADIX:%s BITS=%0d}",
+                   "      SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s   RADIX:%s BITS=%0d}",
                    $realtime,
                    this.get_handle(),
                    nm,
@@ -1075,6 +1084,7 @@ class uvm_text_recorder extends uvm_recorder;
      if (open_file()) begin
         uvm_tr_stream stream_obj = uvm_tr_stream::get_stream_from_handle(stream);
         uvm_recorder recorder;
+  
         if (stream_obj == null)
           return -1;
 

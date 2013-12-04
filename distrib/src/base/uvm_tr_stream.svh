@@ -85,6 +85,16 @@ virtual class uvm_tr_stream extends uvm_object;
       m_cfg_dap = new("cfg_dap");
    endfunction : new
 
+   // Variable- m_ids_by_stream
+   // An associative array of integers, indexed by uvm_tr_streams.  This
+   // provides a unique 'id' or 'handle' for each stream, which can be
+   // used to identify the stream.
+   //
+   // By default, neither ~m_ids_by_stream~ or ~m_streams_by_id~ are
+   // used.  Streams are only placed in the arrays when the user
+   // attempts to determine the id for a stream.
+   local static integer m_ids_by_stream[uvm_tr_stream];
+
    // Group: Configuration API
    
    // Function: get_db
@@ -187,6 +197,8 @@ virtual class uvm_tr_stream extends uvm_object;
    // This method will trigger a <do_free> call, followed by
    // <uvm_recorder::free> on all recorders within the stream.
    function void free();
+	   process p;
+	   string s;
       uvm_tr_database db;
       if (!is_open() && !is_closed())
         return;
@@ -202,7 +214,12 @@ virtual class uvm_tr_stream extends uvm_object;
       // Clear out internal state
       db = get_db();
       m_is_closed = 0;
+      p = process::self();
+      if(p)
+      	s = p.get_randstate();
       m_cfg_dap = new("cfg_dap");
+      if(p)
+      	p.set_randstate(s);
       m_warn_null_cfg = 1;
       if (m_ids_by_stream.exists(this))
         m_free_id(m_ids_by_stream[this]);
@@ -319,13 +336,14 @@ virtual class uvm_tr_stream extends uvm_object;
                                           m_time,
                                           type_name);
 
-         if (p != null)
-           p.set_randstate(s);
+
          
          if (open_recorder != null) begin
             m_records[open_recorder] = 1;
             open_recorder.m_do_open(this, m_time, type_name);
          end
+         if (p != null)
+           p.set_randstate(s); 
       end
    endfunction : open_recorder
 
@@ -361,16 +379,6 @@ virtual class uvm_tr_stream extends uvm_object;
    endfunction : get_recorders
    
    // Group: Handles
-
-   // Variable- m_ids_by_stream
-   // An associative array of integers, indexed by uvm_tr_streams.  This
-   // provides a unique 'id' or 'handle' for each stream, which can be
-   // used to identify the stream.
-   //
-   // By default, neither ~m_ids_by_stream~ or ~m_streams_by_id~ are
-   // used.  Streams are only placed in the arrays when the user
-   // attempts to determine the id for a stream.
-   local static integer m_ids_by_stream[uvm_tr_stream];
 
    // Variable- m_streams_by_id
    // A corollary to ~m_ids_by_stream~, this indexes the streams by their

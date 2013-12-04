@@ -315,7 +315,7 @@ class uvm_report_handler extends uvm_object;
   // (e.g., uvm_report_error) in <uvm_report_object>.
 
   virtual function void process_report_message(uvm_report_message report_message);
-    
+    process p = process::self();
     uvm_report_server srvr = uvm_report_server::get_server();
     string id = report_message.get_id();
     uvm_severity_type severity = report_message.get_severity();
@@ -334,7 +334,6 @@ class uvm_report_handler extends uvm_object;
         report_message.set_severity(severity);
       end
     end
-
     report_message.set_file(get_file_handle(severity, id));
     report_message.set_report_handler(this);
     report_message.set_action(get_action(severity, id));

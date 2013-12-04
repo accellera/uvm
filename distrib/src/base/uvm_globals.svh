@@ -240,6 +240,8 @@ endfunction
 
 function void uvm_process_report_message(uvm_report_message report_message);
   uvm_root top;
+  process p;
+  p = process::self();
   top = uvm_coreservice.get_root();
   top.uvm_process_report_message(report_message);
 endfunction
