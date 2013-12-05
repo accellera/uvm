@@ -423,7 +423,7 @@ int uvm_hdl_read(char *path, p_vpi_vecval value)
 		switch(language) {
 			case vhpiVerilog:  return uvm_hdl_get_vlog(path, value, vpiNoDelay);
 			case vhpiVHDL: return uvm_hdl_get_vhdl(path, value);
-			default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path);
+			default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path); return 0;
 		}
 }
 
