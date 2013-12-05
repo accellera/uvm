@@ -22,12 +22,17 @@ use File::Basename;
 
 # the script compares a set of goldfiles
 #
-# goldfiles are all files in the local directory *.au and *.au.$tool
-# each goldfile is compared to a produced file by chopping \.au(.$tool)$ from the goldfile
+# goldfiles are all files in the local directory matching *.au.($tool)?
+# each goldfile is compared to a produced file $file by chopping \.au(.$tool)$ from the goldfile name
+# if the produced file $file doesnt exist its assumed that the goldfile shall be compared to the simulator default log
 # 
-# 1. each produced file is filtered and saved as .post
-# 2. then a diff is performed between X.post and X.au(.$tools) and saved as X.df
-# 3. the script returns showing the mismatches (or not)
+# 1. each produced file is filtered and saved as $file.post
+# 2. then a diff is performed between $file.post and $file.au(.$tool)? and saved as $file.df
+# 3. the script returns showing the set mismatches, missing files (or not)
+#
+#
+# the script filters a set of variying patterns such as
+# filenames, message locations, seeds, handles
 
 
 # consider all *.au and *.au.$tool files
@@ -81,6 +86,12 @@ sub scrub {
   $$logfile =~ s/^SVSEED.*\n//sg;
   $$logfile =~ s/\$unit_0x[0-9a-f]+::/SCOPE::/mg;
   $$logfile =~ s/(\s+m_inst_(id|count)):\d+/\1:X/mg;
+
+  # if this is a recorder dump then handle the TXH as handles
+  if($$logfile =~ /\s+CREATE_STREAM/) {
+      $$logfile =~ s/([\{ ]TXH\d*:)(\d+)/\1\@H/mg;
+      $$logfile =~ s/STREAM:\d+/STREAM:\@H/mg;
+  }
 }
 
 sub diffLogs {

@@ -94,6 +94,7 @@ endclass // my_simple_item
 
   initial begin
     uvm_default_printer=uvm_default_tree_printer;
+    $system("rm -fr tr_db.log");
      simple_item::type_id::set_type_override(my_simple_item::get_type());
 
     run_test("test");
