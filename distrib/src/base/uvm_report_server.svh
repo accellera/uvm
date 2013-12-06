@@ -204,7 +204,7 @@ class uvm_default_report_server extends uvm_report_server;
   local int m_quit_count;
   local int m_max_quit_count; 
   bit max_quit_overridable = 1;
-  local int m_severity_count[uvm_severity_type];
+  local int m_severity_count[uvm_severity];
   protected int m_id_count[string];
    protected uvm_tr_database m_message_db;
    protected uvm_tr_stream m_streams[string][string]; // ro.name,rh.name
@@ -287,7 +287,7 @@ class uvm_default_report_server extends uvm_report_server;
   // Print to show report server state
   virtual function void do_print (uvm_printer printer);
 
-    uvm_severity_type l_severity_count_index;
+    uvm_severity l_severity_count_index;
     string l_id_count_index;
 
     printer.print_int("quit_count", m_quit_count, $bits(m_quit_count), UVM_DEC,
@@ -401,22 +401,19 @@ class uvm_default_report_server extends uvm_report_server;
   // Function: get_severity_count
 
   function int get_severity_count(uvm_severity severity);
-    uvm_severity_type l_severity_type = uvm_severity_type'(severity);
-    return m_severity_count[l_severity_type];
+    return m_severity_count[severity];
   endfunction
 
   // Function: set_severity_count
 
   function void set_severity_count(uvm_severity severity, int count);
-    uvm_severity_type l_severity_type = uvm_severity_type'(severity);
-    m_severity_count[l_severity_type] = count < 0 ? 0 : count;
+    m_severity_count[severity] = count < 0 ? 0 : count;
   endfunction
 
   // Function: incr_severity_count
 
   function void incr_severity_count(uvm_severity severity);
-    uvm_severity_type l_severity_type = uvm_severity_type'(severity);
-    m_severity_count[l_severity_type]++;
+    m_severity_count[severity]++;
   endfunction
 
   // Function: reset_severity_counts
@@ -425,7 +422,7 @@ class uvm_default_report_server extends uvm_report_server;
   // all severity counters to 0.
 
   function void reset_severity_counts();
-    uvm_severity_type s;
+    uvm_severity s;
     s = s.first();
     forever begin
       m_severity_count[s] = 0;
@@ -707,7 +704,7 @@ class uvm_default_report_server extends uvm_report_server;
                                                  string report_object_name = "");
 
     string sev_string;
-    uvm_severity_type l_severity;
+    uvm_severity l_severity;
     uvm_verbosity l_verbosity;
     string filename_line_string;
     string time_str;
@@ -832,8 +829,8 @@ class uvm_default_report_server extends uvm_report_server;
     uvm_report_message l_report_message;
 
     l_report_message = uvm_report_message::new_report_message();
-    l_report_message.set_report_message(uvm_severity_type'(severity),
-      id, message, verbosity_level, filename, line, "");
+    l_report_message.set_report_message(severity, id, message, 
+					verbosity_level, filename, line, "");
     l_report_message.set_report_object(client);
     l_report_message.set_report_handler(client.get_report_handler());
     l_report_message.set_file(file);
@@ -862,8 +859,8 @@ class uvm_default_report_server extends uvm_report_server;
     uvm_report_message l_report_message;
 
     l_report_message = uvm_report_message::new_report_message();
-    l_report_message.set_report_message(uvm_severity_type'(severity),
-      id, message, UVM_NONE, filename, line, "");
+    l_report_message.set_report_message(severity, id, message, 
+					UVM_NONE, filename, line, "");
 
     return compose_report_message(l_report_message, name);
   endfunction 
