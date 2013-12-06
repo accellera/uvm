@@ -2,7 +2,7 @@
 Name                Type                Size  Value             
 ----------------------------------------------------------------
 uvm_report_message  uvm_report_message  -     
-  severity          uvm_severity_type   2     UVM_INFO          
+  severity          uvm_severity        2     UVM_INFO          
   id                string              4     TEST              
   message           string              18    Testing message...
   verbosity         uvm_verbosity       32    UVM_LOW           

@@ -155,18 +155,17 @@ class uvm_report_handler extends uvm_object;
         "array");
       if(severity_id_verbosities.first(l_severity)) begin
         do begin
-          uvm_severity_type sev = uvm_severity_type'(l_severity);
           uvm_id_verbosities_array id_v_ary = severity_id_verbosities[l_severity];
           if(id_v_ary.first(idx))
           do begin
             l_int = id_v_ary.get(idx);
             if ($cast(l_verbosity, l_int))
-              printer.print_generic($sformatf("[%s:%s]", sev.name(), idx), "uvm_verbosity", 32, 
+              printer.print_generic($sformatf("[%s:%s]", l_severity.name(), idx), "uvm_verbosity", 32, 
                 l_verbosity.name());
             else begin
               string l_str;
               l_str.itoa(l_int);
-              printer.print_generic($sformatf("[%s:%s]", sev.name(), idx), "int", 32, l_str);
+              printer.print_generic($sformatf("[%s:%s]", l_severity.name(), idx), "int", 32, l_str);
             end
           end while(id_v_ary.next(idx));
         end while(severity_id_verbosities.next(l_severity));
@@ -190,8 +189,7 @@ class uvm_report_handler extends uvm_object;
     if(severity_actions.first(l_severity)) begin
       printer.print_array_header("severity_actions",4,"array");
       do begin
-        uvm_severity_type sev = uvm_severity_type'(l_severity);
-        printer.print_generic($sformatf("[%s]", sev.name()), "uvm_action", 32, 
+        printer.print_generic($sformatf("[%s]", l_severity.name()), "uvm_action", 32, 
           format_action(severity_actions[l_severity]));
       end while(severity_actions.next(l_severity));
       printer.print_array_footer();
@@ -206,11 +204,10 @@ class uvm_report_handler extends uvm_object;
         "array");
       if(severity_id_actions.first(l_severity)) begin
         do begin
-          uvm_severity_type sev = uvm_severity_type'(l_severity);
           uvm_id_actions_array id_a_ary = severity_id_actions[l_severity];
           if(id_a_ary.first(idx))
           do begin
-            printer.print_generic($sformatf("[%s:%s]", sev.name(), idx), "uvm_action", 32, 
+            printer.print_generic($sformatf("[%s:%s]", l_severity.name(), idx), "uvm_action", 32, 
               format_action(id_a_ary.get(idx)));
           end while(id_a_ary.next(idx));
         end while(severity_id_actions.next(l_severity));
@@ -223,9 +220,9 @@ class uvm_report_handler extends uvm_object;
       printer.print_array_header("sev_overrides",sev_overrides.num(),
         "uvm_pool");
       do begin
-        uvm_severity_type l_severity_orig = uvm_severity_type'(l_severity);
-        uvm_severity_type l_severity_new 
-          = uvm_severity_type'(sev_overrides.get(l_severity));
+        uvm_severity l_severity_orig = uvm_severity'(l_severity);
+        uvm_severity l_severity_new 
+          = uvm_severity'(sev_overrides.get(l_severity));
         printer.print_generic($sformatf("[%s]", l_severity_orig.name()),
           "uvm_severity", 32, l_severity_new.name());
       end while(sev_overrides.next(l_severity));
@@ -244,8 +241,8 @@ class uvm_report_handler extends uvm_object;
           uvm_sev_override_array sev_o_ary = sev_id_overrides[idx];
           if(sev_o_ary.first(l_severity))
           do begin
-            uvm_severity_type old_sev = uvm_severity_type'(l_severity);
-            uvm_severity_type new_sev = uvm_severity_type'(sev_o_ary.get(l_severity));
+            uvm_severity old_sev = uvm_severity'(l_severity);
+            uvm_severity new_sev = uvm_severity'(sev_o_ary.get(l_severity));
             printer.print_generic($sformatf("[%s:%s]", old_sev.name(), idx), 
               "uvm_severity", 32, new_sev.name());
           end while(sev_o_ary.next(l_severity));
@@ -273,7 +270,7 @@ class uvm_report_handler extends uvm_object;
     if(severity_file_handles.first(l_severity)) begin
       printer.print_array_header("severity_file_handles",4,"array");
       do begin
-        uvm_severity_type sev = uvm_severity_type'(l_severity);
+        uvm_severity sev = uvm_severity'(l_severity);
         printer.print_int($sformatf("[%s]", sev.name()), 
           severity_file_handles[l_severity], 32, UVM_HEX, ".", "UVM_FILE");
       end while(severity_file_handles.next(l_severity));
@@ -289,7 +286,7 @@ class uvm_report_handler extends uvm_object;
         "array");
       if(severity_id_file_handles.first(l_severity)) begin
         do begin
-          uvm_severity_type sev = uvm_severity_type'(l_severity);
+          uvm_severity sev = uvm_severity'(l_severity);
           uvm_id_file_array id_f_ary = severity_id_file_handles[l_severity];
           if(id_f_ary.first(idx))
           do begin
@@ -318,19 +315,19 @@ class uvm_report_handler extends uvm_object;
     process p = process::self();
     uvm_report_server srvr = uvm_report_server::get_server();
     string id = report_message.get_id();
-    uvm_severity_type severity = report_message.get_severity();
+    uvm_severity severity = report_message.get_severity();
 
     // Check for severity overrides and apply them before calling the server.
     // An id specific override has precedence over a generic severity override.
     if(sev_id_overrides.exists(id)) begin
       if(sev_id_overrides[id].exists(uvm_severity'(severity))) begin
-        severity = uvm_severity_type'(sev_id_overrides[id].get(severity));
+        severity = uvm_severity'(sev_id_overrides[id].get(severity));
         report_message.set_severity(severity);
       end
     end
     else begin
       if(sev_overrides.exists(severity)) begin
-        severity = uvm_severity_type'(sev_overrides.get(uvm_severity'(severity)));
+        severity = uvm_severity'(sev_overrides.get(uvm_severity'(severity)));
         report_message.set_severity(severity);
       end
     end
@@ -600,8 +597,6 @@ class uvm_report_handler extends uvm_object;
   endfunction
 
   
-`ifndef UVM_NO_DEPRECATED
-
 
   // Function- report
   //
@@ -628,13 +623,15 @@ class uvm_report_handler extends uvm_object;
       client = uvm_coreservice.get_root();
 
     l_report_message = uvm_report_message::new_report_message();
-    l_report_message.set_report_message(uvm_severity_type'(severity),
+    l_report_message.set_report_message(uvm_severity'(severity),
       id, message, verbosity_level, filename, line, name);
     l_report_message.set_report_object(client);
     l_report_message.set_action(get_action(severity,id));
     process_report_message(l_report_message);
 
   endfunction
+
+`ifndef UVM_NO_DEPRECATED
 
 
   // Function- run_hooks

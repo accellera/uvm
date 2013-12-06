@@ -261,7 +261,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // report catchers will see the modified value.
   
   protected function void set_severity(uvm_severity severity);
-    this.m_modified_report_message.set_severity(uvm_severity_type'(severity));
+    this.m_modified_report_message.set_severity(uvm_severity'(severity));
   endfunction
   
   // Function: set_verbosity
@@ -521,7 +521,7 @@ virtual class uvm_report_catcher extends uvm_callback;
      end
 
      l_report_message = uvm_report_message::new_report_message();
-     l_report_message.set_report_message(uvm_severity_type'(severity),
+     l_report_message.set_report_message(uvm_severity'(severity),
        id, message, verbosity, fname, line, context_name);
      this.uvm_process_report_message(l_report_message);
    endfunction

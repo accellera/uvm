@@ -477,7 +477,7 @@ class uvm_report_message extends uvm_object;
   protected uvm_report_handler _report_handler;
   protected uvm_report_server _report_server;
 
-  protected uvm_severity_type _severity; 
+  protected uvm_severity _severity; 
   protected string _id;
   protected string _message;
   protected int _verbosity;
@@ -533,7 +533,7 @@ class uvm_report_message extends uvm_object;
   // Name               Type               Size  Value
   // --------------------------------------------------------
   // uvm_report_message  uvm_report_message  -     @532
-  //   severity         uvm_severity_type  2     UVM_INFO
+  //   severity         uvm_severity  2     UVM_INFO
   //   id               string             10    TEST_ID
   //   message          string             12    A message...
   //   verbosity        uvm_verbosity      32    UVM_LOW
@@ -553,7 +553,7 @@ class uvm_report_message extends uvm_object;
 
     super.do_print(printer);
 
-    printer.print_generic("severity", "uvm_severity_type", 
+    printer.print_generic("severity", "uvm_severity", 
                           $bits(_severity), _severity.name());
     printer.print_string("id", _id);
     printer.print_string("message",_message);
@@ -665,7 +665,7 @@ class uvm_report_message extends uvm_object;
 
   // Function: get_severity
 
-  virtual function uvm_severity_type get_severity();
+  virtual function uvm_severity get_severity();
     return _severity;
   endfunction
 
@@ -675,7 +675,7 @@ class uvm_report_message extends uvm_object;
   // UVM_FATAL) of the message.  The value of this field is determined via
   // the API used (`uvm_info(), `uvm_waring(), etc.) and populated for the user.
 
-  virtual function void set_severity(uvm_severity_type sev);
+  virtual function void set_severity(uvm_severity sev);
     _severity = sev;
   endfunction
 
@@ -827,7 +827,7 @@ class uvm_report_message extends uvm_object;
   // Set all the common fields of the report message in one shot.
   //
 
-  virtual function void set_report_message(uvm_severity_type severity, 
+  virtual function void set_report_message(uvm_severity severity, 
     					   string id,
 					   string message,
 					   int verbosity, 

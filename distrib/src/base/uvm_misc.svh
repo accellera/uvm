@@ -694,7 +694,7 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
     uvm_object obj;
     TYPE cfg;
 
-    if (!comp.get_config_object(FIELD, obj, 0)) begin
+    if (!uvm_config_object::get(comp,"",FIELD, obj)) begin
       if (is_fatal)
         comp.uvm_report_fatal("NO_SET_CFG", {"no set_config to field '", FIELD,
                            "' for component '",comp.get_full_name(),"'"},
