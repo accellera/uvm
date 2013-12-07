@@ -268,8 +268,9 @@ class uvm_resource_db #(type T=uvm_object);
   // function: write_by_name
   //
   // write a ~val~ into the resources database.  First, look up the
-  // resource by ~name~ and ~scope~.  If it is not located then add a new 
-  // resource to the database and then write its value.
+  // resource by ~name~ and ~scope~.  If it is not located then return a
+  // 0 indicating an error. Otherwise, write the value in the resource
+  // and return a 1 indicating success.
   //
   // Because the ~scope~ is matched to a resource which may be a
   // regular expression, and consequently may target other scopes beyond
@@ -297,8 +298,9 @@ class uvm_resource_db #(type T=uvm_object);
   // function: write_by_type
   //
   // write a ~val~ into the resources database.  First, look up the
-  // resource by type.  If it is not located then add a new resource to
-  // the database and then write its value.
+  // resource by type.  If it is not located then return a 0 indicating
+  // an error.  Otherwise, write the value in the resourcea and return a
+  // 1 indicating success.
   //
   // Because the ~scope~ is matched to a resource which may be a
   // regular expression, and consequently may target other scopes beyond
