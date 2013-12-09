@@ -160,12 +160,13 @@ class uvm_report_handler extends uvm_object;
           do begin
             l_int = id_v_ary.get(idx);
             if ($cast(l_verbosity, l_int))
-              printer.print_generic($sformatf("[%s:%s]", l_severity.name(), idx), "uvm_verbosity", 32, 
-                l_verbosity.name());
+              printer.print_generic($sformatf("[%s:%s]", l_severity.name(), idx), 
+				    "uvm_verbosity", 32, l_verbosity.name());
             else begin
               string l_str;
               l_str.itoa(l_int);
-              printer.print_generic($sformatf("[%s:%s]", l_severity.name(), idx), "int", 32, l_str);
+              printer.print_generic($sformatf("[%s:%s]", l_severity.name(), idx), 
+				    "int", 32, l_str);
             end
           end while(id_v_ary.next(idx));
         end while(severity_id_verbosities.next(l_severity));
@@ -207,8 +208,8 @@ class uvm_report_handler extends uvm_object;
           uvm_id_actions_array id_a_ary = severity_id_actions[l_severity];
           if(id_a_ary.first(idx))
           do begin
-            printer.print_generic($sformatf("[%s:%s]", l_severity.name(), idx), "uvm_action", 32, 
-              format_action(id_a_ary.get(idx)));
+            printer.print_generic($sformatf("[%s:%s]", l_severity.name(), idx), 
+				  "uvm_action", 32, format_action(id_a_ary.get(idx)));
           end while(id_a_ary.next(idx));
         end while(severity_id_actions.next(l_severity));
       end
@@ -220,10 +221,8 @@ class uvm_report_handler extends uvm_object;
       printer.print_array_header("sev_overrides",sev_overrides.num(),
         "uvm_pool");
       do begin
-        uvm_severity l_severity_orig = uvm_severity'(l_severity);
-        uvm_severity l_severity_new 
-          = uvm_severity'(sev_overrides.get(l_severity));
-        printer.print_generic($sformatf("[%s]", l_severity_orig.name()),
+        uvm_severity l_severity_new = sev_overrides.get(l_severity);
+        printer.print_generic($sformatf("[%s]", l_severity.name()),
           "uvm_severity", 32, l_severity_new.name());
       end while(sev_overrides.next(l_severity));
       printer.print_array_footer();
@@ -241,9 +240,8 @@ class uvm_report_handler extends uvm_object;
           uvm_sev_override_array sev_o_ary = sev_id_overrides[idx];
           if(sev_o_ary.first(l_severity))
           do begin
-            uvm_severity old_sev = uvm_severity'(l_severity);
-            uvm_severity new_sev = uvm_severity'(sev_o_ary.get(l_severity));
-            printer.print_generic($sformatf("[%s:%s]", old_sev.name(), idx), 
+            uvm_severity new_sev = sev_o_ary.get(l_severity);
+            printer.print_generic($sformatf("[%s:%s]", l_severity.name(), idx), 
               "uvm_severity", 32, new_sev.name());
           end while(sev_o_ary.next(l_severity));
         end while(sev_id_overrides.next(idx));
@@ -270,8 +268,7 @@ class uvm_report_handler extends uvm_object;
     if(severity_file_handles.first(l_severity)) begin
       printer.print_array_header("severity_file_handles",4,"array");
       do begin
-        uvm_severity sev = uvm_severity'(l_severity);
-        printer.print_int($sformatf("[%s]", sev.name()), 
+        printer.print_int($sformatf("[%s]", l_severity.name()), 
           severity_file_handles[l_severity], 32, UVM_HEX, ".", "UVM_FILE");
       end while(severity_file_handles.next(l_severity));
       printer.print_array_footer();
@@ -286,11 +283,10 @@ class uvm_report_handler extends uvm_object;
         "array");
       if(severity_id_file_handles.first(l_severity)) begin
         do begin
-          uvm_severity sev = uvm_severity'(l_severity);
           uvm_id_file_array id_f_ary = severity_id_file_handles[l_severity];
           if(id_f_ary.first(idx))
           do begin
-            printer.print_int($sformatf("[%s:%s]", sev.name(), idx),
+            printer.print_int($sformatf("[%s:%s]", l_severity.name(), idx),
               id_f_ary.get(idx), 32, UVM_HEX, ".", "UVM_FILE");
           end while(id_f_ary.next(idx));
         end while(severity_id_file_handles.next(l_severity));
@@ -321,13 +317,13 @@ class uvm_report_handler extends uvm_object;
     // An id specific override has precedence over a generic severity override.
     if(sev_id_overrides.exists(id)) begin
       if(sev_id_overrides[id].exists(uvm_severity'(severity))) begin
-        severity = uvm_severity'(sev_id_overrides[id].get(severity));
+        severity = sev_id_overrides[id].get(severity);
         report_message.set_severity(severity);
       end
     end
     else begin
       if(sev_overrides.exists(severity)) begin
-        severity = uvm_severity'(sev_overrides.get(uvm_severity'(severity)));
+        severity = sev_overrides.get(severity);
         report_message.set_severity(severity);
       end
     end
@@ -623,8 +619,8 @@ class uvm_report_handler extends uvm_object;
       client = uvm_coreservice.get_root();
 
     l_report_message = uvm_report_message::new_report_message();
-    l_report_message.set_report_message(uvm_severity'(severity),
-      id, message, verbosity_level, filename, line, name);
+    l_report_message.set_report_message(severity, id, message, 
+					verbosity_level, filename, line, name);
     l_report_message.set_report_object(client);
     l_report_message.set_action(get_action(severity,id));
     process_report_message(l_report_message);

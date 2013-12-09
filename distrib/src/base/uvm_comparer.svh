@@ -31,8 +31,6 @@
 //
 //------------------------------------------------------------------------------
 
-typedef class uvm_report_handler;
-   
 class uvm_comparer;
 
   // Variable: policy
@@ -342,13 +340,12 @@ class uvm_comparer;
   // settings. See the <verbosity> and <sev> variables for more information.
 
   function void print_msg (string msg);
-     uvm_root root = uvm_coreservice.get_root();
-     uvm_report_handler m_rh = root.get_report_handler();
+    uvm_root root = uvm_coreservice.get_root();
      
     result++;
     if(result <= show_max) begin
        msg = {"Miscompare for ", uvm_object::__m_uvm_status_container.scope.get(), ": ", msg};
-       m_rh.report(sev,root.get_full_name(),"MISCMP", msg, verbosity,`uvm_file,`uvm_line,root);
+       root.uvm_report(sev, "MISCMP", msg, verbosity, `uvm_file, `uvm_line);
     end
     miscompares = { miscompares, uvm_object::__m_uvm_status_container.scope.get(), ": ", msg, "\n" };
   endfunction
@@ -363,7 +360,6 @@ class uvm_comparer;
   //Need this function because sformat doesn't support objects
   function void print_rollup(uvm_object rhs, uvm_object lhs);
      uvm_root root = uvm_coreservice.get_root();
-     uvm_report_handler m_rh = root.get_report_handler();
 
     string msg;
     if(uvm_object::__m_uvm_status_container.scope.depth() == 0) begin
@@ -375,9 +371,9 @@ class uvm_comparer;
            $swrite(msg, "%0d Miscompare(s) for object ", result);
         end
 
-	m_rh.report(sev,root.get_full_name(),"MISCMP", $sformatf("%s%s@%0d vs. %s@%0d", msg,
-                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()), 
-		    verbosity,`uvm_file,`uvm_line,root);
+        root.uvm_report(sev, "MISCMP", $sformatf("%s%s@%0d vs. %s@%0d", msg,
+                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()),
+			verbosity, `uvm_file, `uvm_line);
       end
     end
   endfunction
@@ -388,13 +384,12 @@ class uvm_comparer;
 
   function void print_msg_object(uvm_object lhs, uvm_object rhs);
      uvm_root root = uvm_coreservice.get_root();
-     uvm_report_handler m_rh = root.get_report_handler();
 
     result++;
     if(result <= show_max) begin
-       m_rh.report(sev,root.get_full_name(),"MISCMP", 
-        $sformatf("Miscompare for %0s: lhs = @%0d : rhs = @%0d", 
-        uvm_object::__m_uvm_status_container.scope.get(), (lhs!=null ? lhs.get_inst_id() : 0), (rhs != null ? rhs.get_inst_id() : 0)), verbosity,`uvm_file,`uvm_line,root);
+       root.uvm_report(sev, "MISCMP",
+         $sformatf("Miscompare for %0s: lhs = @%0d : rhs = @%0d",
+         uvm_object::__m_uvm_status_container.scope.get(), (lhs!=null ? lhs.get_inst_id() : 0), 	(rhs != null ? rhs.get_inst_id() : 0)), verbosity, `uvm_file, `uvm_line);
     end
     $swrite(miscompares, "%s%s: lhs = @%0d : rhs = @%0d",
         miscompares, uvm_object::__m_uvm_status_container.scope.get(), (lhs != null ? lhs.get_inst_id() : 0), (rhs != null ? rhs.get_inst_id() : 0));

@@ -61,7 +61,7 @@ module snps_env_top();
       uvm_pkg::uvm_report_server svr;
       svr = uvm_pkg::uvm_coreservice.get_report_server();
 
-      svr.summarize();
+      svr.report_summarize();
 
       if (svr.get_severity_count(uvm_pkg::UVM_FATAL) == 0 &&
           svr.get_severity_count(uvm_pkg::UVM_ERROR) == 0)

@@ -50,7 +50,7 @@ begin
    else
       $write("!! UVM TEST FAILED !!\n");
 
-   svr.summarize();
+   svr.report_summarize();
 end
 
 endprogram

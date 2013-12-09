@@ -533,7 +533,7 @@ class uvm_report_message extends uvm_object;
   // Name               Type               Size  Value
   // --------------------------------------------------------
   // uvm_report_message  uvm_report_message  -     @532
-  //   severity         uvm_severity  2     UVM_INFO
+  //   severity         uvm_severity       2     UVM_INFO
   //   id               string             10    TEST_ID
   //   message          string             12    A message...
   //   verbosity        uvm_verbosity      32    UVM_LOW

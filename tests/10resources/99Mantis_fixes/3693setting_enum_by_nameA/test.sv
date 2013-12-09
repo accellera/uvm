@@ -47,7 +47,7 @@ module testmod;
           begin
 	          uvm_report_server svr;
 	          svr=uvm_report_server::get_server();
-	          svr.summarize();
+	          svr.report_summarize();
           end	
     end
 

@@ -829,8 +829,8 @@ class uvm_default_report_server extends uvm_report_server;
     uvm_report_message l_report_message;
 
     l_report_message = uvm_report_message::new_report_message();
-    l_report_message.set_report_message(uvm_severity'(severity),
-      id, message, verbosity_level, filename, line, "");
+    l_report_message.set_report_message(severity, id, message, 
+					verbosity_level, filename, line, "");
     l_report_message.set_report_object(client);
     l_report_message.set_report_handler(client.get_report_handler());
     l_report_message.set_file(file);
@@ -859,8 +859,8 @@ class uvm_default_report_server extends uvm_report_server;
     uvm_report_message l_report_message;
 
     l_report_message = uvm_report_message::new_report_message();
-    l_report_message.set_report_message(uvm_severity'(severity),
-      id, message, UVM_NONE, filename, line, "");
+    l_report_message.set_report_message(severity, id, message, 
+					UVM_NONE, filename, line, "");
 
     return compose_report_message(l_report_message, name);
   endfunction 
