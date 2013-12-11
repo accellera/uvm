@@ -93,7 +93,13 @@ Mantis 4378: Proper documentation of set_inst_override_by_name and
 
 Mantis 4382: Add document for UVM_UNFORMAT2/4 and UVM_REAL/REAL_DEC/REAL_EXP
 
+(+) Mantis 4389: mode bit for propagation of objections was added via Mantis 3893
+
 Mantis 4391: removed redundant code in uvm_port_base
+
+(*) Mantis 4416 : The confusing uvm_severity_type was deprecated, and
+replaced internally using uvm_severity.  The 1.1 -> 1.2 conversion
+script can be used to replace any occurances in user code.
 
 Mantis 4418 : Clarified meaning of specified verbosity when using set_report_verbosity
 
@@ -236,5 +242,10 @@ pack_bits/bytes/ints and unpack_bits/bytes/ints to allow easier
 compatibility with the SystemVerilog stream operator.
 
 Mantis 4772: separated hdl vendor dpi backends into one file per vendor
+
+(*) Mantis 4783: The `uvm_record_* macros no longer call undocumented
+member methods of uvm_recorder.
+
+(+) Mantis 4786: Corrected the documentation of print_real
 
 (+) Mantis 4784: documenting the `uvm_record_(int,string,real,time) macros
