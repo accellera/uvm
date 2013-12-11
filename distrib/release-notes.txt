@@ -59,6 +59,10 @@ command line using +uvm_set_config_string.
 (+) Mantis 3741: Added command-line functionality to setting
 default_sequence (+uvm_set_default_sequence)
 
+Mantis 3783: all messaging is now routed via uvm_report_server
+
+Mantis 3887: allows the factory to be replaced in order to trace create or override calls as well as to identify unused overrides
+
 Mantis 3901: Feature request to prevent objection from throwing 
 decrement-below-zero error if the count is 0
 
@@ -143,6 +147,8 @@ Mantis 4532: uvm_reg_access_seq ignoring regs with one RO field
 Mantis 4533: static data in DPI may survive reset
 
 Mantis 4542: uvm_test_done is now const to prevent changes
+
+Mantis 4550: clarified that TLM port transaction types are not restricted to class/uvm_objects
 
 (+) Mantis 4553: Introduces NOACCESS field access in uvm_reg_field.svh; removed error msgs from get_access(), and augmented by using NOACCESS when map and field have conflicting access values. 
 

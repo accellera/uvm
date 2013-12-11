@@ -63,10 +63,17 @@ foreach $thisBranch (keys %mantis) {
   if($t =~  /$after/) {
     push @{$reason{$mantis{$thisBranch}}},"already-in-$after";
   } else {
-    $score{$mantis{$thisBranch}}++;
-    push @{$reason{$mantis{$thisBranch}}},$thisBranch;
+      my $t = qx{git branch -r --contains $thisBranch $target};
+      if($t =~ /$target/) {
+	  $score{$mantis{$thisBranch}}++;
+	  push @{$reason{$mantis{$thisBranch}}},"merged($thisBranch)";
+      } else {
+          push @{$reason{$mantis{$thisBranch}}},"not-merged($thisBranch)";
+      }
   }
 }
+
+
 
 # now extract the info from the relnotes
 $releasenotes = qx{git show ${target}:distrib/release-notes.txt};
@@ -96,6 +103,7 @@ while($csv =~ /(^\d+\,.*)/mgx) {
     $score{$id}++;
   }
   push @{$reason{$id}},$cols[$cols{"Status"}];
+  push @{$reason{$id}},$cols[$cols{"Assigned To"}];  
 }
 
 print "mantis,score,reasons\n";

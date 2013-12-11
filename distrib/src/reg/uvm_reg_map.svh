@@ -2049,7 +2049,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       n_bits -= bus_width * 8;
     end
     
-    // if set utilizy the order policy
+    // if set utilize the order policy
     if(policy!=null)
         policy.order(accesses);
         
