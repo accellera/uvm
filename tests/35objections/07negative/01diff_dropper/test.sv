@@ -27,11 +27,11 @@ module test;
       super.new(name, parent);
     endfunction : new
     `uvm_component_utils(simple_driver)
-    task run();
-      uvm_test_done.raise_objection(this);
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       repeat(i) #10;
-      uvm_test_done.drop_objection();
-    endtask: run
+      phase.drop_objection(uvm_root::get());
+    endtask: run_phase
   endclass : simple_driver
 
   class my_catcher extends uvm_report_catcher;

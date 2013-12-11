@@ -43,6 +43,9 @@ typedef enum {UVM_APPEND, UVM_PREPEND} uvm_apprepend;
 // Forward declaration since scope stack uses uvm_objects now
 typedef class uvm_object;
 
+typedef class uvm_coreservice_t;
+typedef class uvm_factory;
+
 //----------------------------------------------------------------------------
 //
 // CLASS- uvm_scope_stack
@@ -293,37 +296,6 @@ class uvm_status_container;
   endfunction
 endclass
 
-
-
-//------------------------------------------------------------------------------
-//
-// CLASS- uvm_copy_map
-//
-//
-// Internal class used to map rhs to lhs so when a cycle is found in the rhs,
-// the correct lhs object can be bound to it.
-//------------------------------------------------------------------------------
-
-class uvm_copy_map;
-  local uvm_object m_map[uvm_object];
-  function void set(uvm_object key, uvm_object obj);
-    m_map[key] = obj;
-  endfunction
-  function uvm_object get(uvm_object key);
-    if (m_map.exists(key))
-       return m_map[key];
-    return null;
-  endfunction
-  function void clear();
-    m_map.delete();
-  endfunction 
-  function void delete(uvm_object v);
-    m_map.delete(v);
-  endfunction 
-endclass
-
-
-
 // Variable- uvm_global_random_seed
 //
 // Create a seed which is based off of the global seed which can be used to seed
@@ -497,18 +469,26 @@ function string uvm_leaf_scope (string full_name, byte scope_separator = ".");
 endfunction
 
 
-// Function- uvm_vector_to_string
+// Function- uvm_bitstream_to_string
 //
 //
-function string uvm_vector_to_string (uvm_bitstream_t value, int size,
-                                      uvm_radix_enum radix=UVM_NORADIX,
-                                      string radix_str="");
-
+function string uvm_bitstream_to_string (uvm_bitstream_t value, int size,
+                                         uvm_radix_enum radix=UVM_NORADIX,
+                                         string radix_str="");
   // sign extend & don't show radix for negative values
   if (radix == UVM_DEC && value[size-1] === 1)
     return $sformatf("%0d", value);
 
-  value &= (1 << size)-1;
+  // TODO $countbits(value,'z) would be even better
+  if($isunknown(value)) begin
+	  uvm_bitstream_t _t;
+	  _t=0;
+	  for(int idx=0;idx<size;idx++)
+	    _t[idx]=value[idx];
+	  value=_t;
+  	end
+  else 
+  	value &= (1 << size)-1;
 
   case(radix)
     UVM_BIN:      return $sformatf("%0s%0b", radix_str, value);
@@ -521,7 +501,45 @@ function string uvm_vector_to_string (uvm_bitstream_t value, int size,
   endcase
 endfunction
 
+// Function- uvm_integral_to_string
+//
+//
+function string uvm_integral_to_string (uvm_integral_t value, int size,
+                                         uvm_radix_enum radix=UVM_NORADIX,
+                                         string radix_str="");
+  // sign extend & don't show radix for negative values
+  if (radix == UVM_DEC && value[size-1] === 1)
+    return $sformatf("%0d", value);
 
+  // TODO $countbits(value,'z) would be even better
+  if($isunknown(value)) begin
+	  uvm_integral_t _t;
+	  _t=0;
+	  for(int idx=0;idx<size;idx++)
+	  	_t[idx]=value[idx];
+	  value=_t;
+  	end
+  else 
+  	value &= (1 << size)-1;
+
+  case(radix)
+    UVM_BIN:      return $sformatf("%0s%0b", radix_str, value);
+    UVM_OCT:      return $sformatf("%0s%0o", radix_str, value);
+    UVM_UNSIGNED: return $sformatf("%0s%0d", radix_str, value);
+    UVM_STRING:   return $sformatf("%0s%0s", radix_str, value);
+    UVM_TIME:     return $sformatf("%0s%0t", radix_str, value);
+    UVM_DEC:      return $sformatf("%0s%0d", radix_str, value);
+    default:      return $sformatf("%0s%0x", radix_str, value);
+  endcase
+endfunction
+
+// Backwards compat
+function string uvm_vector_to_string(uvm_bitstream_t value, int size,
+                                     uvm_radix_enum radix=UVM_NORADIX,
+                                     string radix_str="");
+   return uvm_bitstream_to_string(value,size,radix,radix_str);
+endfunction // uvm_vector_to_string
+   
 // Function- uvm_get_array_index_int
 //
 // The following functions check to see if a string is representing an array
@@ -599,6 +617,7 @@ function automatic bit uvm_has_wildcard (string arg);
 
 endfunction
 
+
 //------------------------------------------------------------------------------
 // CLASS: uvm_utils
 //
@@ -609,6 +628,7 @@ endfunction
 typedef class uvm_component;
 typedef class uvm_root;
 typedef class uvm_object;
+typedef class uvm_report_object;
         
 class uvm_utils #(type TYPE=int, string FIELD="config");
 
@@ -623,7 +643,7 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
     uvm_component list[$];
     types_t types;
     uvm_root top;
-    top = uvm_root::get();
+    top = uvm_coreservice.get_root();
     top.find_all("*",list,start);
     foreach (list[i]) begin
       TYPE typ;
@@ -652,6 +672,9 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
   static function TYPE create_type_by_name(string type_name, string contxt);
     uvm_object obj;
     TYPE  typ;
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
+  
     obj = factory.create_object_by_name(type_name,contxt,type_name);
        if (!$cast(typ,obj))
          uvm_report_error("WRONG_TYPE",{"The type_name given '",type_name,
@@ -671,7 +694,7 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
     uvm_object obj;
     TYPE cfg;
 
-    if (!comp.get_config_object(FIELD, obj, 0)) begin
+    if (!uvm_config_object::get(comp,"",FIELD, obj)) begin
       if (is_fatal)
         comp.uvm_report_fatal("NO_SET_CFG", {"no set_config to field '", FIELD,
                            "' for component '",comp.get_full_name(),"'"},
@@ -709,3 +732,13 @@ class process_container_c;
 endclass
 `endif
 
+
+// NOTE: this is an internal function and provides a string join independent of a streaming pack
+function automatic string m_uvm_string_queue_join(ref string i[$]);
+`ifndef QUESTA
+   m_uvm_string_queue_join = {>>{i}};
+`else
+	foreach(i[idx])
+		m_uvm_string_queue_join = {m_uvm_string_queue_join,i[idx]};
+`endif
+endfunction

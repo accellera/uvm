@@ -44,7 +44,6 @@ class producer extends uvm_component;
   function new(string name, uvm_component parent);
     super.new(name, parent);
     done = 0;
-    enable_stop_interrupt = 1;
   endfunction
 
   function void build_phase(uvm_phase phase);
@@ -57,6 +56,8 @@ class producer extends uvm_component;
     uvm_tlm_time delay = new;
     trans t;
 
+    phase.raise_objection(this);
+
     for(i = 0; i < 10; i++) begin
       t = generate_transaction();
       $display("producer", t.convert2string());
@@ -64,10 +65,9 @@ class producer extends uvm_component;
     end
 
     done = 1;
-  endtask
 
-  task stop(string ph_name);
-    wait(done == 1);
+    phase.drop_objection(this);
+
   endtask
 
   //--------------------------------------------------------------------

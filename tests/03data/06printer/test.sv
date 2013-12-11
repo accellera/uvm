@@ -426,21 +426,21 @@ module test;
        $system("rm -f diff.log; diff expected_table.txt actual_table.log >  diff.log ");      
        fd = $fopen("diff.log","r"); diff= $fgets(str, fd);  $fclose(fd);       
       if (diff >0) begin
-        `uvm_error("BAD_TABLE_PRINTER","Table printer actual output not as expected")
+        `uvm_fatal("BAD_TABLE_PRINTER","Table printer actual output not as expected")
         fail = 1;
       end
 
        $system("rm -f diff.log; diff expected_tree.txt actual_tree.log >  diff.log ");      
        fd = $fopen("diff.log","r"); diff= $fgets(str, fd);  $fclose(fd);
       if (diff >0) begin
-        `uvm_error("BAD_TREE_PRINTER","Tree printer actual output not as expected")
+        `uvm_fatal("BAD_TREE_PRINTER","Tree printer actual output not as expected")
         fail = 1;
       end
 
        $system("rm -f diff.log; diff expected_line.txt actual_line.log >  diff.log ");      
        fd = $fopen("diff.log","r"); diff= $fgets(str, fd);  $fclose(fd);
       if (diff >0) begin
-        `uvm_error("BAD_LINE_PRINTER","Line printer actual output not as expected")
+        `uvm_fatal("BAD_LINE_PRINTER","Line printer actual output not as expected")
         fail = 1;
       end
 

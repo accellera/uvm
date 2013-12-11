@@ -22,12 +22,12 @@ module test;
 
   // This is an example of the most basic usage of the objection mechanism.  In
   // this scenario we will have:
-  //   1.  A sequence, silly_sequence, that:
+  //   1.  A sequence, simple_seq, that:
   //         a.  when it starts up, raises a test done objection
   //         b.  when it finishes, drops a test done objection
   //         c.  sends 10 packets that are #10 apart temporally
   //   2.  A sequencer that:
-  //         a.  is set to start the silly_sequence as the default_sequence
+  //         a.  is set to start the simple_seq as the default_sequence
   //   3.  A driver that just takes the packets and does nothing but keeps
   //       traffic coming (burns #10).
   //   4.  An agent that:
@@ -47,20 +47,23 @@ module test;
   endclass : simple_item
 
   class simple_sequencer extends uvm_sequencer #(simple_item);
-    `uvm_sequencer_utils(simple_sequencer)
+    `uvm_component_utils(simple_sequencer)
     function new (string name, uvm_component parent);
       super.new(name, parent);
-      `uvm_update_sequence_lib_and_item(simple_item)
     endfunction : new
   endclass : simple_sequencer
 
   class simple_seq extends uvm_sequence #(simple_item);
     function new(string name="simple_seq");
       super.new(name);
+      set_automatic_phase_objection(1);
     endfunction
-    `uvm_sequence_utils(simple_seq, simple_sequencer)    
+    `uvm_object_utils(simple_seq)    
+    `uvm_declare_p_sequencer(simple_sequencer)
     virtual task body();
-      starting_phase.raise_objection(this);
+      uvm_domain l_common_domain = uvm_domain::get_common_domain();
+      uvm_phase l_run_phase = l_common_domain.find_by_name("run");
+      l_run_phase.raise_objection(this);
       p_sequencer.uvm_report_info("SEQ_BODY", "simple_seq body() is starting...", UVM_LOW);
       #50;
       // Raising one uvm_test_done objection
@@ -68,7 +71,7 @@ module test;
         `uvm_do(req)
         #10;
       end
-      starting_phase.drop_objection(this);
+      l_run_phase.drop_objection(this);
       p_sequencer.uvm_report_info("SEQ_BODY", "simple_seq body() is ending...", UVM_LOW);
     endtask
   endclass : simple_seq
@@ -114,14 +117,23 @@ module test;
     endfunction : new
     `uvm_component_utils(test)
     function void build();
+      uvm_domain l_common_domain = uvm_domain::get_common_domain();
+      uvm_phase l_run_phase = l_common_domain.find_by_name("run");
+      uvm_objection l_run_phase_objection = l_run_phase.get_objection();
       super.build();
-      set_config_string("agent.sequencer", "default_sequence", "simple_seq");
       agent = simple_agent::type_id::create("agent", this);
-      uvm_test_done.set_drain_time(this, 93);
+      l_run_phase_objection.set_drain_time(this, 93);
     endfunction
     function void start_of_simulation();
       this.print();
     endfunction
+    task run_phase(uvm_phase phase);
+      simple_seq l_ss = simple_seq::type_id::create("simple_seq", this);
+      // fork/join_none for good measure (lets the run_phase finish)
+      fork 
+        l_ss.start(agent.sequencer);
+      join_none
+    endtask
     function void report();
       //time should get to 343, 150 for the sequence, 100 for the driver and 93 
       //for the drain-off.

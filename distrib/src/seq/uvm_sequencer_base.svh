@@ -2,6 +2,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc. 
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -22,6 +23,11 @@
 typedef uvm_config_db#(uvm_sequence_base) uvm_config_seq;
 typedef class uvm_sequence_request;
 
+// Utility class for tracking default_sequences
+class uvm_sequence_process_wrapper;
+    process pid;
+    uvm_sequence_base seq;
+endclass : uvm_sequence_process_wrapper
 
 //------------------------------------------------------------------------------
 //
@@ -49,6 +55,9 @@ class uvm_sequencer_base extends uvm_component;
   protected int                 m_arb_size;       // used for waiting processes
   protected int                 m_wait_for_item_sequence_id,
                                 m_wait_for_item_transaction_id;
+  protected int                 m_wait_relevant_count = 0 ;
+  protected int                 m_max_zero_time_wait_relevant_count = 10;
+  protected time                m_last_wait_relevant_time = 0 ;
 
   local uvm_sequencer_arb_mode  m_arbitration = SEQ_ARB_FIFO;
   local static int              g_request_id;
@@ -100,6 +109,8 @@ class uvm_sequencer_base extends uvm_component;
 
   extern virtual task execute_item(uvm_sequence_item item);
 
+  // Hidden array, keeps track of running default sequences
+  protected uvm_sequence_process_wrapper m_default_sequences[uvm_phase];
 
   // Function: start_phase_sequence
   //
@@ -156,6 +167,15 @@ class uvm_sequencer_base extends uvm_component;
      
 
   extern virtual function void start_phase_sequence(uvm_phase phase);
+
+  // Function: stop_phase_sequence(uvm_phase phase)
+  //
+  // Stop the default sequence for this phase, if any exists, and it
+  // is still executing.
+
+  extern virtual function void stop_phase_sequence(uvm_phase phase);
+
+  
 
   // Task: wait_for_grant
   //
@@ -340,6 +360,12 @@ class uvm_sequencer_base extends uvm_component;
                                             uvm_sequence_item t,
                                             bit rerandomize = 0);
 
+  // Function set_max_zero_time_wait_relevant_count
+  //
+  // Can be called at any time to change the maximum number of times 
+  // wait_for_relevant() can be called by the sequencer in zero time before
+  // an error is declared.  The default maximum is 10.
+  extern virtual function void set_max_zero_time_wait_relevant_count(int new_val) ;
 
 
   //----------------------------------------------------------------------------
@@ -394,6 +420,23 @@ class uvm_sequencer_base extends uvm_component;
 
   int m_is_relevant_completed;
 
+
+`ifdef UVM_DISABLE_AUTO_ITEM_RECORDING
+  local bit m_auto_item_recording = 0;
+`else
+  local bit m_auto_item_recording = 1;
+`endif
+
+
+  // Access to following internal methods provided via seq_item_export
+
+  virtual function void disable_auto_item_recording();
+    m_auto_item_recording = 0;
+  endfunction
+
+  virtual function bit is_auto_item_recording_enabled();
+    return m_auto_item_recording;
+  endfunction
 
   //----------------------------------------------------------------------------
   // DEPRECATED - DO NOT USE IN NEW DESIGNS - NOT PART OF UVM STANDARD
@@ -473,25 +516,25 @@ function void uvm_sequencer_base::build();
   `ifndef UVM_NO_DEPRECATED
   // deprecated parameters for sequencer. Use uvm_sequence_library class
   // for sequence library functionality.
-  if (get_config_string("default_sequence", default_sequence)) begin
+  if (uvm_config_string::get(this, "", "default_sequence", default_sequence)) begin
     `uvm_warning("UVM_DEPRECATED",{"default_sequence config parameter is deprecated and not ",
                  "part of the UVM standard. See documentation for uvm_sequencer_base::start_phase_sequence()."})
     this.m_default_seq_set = 1;
   end
-  if (get_config_int("count", count)) begin
+  if (uvm_config_int::get(this, "", "count", count)) begin
     `uvm_warning("UVM_DEPRECATED",{"count config parameter is deprecated and not ",
                  "part of the UVM standard"})
   end
-  if (get_config_int("max_random_count", max_random_count)) begin
+  if (uvm_config_int::get(this, "", "max_random_count", max_random_count)) begin
     `uvm_warning("UVM_DEPRECATED",{"count config parameter is deprecated and not ",
                  "part of the UVM standard"})
   end
-  if (get_config_int("max_random_depth", max_random_depth)) begin
+  if (uvm_config_int::get(this, "", "max_random_depth", max_random_depth)) begin
     `uvm_warning("UVM_DEPRECATED",{"max_random_depth config parameter is deprecated and not ",
                  "part of the UVM standard. Use 'uvm_sequence_library' class for ",
                  "sequence library functionality"})
   end
-  if (get_config_int("pound_zero_count", dummy))
+  if (uvm_config_int::get(this, "", "pound_zero_count", dummy))
     `uvm_warning("UVM_DEPRECATED",
       {"pound_zero_count was set but ignored. ",
        "Sequencer/driver synchronization now uses 'uvm_wait_for_nba_region'"})
@@ -872,7 +915,17 @@ task uvm_sequencer_base::m_wait_for_available_sequence();
                     
                   begin
                     arb_sequence_q[is_relevant_entries[k]].sequence_ptr.wait_for_relevant();
-                      m_is_relevant_completed = 1;
+                    if ($realtime != m_last_wait_relevant_time) begin
+                       m_last_wait_relevant_time = $realtime ;
+                       m_wait_relevant_count = 0 ;
+                    end
+                    else begin
+                       m_wait_relevant_count++ ;
+                       if (m_wait_relevant_count > m_max_zero_time_wait_relevant_count) begin
+                          `uvm_fatal("SEQRELEVANTLOOP",$sformatf("Zero time loop detected, passed wait_for_relevant %0d times without time advancing",m_wait_relevant_count))
+                       end
+                    end
+                    m_is_relevant_completed = 1;
                   end
                 join_none
                   
@@ -1358,6 +1411,14 @@ function void uvm_sequencer_base::send_request(uvm_sequence_base sequence_ptr,
 endfunction
 
 
+// set_max_zero_time_wait_relevant_count
+// ------------
+
+function void uvm_sequencer_base::set_max_zero_time_wait_relevant_count(int new_val) ;
+   m_max_zero_time_wait_relevant_count = new_val ;
+endfunction
+
+
 // start_phase_sequence
 // --------------------
 
@@ -1425,7 +1486,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
   seq.print_sequence_info = 1;
   seq.set_sequencer(this);
   seq.reseed();
-  seq.starting_phase = phase;
+  seq.set_starting_phase(phase);
   
   if (!seq.do_not_randomize && !seq.randomize()) begin
     `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
@@ -1434,15 +1495,36 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
   end
   
   fork begin
+    uvm_sequence_process_wrapper w = new();
     // reseed this process for random stability
-    process proc = process::self();
-    proc.srandom(uvm_create_random_seed(seq.get_type_name(), this.get_full_name()));
+    w.pid = process::self();
+    w.seq = seq;
+    w.pid.srandom(uvm_create_random_seed(seq.get_type_name(), this.get_full_name()));
+    m_default_sequences[phase] = w;
+    // this will either complete naturally, or be killed later
     seq.start(this);
+    m_default_sequences.delete(phase);
   end
   join_none
   
 endfunction
 
+// stop_phase_sequence
+// --------------------
+
+function void uvm_sequencer_base::stop_phase_sequence(uvm_phase phase);
+    if (m_default_sequences.exists(phase)) begin
+        `uvm_info("PHASESEQ",
+                  {"Killing default sequence '", m_default_sequences[phase].seq.get_type_name(),
+                   "' for phase '", phase.get_name(), "'"}, UVM_FULL)
+        m_default_sequences[phase].seq.kill();
+    end
+    else begin
+        `uvm_info("PHASESEQ",
+                  {"No default sequence to kill for phase '", phase.get_name(), "'"},
+                  UVM_FULL)
+    end
+endfunction : stop_phase_sequence
 
 
 //----------------------------------------------------------------------------
@@ -1511,6 +1593,8 @@ endfunction
 
 task uvm_sequencer_base::start_default_sequence();
   uvm_sequence_base m_seq ;
+  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  uvm_factory factory=cs.get_factory();
 
   // Default sequence was cleared, or the count is zero
   if (default_sequence == "" || count == 0 ||
@@ -1563,7 +1647,7 @@ task uvm_sequencer_base::start_default_sequence();
     if (m_seq == null) begin
       uvm_report_fatal("STRDEFSEQ", "Null m_sequencer reference", UVM_NONE);
     end
-    m_seq.starting_phase = run_ph;
+    m_seq.set_starting_phase(run_ph);
     m_seq.print_sequence_info = 1;
     m_seq.set_parent_sequence(null);
     m_seq.set_sequencer(this);
@@ -1579,7 +1663,7 @@ endtask
 // get_seq_kind
 // ------------
 // Returns an int seq_kind correlating to the sequence of type type_name
-// in the sequencer�s sequence library. If the named sequence is not
+// in the sequencer���s sequence library. If the named sequence is not
 // registered a SEQNF warning is issued and -1 is returned.
 
 function int uvm_sequencer_base::get_seq_kind(string type_name);

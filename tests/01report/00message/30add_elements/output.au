@@ -1,0 +1,11 @@
+UVM_INFO test.sv(75) @ 0: uvm_test_top [ID0] Message 0
+ +---------------------------------------------------------------------------------
+ +Name               Type                                  Size  Value             
+ +---------------------------------------------------------------------------------
+ +element_container  uvm_report_message_element_container  -     
+ +  component_name   string                                12    uvm_test_top      
+ +  handler_name     string                                12    uvm_test_top      
+ +  catcher_name     string                                18    uvm_report_catcher
+ +  server_name      string                                17    uvm_report_server 
+ +---------------------------------------------------------------------------------
+ +

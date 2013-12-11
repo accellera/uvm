@@ -34,7 +34,8 @@ class test extends uvm_test;
    endfunction
 
    function void start_of_simulation();
-     set_global_timeout(123);
+     uvm_root l_root = uvm_root::get();
+     l_root.set_timeout(123);
    endfunction
 
    task run_phase(uvm_phase phase);

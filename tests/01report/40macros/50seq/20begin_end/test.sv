@@ -1,0 +1,226 @@
+//
+//------------------------------------------------------------------------------
+//   Copyright 2011 Mentor Graphics
+//   Copyright 2011 Cadence
+//   Copyright 2011 Synopsys, Inc.
+//   All Rights Reserved Worldwide
+//
+//   Licensed under the Apache License, Version 2.0 (the
+//   "License"); you may not use this file except in
+//   compliance with the License.  You may obtain a copy of
+//   the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in
+//   writing, software distributed under the License is
+//   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+//   CONDITIONS OF ANY KIND, either express or implied.  See
+//   the License for the specific language governing
+//   permissions and limitations under the License.
+//------------------------------------------------------------------------------
+
+module top();
+
+  import uvm_pkg::*;
+  `include "uvm_macros.svh"
+
+  bit block_bit;
+
+  class my_class extends uvm_object;
+    int foo = 3;
+    string bar = "hi there";
+    `uvm_object_utils_begin(my_class)
+      `uvm_field_int(foo, UVM_ALL_ON | UVM_DEC)
+      `uvm_field_string(bar, UVM_ALL_ON)
+    `uvm_object_utils_end
+    function new (string name = "unnamed-my_class");
+      super.new(name);
+    endfunction
+  endclass
+
+  class my_catcher extends uvm_report_catcher;
+    virtual function action_e catch();
+  
+      if(get_severity() == UVM_FATAL)
+        set_severity(UVM_ERROR);
+
+      return THROW;
+    endfunction
+  endclass
+
+
+  class my_item extends uvm_sequence_item;
+    rand bit[7:0] addr;
+    `uvm_object_utils_begin(my_item)
+      `uvm_field_int(addr, UVM_ALL_ON)
+    `uvm_object_utils_end
+    function new(string name = "unnamed-my_item");
+      super.new(name);
+      `uvm_info(get_type_name(), $sformatf("new sequence item"), UVM_LOW);
+    endfunction
+  endclass
+
+  class my_sequence extends uvm_sequence #(my_item);
+    `uvm_object_utils(my_sequence)
+    function new(string name = "my_sequence");
+      super.new(name);
+    endfunction
+    task pre_body();
+      `uvm_info(get_type_name(), $sformatf("pre_body starting"), UVM_LOW)
+    endtask
+    task body();
+      `uvm_info(get_type_name(), $sformatf("body starting"), UVM_LOW)
+      #100;
+      `uvm_do(req)
+      `uvm_info(get_type_name(), $sformatf("item done, sequence is finishing"), UVM_LOW)
+
+  begin
+    int my_int;
+    string my_string;
+    my_class my_obj;
+
+    my_int = 5;
+    my_string = "foo";
+    my_obj = new("my_obj");
+
+    $display("START OF GOLD FILE");
+
+    `uvm_info_begin("TEST", "Testing message...", UVM_LOW)
+    `uvm_message_add_tag("my_color", "red")
+    `uvm_message_add_int(my_int, UVM_DEC,"",UVM_LOG)
+    `uvm_message_add_string(my_string,UVM_LOG|UVM_RM_RECORD)
+    `uvm_message_add_object(my_obj)
+    `uvm_info_end
+
+    `uvm_warning_begin("TEST", "Testing message...")
+    `uvm_message_add_tag("my_color", "red")
+    `uvm_message_add_int(my_int, UVM_DEC,"",UVM_LOG)
+    `uvm_message_add_string(my_string,UVM_LOG|UVM_RM_RECORD)
+    `uvm_message_add_object(my_obj)
+    `uvm_warning_end
+
+    `uvm_error_begin("TEST", "Testing message...")
+    `uvm_message_add_tag("my_color", "red")
+    `uvm_message_add_int(my_int, UVM_DEC,"",UVM_LOG)
+    `uvm_message_add_string(my_string,UVM_LOG|UVM_RM_RECORD)
+    `uvm_message_add_object(my_obj)
+    `uvm_error_end
+
+    `uvm_fatal_begin("TEST", "Testing message...")
+    `uvm_message_add_tag("my_color", "red")
+    `uvm_message_add_int(my_int, UVM_DEC,"",UVM_LOG)
+    `uvm_message_add_string(my_string,UVM_LOG|UVM_RM_RECORD)
+    `uvm_message_add_object(my_obj)
+    `uvm_fatal_end
+
+    $display("END OF GOLD FILE");
+  end
+
+    endtask
+  endclass
+
+  class top_seq extends uvm_sequence #(my_item);
+    `uvm_object_utils(top_seq)
+
+     my_sequence seq;
+     
+    function new(string name = "top_seq");
+      super.new(name);
+    endfunction
+    task pre_body();
+      `uvm_info(get_type_name(), $sformatf("pre_body starting"), UVM_LOW)
+    endtask
+    task body();
+      `uvm_info(get_type_name(), $sformatf("body starting"), UVM_LOW)
+      #100;
+      `uvm_create(seq)
+      seq.start(get_sequencer(), this);
+      `uvm_info(get_type_name(), $sformatf("item done, sequence is finishing"), UVM_LOW)
+    endtask
+  endclass
+
+  class my_sequencer extends uvm_sequencer #(my_item);
+    `uvm_component_utils(my_sequencer)
+
+    function new(string name, uvm_component parent);
+      super.new(name, parent);
+    endfunction
+
+  endclass
+  
+  class my_driver extends uvm_driver #(my_item);
+    `uvm_component_utils(my_driver)
+
+    function new(string name, uvm_component parent);
+      super.new(name, parent);
+    endfunction
+
+    task run();
+      forever begin
+        seq_item_port.get_next_item(req);
+        `uvm_info(get_type_name(), $sformatf("Request is:\n%s", req.sprint()), UVM_LOW)
+        #100;
+        seq_item_port.item_done();
+      end
+    endtask
+  endclass
+
+  class my_agent extends uvm_agent;
+    `uvm_component_utils(my_agent)
+
+    my_sequencer ms;
+    my_driver md;
+
+    function new(string name, uvm_component parent);
+      super.new(name, parent);
+    endfunction
+
+    function void build();
+      super.build();
+      ms = my_sequencer::type_id::create("ms", this);
+      md = my_driver::type_id::create("md", this);
+    endfunction
+
+    function void connect();
+      md.seq_item_port.connect(ms.seq_item_export);
+    endfunction
+  endclass
+
+  
+  class test extends uvm_test;
+    `uvm_component_utils(test)
+
+    my_agent ma0;
+
+    function new(string name, uvm_component parent);
+      super.new(name, parent);
+    endfunction
+
+    function void build();
+      super.build();
+      ma0 = my_agent::type_id::create("ma0", this);
+    endfunction
+
+    function void end_of_elaboration();
+      `uvm_info(get_type_name(), $sformatf("The topology:\n%s", this.sprint()), UVM_LOW)
+    endfunction
+
+    task run_phase(uvm_phase phase);
+      top_seq the_0seq;
+      phase.raise_objection(this);
+      the_0seq = top_seq::type_id::create("the_0seq", this);
+      the_0seq.start(ma0.ms);
+      phase.drop_objection(this);
+    endtask
+  endclass
+
+  initial
+  begin
+     static my_catcher catcher = new();
+     uvm_report_cb::add(null, catcher);
+
+     run_test();
+  end
+
+endmodule

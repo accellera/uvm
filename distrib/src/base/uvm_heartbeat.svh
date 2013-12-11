@@ -59,7 +59,7 @@ class uvm_heartbeat extends uvm_object;
   protected uvm_component   m_cntxt;
   protected uvm_heartbeat_modes   m_mode;
   protected uvm_component   m_hblist[$];
-  protected uvm_event       m_event;
+  protected uvm_event#()       m_event;
   protected bit             m_started;
   protected event           m_stop_event;
 
@@ -83,7 +83,7 @@ class uvm_heartbeat extends uvm_object;
     
     //if a cntxt is given it will be used for reporting.
     if(cntxt != null) m_cntxt = cntxt;
-    else m_cntxt = uvm_root::get();
+    else m_cntxt = uvm_coreservice.get_root();
 
     m_cb = new({name,"_cb"},m_cntxt);
 
@@ -115,7 +115,7 @@ class uvm_heartbeat extends uvm_object;
   // trigger event, then the monitoring is not started. Monitoring can be 
   // started by explicitly calling <start>.
 
-  function void set_heartbeat (uvm_event e, ref uvm_component comps[$]);
+  function void set_heartbeat (uvm_event#() e, ref uvm_component comps[$]);
     uvm_object c;
     foreach(comps[i]) begin
       c = comps[i];
@@ -164,7 +164,7 @@ class uvm_heartbeat extends uvm_object;
   // running and ~e~ is specifying a different trigger event from the
   // current event.
 
-  function void start (uvm_event e=null);
+  function void start (uvm_event#() e=null);
     if(m_event == null && e == null) begin
       m_cntxt.uvm_report_warning("NOEVNT", { "start() was called for: ",
         get_name(), " with a null trigger and no currently set trigger" },
@@ -297,7 +297,7 @@ class uvm_heartbeat_callback extends uvm_objection_callback;
     if (target != null)
        this.target = target;
     else
-       this.target = uvm_root::get();
+       this.target = uvm_coreservice.get_root();
   endfunction
 
   virtual function void raised (uvm_objection objection,

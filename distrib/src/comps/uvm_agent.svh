@@ -49,7 +49,7 @@ virtual class uvm_agent extends uvm_component;
   // agent should be acting in active or passive mode. This parameter can
   // be set by doing:
   //
-  //| set_config_int("<path_to_agent>", "is_active", UVM_ACTIVE);
+  //| uvm_config_int::set(this, "<relative_path_to_agent>, "is_active", UVM_ACTIVE);
 
   function new (string name, uvm_component parent);
     super.new(name, parent);
@@ -58,7 +58,7 @@ virtual class uvm_agent extends uvm_component;
   function void build_phase(uvm_phase phase);
     int active;
     super.build_phase(phase);
-    if(get_config_int("is_active", active)) is_active = uvm_active_passive_enum'(active);
+    if(uvm_config_int::get(this, "", "is_active", active)) is_active = uvm_active_passive_enum'(active);
   endfunction
 
   const static string type_name = "uvm_agent";

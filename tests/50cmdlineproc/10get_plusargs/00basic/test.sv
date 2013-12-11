@@ -51,14 +51,14 @@ class test extends uvm_test;
      case (tool)
        "Chronologic Simulation VCS Release " : begin
          $display("Doing VCS checks");
-         if(plus_args.size() != 9)
+         if(plus_args.size() != 8)
            pass_the_test = pass_the_test & 0;
          else
            $display("  Correct number of arguments found");
        end
        "ncsim(64)","ncsim" : begin
          $display($sformatf("Doing IUS checks found=%0d plusargs",plus_args.size()));
-         if(plus_args.size() != 10)
+         if(plus_args.size() != 9)
            pass_the_test = pass_the_test & 0;
          else
            $display("  Correct number of arguments found");
@@ -69,7 +69,7 @@ class test extends uvm_test;
        "ModelSim SE",
        "ModelSim SE-64" : begin
          $display("Doing Questa checks");
-         if(plus_args.size() != 9) begin
+         if(plus_args.size() != 8) begin
            $display("  Incorrect number of arguments %0d found (expected 9)", plus_args.size());
            pass_the_test = pass_the_test & 0;
          end
@@ -84,8 +84,9 @@ class test extends uvm_test;
      endcase
    endfunction
 
-   virtual task run();
-      uvm_top.stop_request();
+   virtual task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
+      phase.drop_objection(this);
    endtask
 
    virtual function void report();

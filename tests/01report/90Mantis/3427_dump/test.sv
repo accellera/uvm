@@ -36,6 +36,9 @@ module top;
     endfunction
 
     function void build_phase(uvm_phase phase);
+
+      uvm_report_server l_rs = uvm_report_server::get_server();
+
       myenv.set_report_id_verbosity("ID1", UVM_LOW);
       set_report_id_verbosity_hier("ID2", UVM_MEDIUM);
       set_report_id_verbosity("ID3", UVM_HIGH);
@@ -53,13 +56,13 @@ module top;
 
       set_report_default_file(1);
 
-      set_report_max_quit_count(5);
+      l_rs.set_max_quit_count(5);
     endfunction : build_phase
 
     task run_phase(uvm_phase phase);
-      $display("START OF GOLD FILE");
+      $display("GOLD-FILE-START");
       dump_report_state();
-      $display("END OF GOLD FILE");
+      $display("GOLD-FILE-END");
     endtask : run_phase
   endclass : test
 

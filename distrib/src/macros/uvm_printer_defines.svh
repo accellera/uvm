@@ -48,7 +48,10 @@
    end while(0);
 
 `define uvm_print_int4(F, R, NM, P) \
-    P.print_int(NM, F, $bits(F), R, "[");
+    if ($bits(F) > 64) \
+      P.print_field(NM, F, $bits(F), R, "["); \
+    else \
+      P.print_field_int(NM, F, $bits(F), R, "["); 
 
 
 // uvm_print_enum

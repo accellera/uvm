@@ -168,12 +168,13 @@ class uvm_reg_sequence #(type BASE=uvm_sequence #(uvm_reg_item)) extends BASE;
   // this sequencer.
   //
   virtual task do_reg_item(uvm_reg_item rw);
+     string rws=rw.convert2string();
     if (m_sequencer == null)
      `uvm_fatal("REG/DO_ITEM/NULL","do_reg_item: m_sequencer is null") 
     if (adapter == null)
      `uvm_fatal("REG/DO_ITEM/NULL","do_reg_item: adapter handle is null") 
 
-    `uvm_info("DO_RW_ACCESS",{"Doing transaction: ",rw.convert2string()},UVM_HIGH)
+    `uvm_info("DO_RW_ACCESS",{"Doing transaction: ",rws},UVM_HIGH)
 
     if (parent_select == LOCAL) begin
       upstream_parent = rw.parent;

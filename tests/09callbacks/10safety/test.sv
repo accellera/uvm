@@ -129,10 +129,12 @@ class test extends uvm_test;
    virtual function void build();
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
       my_a_cb acb   = new;
       my_b1_cb b1cb = new;
       my_b2_cb b2cb = new;
+
+      phase.raise_objection(this);
 
       $write("Checking valid registrations...\n");
       uvm_callbacks#(a_comp, a_cb)::add(null, acb);
@@ -165,7 +167,7 @@ class test extends uvm_test;
          pass = 0;
       end
 
-      uvm_top.stop_request();
+      phase.drop_objection(this);
    endtask
 
    virtual function void check();

@@ -619,9 +619,9 @@ virtual class uvm_reg extends uvm_object;
 
    // Function: predict
    //
-   // Update the mirrored value for this register.
+   // Update the mirrored and desired value for this register.
    //
-   // Predict the mirror value of the fields in the register
+   // Predict the mirror (and desired) value of the fields in the register
    // based on the specified observed ~value~ on a specified adress ~map~,
    // or based on a calculated value.
    // See <uvm_reg_field::predict()> for more details.
@@ -1964,7 +1964,8 @@ function void uvm_reg::do_predict(uvm_reg_item      rw,
    uvm_reg_data_t reg_value = rw.value[0];
    m_fname = rw.fname;
    m_lineno = rw.lineno;
-
+   
+if (rw.status ==UVM_IS_OK )
    rw.status = UVM_IS_OK;
 
    if (m_is_busy && kind == UVM_PREDICT_DIRECT) begin

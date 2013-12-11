@@ -95,7 +95,7 @@ module test();
   `uvm_blocking_put_imp_decl(_reg)
   
   class user_ovc_sequencer extends uvm_sequencer#(user_transaction);
-    `uvm_sequencer_utils(user_ovc_sequencer)
+    `uvm_component_utils(user_ovc_sequencer)
     function new (string name, uvm_component parent);
       super.new(name, parent);
     endfunction : new
@@ -250,8 +250,8 @@ module test();
   final
   begin
     uvm_report_server svr;
-    svr = _global_reporter.get_report_server();
-    svr.summarize();
+    svr = uvm_report_server::get_server();
+    svr.report_summarize();
     if (svr.get_severity_count(UVM_FATAL) + svr.get_severity_count(UVM_ERROR) == 0)
       $write("** UVM TEST PASSED **\n");
     else

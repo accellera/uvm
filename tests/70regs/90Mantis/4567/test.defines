@@ -1,0 +1,2 @@
++define+UVM_RAL_SEQ 
++define+DUT_TOP_PATH=snps_env_top.dut

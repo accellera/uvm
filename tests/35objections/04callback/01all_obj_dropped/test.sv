@@ -48,10 +48,9 @@ module test;
   endclass : simple_item
 
   class simple_sequencer extends uvm_sequencer #(simple_item);
-    `uvm_sequencer_utils(simple_sequencer)
+    `uvm_component_utils(simple_sequencer)
     function new (string name, uvm_component parent);
       super.new(name, parent);
-      `uvm_update_sequence_lib_and_item(simple_item)
     endfunction : new
   endclass : simple_sequencer
 
@@ -59,12 +58,15 @@ module test;
     function new(string name="simple_seq");
       super.new(name);
     endfunction
-    `uvm_sequence_utils(simple_seq, simple_sequencer)    
+    `uvm_object_utils(simple_seq)    
+    `uvm_declare_p_sequencer(simple_sequencer)    
     virtual task body();
       p_sequencer.uvm_report_info("SEQ_BODY", "simple_seq body() is starting...", UVM_LOW);
       repeat(2) begin
+        uvm_domain l_common_domain = uvm_domain::get_common_domain();
+        uvm_phase l_run_phase = l_common_domain.find_by_name("run");
         // Raising one uvm_test_done objection
-        uvm_test_done.raise_objection(this);
+        l_run_phase.raise_objection(this);
         //The second time through, the count is 0 but the all dropped cb
         //in the test allows this comp to reraise.
         #50;
@@ -72,7 +74,7 @@ module test;
           `uvm_do(req)
           #10;
         end
-        uvm_test_done.drop_objection(this);
+        l_run_phase.drop_objection(this);
       end
       p_sequencer.uvm_report_info("SEQ_BODY", "simple_seq body() is ending...", UVM_LOW);
     endtask
@@ -102,7 +104,10 @@ module test;
       super.new(name, parent);
     endfunction : new
     virtual task all_dropped (uvm_objection objection, uvm_object source_obj, string description, int count);
-      if (objection == uvm_test_done) begin
+      uvm_domain l_common_domain = uvm_domain::get_common_domain();
+      uvm_phase l_run_phase = l_common_domain.find_by_name("run");
+      uvm_objection l_run_phase_objection = l_run_phase.get_objection();
+      if (objection == l_run_phase_objection) begin
         #93;
       end
     endtask
@@ -125,12 +130,17 @@ module test;
     `uvm_component_utils(test)
     function void build();
       super.build();
-      set_config_string("agent.sequencer", "default_sequence", "simple_seq");
       agent = simple_agent::type_id::create("agent", this);
     endfunction
     function void start_of_simulation();
       this.print();
     endfunction
+    task run_phase(uvm_phase phase);
+      simple_seq l_ss = simple_seq::type_id::create("simple_seq", this);
+      fork
+        l_ss.start(agent.sequencer);
+      join_none
+    endtask
     function void report();
       //time goes for 250, but the all_dropped_cb causes an additonal 93,
       //at which point the test goes another 250 (50 units into the 93). 

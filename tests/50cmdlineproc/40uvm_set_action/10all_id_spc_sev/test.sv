@@ -35,13 +35,14 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       `uvm_error("A", "A Error")
       `uvm_error("B", "B Error")
       `uvm_error("C", "C Error")
       `uvm_error("D", "D Error")
       #1000;
-      uvm_top.stop_request();
+      phase.drop_objection(this);
    endtask
 
    virtual function void report();

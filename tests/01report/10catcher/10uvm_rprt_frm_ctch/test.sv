@@ -26,7 +26,7 @@
 ///////  UVM_WARNING,
 ///////  UVM_ERROR,
 ///////  UVM_FATAL
-/////////} uvm_severity_type;
+/////////} uvm_severity;
 //////////////////////////
 
 
@@ -105,7 +105,10 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
+
+      phase.raise_objection(this);
+
       $write("UVM TEST - Same catcher type - different IDs\n");
   
         begin
@@ -140,14 +143,16 @@ class test extends uvm_test;
   
 
   
-  //$write("UVM TEST EXPECT 1 UVM_ERROR\n");
+      //$write("UVM TEST EXPECT 1 UVM_ERROR\n");
   
-  uvm_top.stop_request();
+      phase.drop_objection(this);
+
    endtask
 
    virtual function void report();
-  $write("** UVM TEST PASSED **\n");
+      $write("** UVM TEST PASSED **\n");
    endfunction
+
 endclass
 
 

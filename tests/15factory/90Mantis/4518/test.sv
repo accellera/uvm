@@ -33,7 +33,7 @@ begin
    uvm_report_server svr;
    obj o;
    
-   svr = _global_reporter.get_report_server();
+   svr = uvm_coreservice.get_report_server();
 
    $write("Testing obsolete object constructor...\n");
    o = new();
@@ -50,7 +50,7 @@ begin
    else
       $write("!! UVM TEST FAILED !!\n");
 
-   svr.summarize();
+   svr.report_summarize();
 end
 
 endprogram

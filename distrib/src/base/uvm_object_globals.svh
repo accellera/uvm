@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010-2013 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -66,10 +67,18 @@ parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS;
 // Type: uvm_bitstream_t
 //
 // The bitstream type is used as a argument type for passing integral values
-// in such methods as set_int_local, get_int_local, get_config_int, report,
+// in such methods as set_int_local, get_int_local, uvm_config_int, report,
 // pack and unpack. 
 
 typedef logic signed [UVM_STREAMBITS-1:0] uvm_bitstream_t;
+
+// Type: uvm_integral_t
+//
+// The integral type is used as a argument type for passing integral values
+// of 64 bits or less to report, record, compare, pack and unpack.
+//
+
+typedef logic signed [63:0] uvm_integral_t;
 
 
 
@@ -80,11 +89,17 @@ typedef logic signed [UVM_STREAMBITS-1:0] uvm_bitstream_t;
 // UVM_BIN       - Selects binary (%b) format
 // UVM_DEC       - Selects decimal (%d) format
 // UVM_UNSIGNED  - Selects unsigned decimal (%u) format
+// UVM_UNFORMAT2 - Selects unformatted 2 value data (%u) format
+// UVM_UNFORMAT4 - Selects unformatted 4 value data (%z) format
 // UVM_OCT       - Selects octal (%o) format
 // UVM_HEX       - Selects hexidecimal (%h) format
 // UVM_STRING    - Selects string (%s) format
 // UVM_TIME      - Selects time (%t) format
 // UVM_ENUM      - Selects enumeration value (name) format
+// UVM_REAL      - Selects real (%g) in exponential or decimal format,
+//                 whichever format results in the shorter printed output
+// UVM_REAL_DEC  - Selects real (%f) in decimal format
+// UVM_REAL_EXP  - Selects real (%e) in exponential format
 
 typedef enum {
    UVM_BIN       = 'h1000000,
@@ -148,7 +163,9 @@ typedef enum {
 //
 // Convenience value to define whether a component, usually an agent,
 // is in "active" mode or "passive" mode.
-
+//
+// UVM_PASSIVE - "Passive" mode
+// UVM_ACTIVE  - "Active" mode
 typedef enum bit { UVM_PASSIVE=0, UVM_ACTIVE=1 } uvm_active_passive_enum;
 
 
@@ -244,16 +261,17 @@ string uvm_aa_string_key;
 //   UVM_FATAL   - Indicates a problem from which simulation can not
 //                 recover. Simulation exits via $finish after a #0 delay.
 
-typedef bit [1:0] uvm_severity;
-
-typedef enum uvm_severity
+typedef enum bit [1:0]
 {
   UVM_INFO,
   UVM_WARNING,
   UVM_ERROR,
   UVM_FATAL
-} uvm_severity_type;
+} uvm_severity;
 
+`ifndef UVM_NO_DEPRECATED
+typedef uvm_severity uvm_severity_type;
+`endif
 
 // Enum: uvm_action
 //
@@ -270,19 +288,21 @@ typedef enum uvm_severity
 //   UVM_CALL_HOOK - Callback the report hook methods 
 //   UVM_STOP      - Causes ~$stop~ to be executed, putting the simulation into
 //                   interactive mode.
+//   UVM_RM_RECORD - Sends the report to the recorder
 
 
 typedef int uvm_action;
 
 typedef enum
 {
-  UVM_NO_ACTION = 'b000000,
-  UVM_DISPLAY   = 'b000001,
-  UVM_LOG       = 'b000010,
-  UVM_COUNT     = 'b000100,
-  UVM_EXIT      = 'b001000,
-  UVM_CALL_HOOK = 'b010000,
-  UVM_STOP      = 'b100000
+  UVM_NO_ACTION = 'b0000000,
+  UVM_DISPLAY   = 'b0000001,
+  UVM_LOG       = 'b0000010,
+  UVM_COUNT     = 'b0000100,
+  UVM_EXIT      = 'b0001000,
+  UVM_CALL_HOOK = 'b0010000,
+  UVM_STOP      = 'b0100000,
+  UVM_RM_RECORD = 'b1000000
 } uvm_action_type;
 
 
@@ -484,7 +504,12 @@ typedef enum { UVM_PHASE_IMP,
 // The set of possible states of a phase. This is an attribute of a schedule
 // node in the graph, not of a phase, to maintain independent per-domain state
 //
-//   UVM_PHASE_DORMANT -  Nothing has happened with the phase in this domain.
+//   UVM_PHASE_UNINITIALIZED - The state is uninitialized.  This is the default
+//             state for phases, and for nodes which have not yet been added to
+//             a schedule.
+//
+//   UVM_PHASE_DORMANT -  The schedule is not currently operating on the phase
+//             node, however it will be scheduled at some point in the future.
 //
 //   UVM_PHASE_SCHEDULED - At least one immediate predecessor has completed.
 //              Scheduled phases block until all predecessors complete or
@@ -521,12 +546,13 @@ typedef enum { UVM_PHASE_IMP,
 //
 //    The state transitions occur as follows:
 //
-//|   DORMANT -> SCHED -> SYNC -> START -> EXEC -> READY -> END -+-> CLEAN -> DONE
-//|      ^                                                       |
-//|      |                      <-- jump_to                      |
-//|      +-------------------------------------------- JUMPING< -+
+//|   UNINITIALIZED -> DORMANT -> SCHED -> SYNC -> START -> EXEC -> READY -> END -+-> CLEAN -> DONE
+//|                       ^                                                       |
+//|                       |                      <-- jump_to                      |
+//|                       +-------------------------------------------- JUMPING< -+
 
-   typedef enum { UVM_PHASE_DORMANT      = 1,
+   typedef enum { UVM_PHASE_UNINITIALIZED = 0,
+                  UVM_PHASE_DORMANT      = 1,
                   UVM_PHASE_SCHEDULED    = 2,
                   UVM_PHASE_SYNCING      = 4,
                   UVM_PHASE_STARTED      = 8,
@@ -594,6 +620,8 @@ typedef class uvm_tree_printer;
 typedef class uvm_line_printer;
 typedef class uvm_comparer;
 typedef class uvm_packer;
+typedef class uvm_tr_database;
+typedef class uvm_text_tr_database;
 typedef class uvm_recorder;
 
 // Variable: uvm_default_table_printer
@@ -646,16 +674,6 @@ uvm_packer uvm_default_packer = new();
 // do not specify a comparer policy.
 
 uvm_comparer uvm_default_comparer = new(); // uvm_comparer::init();
-
-
-// Variable: uvm_default_recorder
-//
-// The default recording policy. Used when calls to <uvm_object::record>
-// do not specify a recorder policy.
-
-uvm_recorder uvm_default_recorder = new();
-
-
 
 
 

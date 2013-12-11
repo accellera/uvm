@@ -1,0 +1,18 @@
+----------------------------------------------------------------
+Name                Type                Size  Value             
+----------------------------------------------------------------
+uvm_report_message  uvm_report_message  -     
+  severity          uvm_severity        2     UVM_INFO          
+  id                string              4     TEST              
+  message           string              18    Testing message...
+  verbosity         uvm_verbosity       32    UVM_LOW           
+  filename          string              7     test.sv           
+  line              integral            32    'd59              
+  context_name      string              0     ""                
+  my_color          string              3     red               
+  my_int            integral            32    'd5               
+  my_string         string              3     foo               
+  my_obj            my_class            -     
+    foo             integral            32    'd3               
+    bar             string              8     hi there          
+----------------------------------------------------------------

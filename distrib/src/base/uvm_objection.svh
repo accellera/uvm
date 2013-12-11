@@ -69,7 +69,7 @@ class uvm_objection extends uvm_report_object;
   protected uvm_objection_events m_events [uvm_object];
   /*protected*/ bit     m_top_all_dropped;
 
-  protected uvm_root m_top = uvm_root::get();
+  protected uvm_root m_top = uvm_coreservice.get_root();
 
   static uvm_objection m_objections[$];
 
@@ -116,7 +116,7 @@ class uvm_objection extends uvm_report_object;
 
   protected bit m_prop_mode = 1;
 
-  uvm_root top = uvm_root::get();
+  uvm_root top = uvm_coreservice.get_root();
 
 
   protected bit m_cleared; /* for checking obj count<0 */
@@ -346,6 +346,10 @@ class uvm_objection extends uvm_report_object;
     int idx;
     uvm_objection_context_object ctxt;
 
+    // Ignore raise if count is 0
+    if (count == 0)
+      return;
+
     if (m_total_count.exists(obj))
       m_total_count[obj] += count;
     else 
@@ -533,6 +537,10 @@ class uvm_objection extends uvm_report_object;
                         string description="",
                         int count=1,
                         int in_top_thread=0);
+
+    // Ignore drops if the count is 0
+    if (count == 0)
+      return;
 
     if (!m_total_count.exists(obj) || (count > m_total_count[obj])) begin
       if(m_cleared)
@@ -1076,7 +1084,8 @@ class uvm_objection extends uvm_report_object;
   // output.
 
   function void display_objections(uvm_object obj=null, bit show_header=1);
-    $display(m_display_objections(obj,show_header));
+	string m = m_display_objections(obj,show_header);
+    `uvm_info("UVM/OBJ/DISPLAY",m,UVM_NONE)
   endfunction
 
 
@@ -1413,8 +1422,8 @@ typedef uvm_objection uvm_callbacks_objection;
 //|
 //|   virtual function void raised (uvm_objection objection, uvm_object obj, 
 //|       uvm_object source_obj, string description, int count);
-//|     $display("%0t: Objection %s: Raised for %s", $time, objection.get_name(),
-//|         obj.get_full_name());
+//|       `uvm_info("RAISED","%0t: Objection %s: Raised for %s", $time, objection.get_name(),
+//|       obj.get_full_name());
 //|   endfunction
 //| endclass
 //| ...

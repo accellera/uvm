@@ -69,7 +69,9 @@ class test extends uvm_test;
     endfunction
 
     function void end_of_elaboration_phase(uvm_phase phase);
+       $display("GOLD-FILE-START");
        uvm_top.print_topology();
+       $display("GOLD-FILE-END");
     endfunction 
    
   task run_phase(uvm_phase phase);
@@ -89,7 +91,8 @@ class test extends uvm_test;
 	$display("UVM TEST PASSED");
        else
 	 $display("UVM TEST FAILED");
-	 
+
+       
      endfunction
 endclass
 
@@ -97,5 +100,6 @@ initial begin
    uvm_component::print_config_matches=1;
    uvm_status_container::print_matches=1;
    run_test("test");
+
 end
 endmodule

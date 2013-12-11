@@ -1345,24 +1345,21 @@ function int unsigned uvm_reg_map::get_size();
   foreach (m_regs_info[rg_]) begin
     uvm_reg rg = rg_;
     addr = m_regs_info[rg].offset + ((rg.get_n_bytes()-1)/m_n_bytes);
-    if (addr > max_addr);
-      max_addr = addr;
+    if (addr > max_addr) max_addr = addr;
   end
 
   // get max offset from memories
   foreach (m_mems_info[mem_]) begin
     uvm_mem mem = mem_;
     addr = m_mems_info[mem].offset + (mem.get_size() * (((mem.get_n_bytes()-1)/m_n_bytes)+1)) -1;
-    if (addr > max_addr) 
-      max_addr = addr;
+    if (addr > max_addr) max_addr = addr;
   end
 
   // get max offset from submaps
   foreach (m_submaps[submap_]) begin
     uvm_reg_map submap=submap_;
     addr = m_submaps[submap] + submap.get_size();
-    if (addr > max_addr)
-      max_addr = addr;
+    if (addr > max_addr) max_addr = addr;
   end
 
   return max_addr + 1;
@@ -2052,7 +2049,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       n_bits -= bus_width * 8;
     end
     
-    // if set utilizy the order policy
+    // if set utilize the order policy
     if(policy!=null)
         policy.order(accesses);
         

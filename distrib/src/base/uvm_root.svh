@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -64,6 +65,8 @@
 
 typedef class uvm_test_done_objection;
 typedef class uvm_cmdline_processor;
+typedef class uvm_component_proxy;
+typedef class uvm_top_down_visitor_adapter;
 
 class uvm_root extends uvm_component;
 
@@ -73,6 +76,16 @@ class uvm_root extends uvm_component;
   extern static function uvm_root get();
 
   uvm_cmdline_processor clp;
+
+  virtual function string get_type_name();
+    return "uvm_root";
+  endfunction
+
+
+  //----------------------------------------------------------------------------
+  // Group: Simulation Control
+  //----------------------------------------------------------------------------
+
 
   // Task: run_test
   //
@@ -86,6 +99,56 @@ class uvm_root extends uvm_component;
   // phasing completes.
 
   extern virtual task run_test (string test_name="");
+
+
+  // Function: die
+  //
+  // This method is called by the report server if a report reaches the maximum
+  // quit count or has an UVM_EXIT action associated with it, e.g., as with
+  // fatal errors.
+  //
+  // Calls the <uvm_component::pre_abort()> method
+  // on the entire <uvm_component> hierarchy in a bottom-up fashion.
+  // It then call calls <report_summarize> and terminates the simulation
+  // with ~$finish~.
+
+  virtual function void die();
+    uvm_report_server l_rs = uvm_report_server::get_server();
+    // do the pre_abort callbacks
+    m_do_pre_abort();
+
+    l_rs.report_summarize();
+    $finish;
+  endfunction
+
+
+  // Function: set_timeout
+  //
+  // Specifies the timeout for the simulation. Default is <`UVM_DEFAULT_TIMEOUT>
+  //
+  // The timeout is simply the maximum absolute simulation time allowed before a
+  // ~FATAL~ occurs.  If the timeout is set to 20ns, then the simulation must end
+  // before 20ns, or a ~FATAL~ timeout will occur.
+  //
+  // This is provided so that the user can prevent the simulation from potentially
+  // consuming too many resources (Disk, Memory, CPU, etc) when the testbench is
+  // essentially hung.
+  //
+  //
+
+  extern function void set_timeout(time timeout, bit overridable=1);
+
+
+  // Variable: finish_on_completion
+  //
+  // If set, then run_test will call $finish after all phases are executed. 
+
+  bit  finish_on_completion = 1;
+
+
+  //----------------------------------------------------------------------------
+  // Group: Topology
+  //----------------------------------------------------------------------------
 
 
   // Variable: top_levels
@@ -115,11 +178,6 @@ class uvm_root extends uvm_component;
                                  input uvm_component comp=null);
 
 
-  virtual function string get_type_name();
-    return "uvm_root";
-  endfunction
-
-
   // Function: print_topology
   //
   // Print the verification environment's component topology. The
@@ -138,38 +196,12 @@ class uvm_root extends uvm_component;
   bit  enable_print_topology = 0;
 
 
-  // Variable: finish_on_completion
-  //
-  // If set, then run_test will call $finish after all phases are executed. 
-
-
-  bit  finish_on_completion = 1;
-
-
   // Variable- phase_timeout
   //
   // Specifies the timeout for the run phase. Default is `UVM_DEFAULT_TIMEOUT
 
 
   time phase_timeout = `UVM_DEFAULT_TIMEOUT;
-
-
-  // Function: set_timeout
-  //
-  // Specifies the timeout for the simulation. Default is <`UVM_DEFAULT_TIMEOUT>
-  //
-  // The timeout is simply the maximum absolute simulation time allowed before a
-  // ~FATAL~ occurs.  If the timeout is set to 20ns, then the simulation must end
-  // before 20ns, or a ~FATAL~ timeout will occur.
-  //
-  // This is provided so that the user can prevent the simulation from potentially 
-  // consuming too many resources (Disk, Memory, CPU, etc) when the testbench is
-  // essentially hung.
-  //
-  //
-   
-   
-  extern function void set_timeout(time timeout, bit overridable=1);
 
 
   // PRIVATE members
@@ -189,7 +221,9 @@ class uvm_root extends uvm_component;
   extern local function void m_do_max_quit_settings();
   extern local function void m_do_dump_args();
   extern local function void m_process_config(string cfg, bit is_int);
+  extern local function void m_process_default_sequence(string cfg);
   extern function void m_check_verbosity();
+  extern virtual function void report_header(UVM_FILE file = 0);
   // singleton handle
   static local uvm_root m_inst;
 
@@ -204,10 +238,9 @@ class uvm_root extends uvm_component;
     if (phase == end_of_elaboration_ph) begin
       do_resolve_bindings(); 
       if (enable_print_topology) print_topology();
-      
       begin
-           uvm_report_server srvr;           
-          srvr = get_report_server();
+          uvm_report_server srvr;
+          srvr = uvm_report_server::get_server();
           if(srvr.get_severity_count(UVM_ERROR) > 0) begin
             uvm_report_fatal("BUILDERR", "stopping due to build errors", UVM_NONE);
           end
@@ -231,9 +264,23 @@ class uvm_root extends uvm_component;
   endfunction
 `endif
 
+ static local bit m_relnotes_done=0;
+
+ function void end_of_elaboration_phase(uvm_phase phase);  
+	 uvm_component_proxy p = new("proxy");
+	 uvm_top_down_visitor_adapter#(uvm_component) adapter = new("adapter");
+	 uvm_coreservice_t cs = uvm_coreservice_t::get();
+	 uvm_visitor#(uvm_component) v = cs.get_component_visitor();
+	 adapter.accept(this, v, p);
+ endfunction
+
 
 endclass
 
+
+//----------------------------------------------------------------------------
+// Group: Global Variables
+//----------------------------------------------------------------------------
 
 
 //------------------------------------------------------------------------------
@@ -243,35 +290,7 @@ endclass
 // search interface. See <uvm_root> for more information.
 //------------------------------------------------------------------------------
 
-const uvm_root uvm_top = uvm_root::get();
-
-// for backward compatibility
-const uvm_root _global_reporter = uvm_root::get();
-
-
-
-//-----------------------------------------------------------------------------
-//
-// Class- uvm_root_report_handler
-//
-//-----------------------------------------------------------------------------
-// Root report has name "reporter"
-
-class uvm_root_report_handler extends uvm_report_handler;
-  virtual function void report(uvm_severity severity,
-                               string name,
-                               string id,
-                               string message,
-                               int verbosity_level=UVM_MEDIUM,
-                               string filename="",
-                               int line=0,
-                               uvm_report_object client=null);
-    if(name == "")
-      name = "reporter";
-    super.report(severity, name, id, message, verbosity_level, filename, line, client);
-  endfunction 
-endclass
-
+const uvm_root uvm_top = uvm_coreservice.get_root();
 
 
 //-----------------------------------------------------------------------------
@@ -296,12 +315,9 @@ endfunction
 
 function uvm_root::new();
 
-  uvm_root_report_handler rh;
-
   super.new("__top__", null);
 
-  rh = new;
-  set_report_handler(rh);
+  m_rh.set_name("reporter");
 
   clp = uvm_cmdline_processor::get_inst();
 
@@ -312,13 +328,63 @@ function uvm_root::new();
   m_check_verbosity();
 endfunction
 
+function void uvm_root::report_header(UVM_FILE file = 0);
+	string q[$];
+	uvm_report_server srvr;
+	uvm_cmdline_processor clp;
+	string args[$];
+
+	srvr = uvm_report_server::get_server();
+	clp = uvm_cmdline_processor::get_inst();
+
+	if (clp.get_arg_matches("+UVM_NO_RELNOTES", args)) return;
+
+
+	q.push_back("\n----------------------------------------------------------------\n");
+	q.push_back({uvm_revision_string(),"\n"});
+	q.push_back({uvm_mgc_copyright,"\n"});
+	q.push_back({uvm_cdn_copyright,"\n"});
+	q.push_back({uvm_snps_copyright,"\n"});
+	q.push_back({uvm_cy_copyright,"\n"});
+	q.push_back({uvm_nv_copyright,"\n"});
+	q.push_back("----------------------------------------------------------------\n");
+
+
+`ifndef UVM_NO_DEPRECATED
+	if(!m_relnotes_done)      
+		q.push_back("\n  ***********       IMPORTANT RELEASE NOTES         ************\n");
+	q.push_back("\n  You are using a version of the UVM library that has been compiled\n");
+	q.push_back("  with `UVM_NO_DEPRECATED undefined.\n");
+	q.push_back("  See http://www.eda.org/svdb/view.php?id=3313 for more details.\n");
+	m_relnotes_done=1;
+`endif
+
+`ifndef UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR
+	if(!m_relnotes_done)      
+		q.push_back("\n  ***********       IMPORTANT RELEASE NOTES         ************\n");
+		
+	q.push_back("\n  You are using a version of the UVM library that has been compiled\n");
+	q.push_back("  with `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR undefined.\n");
+	q.push_back("  See http://www.eda.org/svdb/view.php?id=3770 for more details.\n");
+	m_relnotes_done=1;
+`endif
+
+	if(m_relnotes_done)
+		q.push_back("\n      (Specify +UVM_NO_RELNOTES to turn off this notice)\n");
+
+	`uvm_info("UVM/RELNOTES",`UVM_STRING_QUEUE_STREAMING_PACK(q),UVM_LOW)
+endfunction
+
+
 
 // run_test
 // --------
 
 task uvm_root::run_test(string test_name="");
 
-  uvm_factory factory= uvm_factory::get();
+  uvm_report_server l_rs = uvm_report_server::get_server();
+  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  uvm_factory factory=cs.get_factory();
   bit testname_plusarg;
   int test_name_count;
   string test_names[$];
@@ -375,6 +441,9 @@ task uvm_root::run_test(string test_name="");
 
   // if test now defined, create it using common factory
   if (test_name != "") begin
+  	uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  	uvm_factory factory=cs.get_factory();
+	  
     if(m_children.exists("uvm_test_top")) begin
       uvm_report_fatal("TTINST",
           "An uvm_test_top already exists via a previous call to run_test", UVM_NONE);
@@ -424,7 +493,7 @@ task uvm_root::run_test(string test_name="");
   // clean up after ourselves
   phase_runner_proc.kill();
 
-  report_summarize();
+  l_rs.report_summarize();
 
   if (finish_on_completion)
     $finish;
@@ -476,8 +545,6 @@ function void uvm_root::print_topology(uvm_printer printer=null);
 
   string s;
 
-  uvm_report_info("UVMTOP", "UVM testbench topology:", UVM_LOW);
-
   if (m_children.num()==0) begin
     uvm_report_warning("EMTCOMP", "print_topology - No UVM components to print.", UVM_NONE);
     return;
@@ -491,7 +558,7 @@ function void uvm_root::print_topology(uvm_printer printer=null);
       printer.print_object("", m_children[c]);  
     end
   end
-  $display(printer.emit());
+  `uvm_info("UVMTOP",{"UVM testbench topology:\n",printer.emit()},UVM_NONE)
 
 endfunction
 
@@ -657,7 +724,8 @@ endfunction
 
 function void uvm_root::m_process_inst_override(string ovr);
   string split_val[$];
-  uvm_factory fact = uvm_factory::get();
+  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  uvm_factory factory=cs.get_factory();
 
   uvm_split_string(ovr, ",", split_val);
 
@@ -668,7 +736,7 @@ function void uvm_root::m_process_inst_override(string ovr);
   end
 
   uvm_report_info("INSTOVR", {"Applying instance override from the command line: +uvm_set_inst_override=", ovr}, UVM_NONE);
-  fact.set_inst_override_by_name(split_val[0], split_val[1], split_val[2]);
+  factory.set_inst_override_by_name(split_val[0], split_val[1], split_val[2]);
 endfunction
 
 
@@ -678,7 +746,8 @@ endfunction
 function void uvm_root::m_process_type_override(string ovr);
   string split_val[$];
   int replace=1;
-  uvm_factory fact = uvm_factory::get();
+  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  uvm_factory factory=cs.get_factory();
 
   uvm_split_string(ovr, ",", split_val);
 
@@ -699,7 +768,7 @@ function void uvm_root::m_process_type_override(string ovr);
   end
 
   uvm_report_info("UVM_CMDLINE_PROC", {"Applying type override from the command line: +uvm_set_type_override=", ovr}, UVM_NONE);
-  fact.set_type_override_by_name(split_val[0], split_val[1], replace);
+  factory.set_type_override_by_name(split_val[0], split_val[1], replace);
 endfunction
 
 
@@ -709,7 +778,7 @@ endfunction
 function void uvm_root::m_process_config(string cfg, bit is_int);
   uvm_bitstream_t v;
   string split_val[$];
-  uvm_root m_uvm_top = uvm_root::get();
+  uvm_root m_uvm_top = uvm_coreservice.get_root();
 
   uvm_split_string(cfg, ",", split_val);
   if(split_val.size() == 1) begin
@@ -750,14 +819,56 @@ function void uvm_root::m_process_config(string cfg, bit is_int);
       v = split_val[2].atoi();
     end
     uvm_report_info("UVM_CMDLINE_PROC", {"Applying config setting from the command line: +uvm_set_config_int=", cfg}, UVM_NONE);
-    m_uvm_top.set_config_int(split_val[0], split_val[1], v);
+    uvm_config_int::set(m_uvm_top, split_val[0], split_val[1], v);
   end
   else begin
     uvm_report_info("UVM_CMDLINE_PROC", {"Applying config setting from the command line: +uvm_set_config_string=", cfg}, UVM_NONE);
-    m_uvm_top.set_config_string(split_val[0], split_val[1], split_val[2]);
+    uvm_config_string::set(m_uvm_top, split_val[0], split_val[1], split_val[2]);
   end 
 
 endfunction
+
+// m_process_default_sequence
+// ----------------
+
+function void uvm_root::m_process_default_sequence(string cfg);
+  string split_val[$];
+  uvm_root m_uvm_top = uvm_root::get();
+  uvm_factory f = uvm_factory::get();
+  uvm_object_wrapper w;
+
+  uvm_split_string(cfg, ",", split_val);
+  if(split_val.size() == 1) begin
+    uvm_report_error("UVM_CMDLINE_PROC", {"Invalid +uvm_set_default_sequence command\"", cfg,
+      "\" missing phase and type: sequencer is \"", split_val[0], "\""}, UVM_NONE);
+    return;
+  end
+
+  if(split_val.size() == 2) begin
+    uvm_report_error("UVM_CMDLINE_PROC", {"Invalid +uvm_set_default_sequence command\"", cfg,
+      "\" missing type: sequencer is \"", split_val[0], "\"  phase is \"", split_val[1], "\""}, UVM_NONE);
+    return;
+  end
+
+  if(split_val.size() > 3) begin
+    uvm_report_error("UVM_CMDLINE_PROC", 
+      $sformatf("Invalid +uvm_set_default_sequence command\"%s\" : expected only 3 fields (sequencer, phase and type).", cfg), UVM_NONE);
+    return;
+  end
+
+  w = f.find_wrapper_by_name(split_val[2]);
+  if (w == null) begin
+      uvm_report_error("UVM_CMDLINE_PROC",
+                       $sformatf("Invalid type '%s' provided to +uvm_set_default_sequence", split_val[2]),
+                       UVM_NONE);
+      return;
+  end
+  else begin
+      uvm_report_info("UVM_CMDLINE_PROC", {"Setting default sequence from the command line: +uvm_set_default_sequence=", cfg}, UVM_NONE);
+      uvm_config_db#(uvm_object_wrapper)::set(this, {split_val[0], ".", split_val[1]}, "default_sequence", w);
+  end 
+
+endfunction : m_process_default_sequence
 
 
 // m_do_config_settings
@@ -774,6 +885,10 @@ function void uvm_root::m_do_config_settings();
   foreach(args[i]) begin
     m_process_config(args[i].substr(23, args[i].len()-1), 0);
   end
+  void'(clp.get_arg_matches("/^\\+(UVM_SET_DEFAULT_SEQUENCE|uvm_set_default_sequence)=/", args));
+  foreach(args[i]) begin
+    m_process_default_sequence(args[i].substr(26, args[i].len()-1));
+  end
 endfunction
 
 
@@ -787,7 +902,7 @@ function void uvm_root::m_do_max_quit_settings();
   string max_quit;
   string split_max_quit[$];
   int max_quit_int;
-  srvr = get_report_server();
+  srvr = uvm_report_server::get_server();
   max_quit_count = clp.get_arg_values("+UVM_MAX_QUIT_COUNT=", max_quit_settings);
   if (max_quit_count ==  0)
     return;

@@ -28,6 +28,16 @@
 // are synchronized with respect to the pre-defined phases in the schedule.
 // It is possible for components to belong to different domains
 // in which case their schedules can be unsynchronized.
+//
+// The names of the UVM phases (which will be returned by get_name() for a
+// phase instance) match the class names specified below with the "uvm_"
+// and "_phase" removed.  For example, the main phase corresponds to the 
+// uvm_main_phase class below and has the name "main", which means that 
+// the following can be used to call foo() at the start of main phase:
+//
+// | function void phase_started(uvm_phase phase) ;
+// |    if (phase.get_name()=="main") foo() ;
+// | endfunction
 // 
 // The run-time phases are executed in the sequence they are specified below.
 // 

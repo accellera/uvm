@@ -51,6 +51,9 @@ module top;
 
 
   initial begin
+
+    uvm_report_server l_rs;
+
     item       man1,man2;
     item_macro mac1,mac2;
 
@@ -308,22 +311,24 @@ module top;
     //---------------------------------
 
     begin
-    man1.enable_recording("man1");
-    mac1.enable_recording("mac1");
+       uvm_root top = uvm_root::get();
+       
+       man1.enable_recording(top.get_tr_stream("man1"));
+       mac1.enable_recording(top.get_tr_stream("mac1"));
 
-    for (int i=0; i< `NUM_TRANS; i++) begin
-      void'(man1.begin_tr());
-      #10;
-      man1.int32 = i;
-      man1.end_tr();
-    end
-
-    for (int i=0; i< `NUM_TRANS; i++) begin
-      void'(mac1.begin_tr());
-      #10;
-      mac1.int32 = i;
-      mac1.end_tr();
-    end
+       for (int i=0; i< `NUM_TRANS; i++) begin
+          void'(man1.begin_tr());
+          #10;
+          man1.int32 = i;
+          man1.end_tr();
+       end
+       
+       for (int i=0; i< `NUM_TRANS; i++) begin
+          void'(mac1.begin_tr());
+          #10;
+          mac1.int32 = i;
+          mac1.end_tr();
+       end
     end
 
     //---------------------------------
@@ -347,7 +352,8 @@ module top;
     end
 
     $display("*** UVM TEST PASSED ***");
-    uvm_top.report_summarize();
+    l_rs = uvm_report_server::get_server();
+    l_rs.report_summarize();
   end
 
 endmodule

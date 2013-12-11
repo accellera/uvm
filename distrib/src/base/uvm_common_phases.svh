@@ -26,6 +26,17 @@
 // All <uvm_component>s are always synchronized
 // with respect to the common phases.
 // 
+// The names of the UVM phases (which will be returned by get_name() for a
+// phase instance) match the class names specified below with the "uvm_"
+// and "_phase" removed.  For example, the build phase corresponds to the 
+// uvm_build_phase class below and has the name "build", which means that 
+// the following can be used to call foo() at the end of the build phase 
+// (after all lower levels have finished build):
+//
+// | function void phase_ended(uvm_phase phase) ;
+// |    if (phase.get_name()=="build") foo() ;
+// | endfunction
+// 
 // The common phases are executed in the sequence they are specified below.
 // 
 // 

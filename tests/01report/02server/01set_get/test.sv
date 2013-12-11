@@ -23,14 +23,12 @@ module top;
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
+int cnt = 0;
 
-class my_server extends uvm_report_server;
-  int cnt = 0;
-  virtual function string compose_message( uvm_severity severity, string name,
-      string id, string message, string filename, int    line);
+class my_server extends uvm_default_report_server;
+  virtual function string compose_report_message(uvm_report_message report_message, string report_object_name = "");
     cnt++;
-    compose_message = {"MY_SERVER: ",
-      super.compose_message(severity, name, id, message, filename, line) };
+    compose_report_message = {"MY_SERVER: ", super.compose_report_message(report_message, report_object_name)};
   endfunction
 endclass
 
@@ -59,7 +57,7 @@ class test extends uvm_test;
 
    virtual function void report();
      uvm_report_server serv = uvm_report_server::get_server();
-     if(serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2)
+     if(serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2 && cnt == 2)
        $display("**** UVM TEST PASSED ****");
      else
        $display("**** UVM TEST FAILED ****");

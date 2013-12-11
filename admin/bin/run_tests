@@ -34,7 +34,6 @@ Usage: $0 [options] tool {dir}
    dir      Name of the directories containing the UVM testcases
 
 Options:
-   -0       Do not define UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
    -c       Do not run. Only clean-up tool-generated files.
    -C opts  Add the specified options to the compilation command
    -d       Do not remove tool-generated files
@@ -264,7 +263,6 @@ sub run_one_test {
    if (!$opt_c) {
      print "<running>\n" if ($opt_v || $opt_P);
 
-     $comp_args = "+define+UVM_OBJECT_MUST_HAVE_CONSTRUCTOR" unless $opt_0;
      $comp_args = "+define+UVM_NO_DEPRECATED" if $opt_D;
      if (-e "$testdir/$tool.comp.args") {
        if (!open(ARGS, "< $testdir/$tool.comp.args")) {

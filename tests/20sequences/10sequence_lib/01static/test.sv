@@ -138,12 +138,12 @@ module top;
      endfunction
 
      virtual task post_shutdown_phase(uvm_phase phase);
-        global_stop_request();
+       phase.raise_objection(this);
+       phase.drop_objection(this);
      endtask
 
      virtual function void report();
-       uvm_root top = uvm_root::get();
-       uvm_report_server svr = top.get_report_server();
+       uvm_report_server svr = uvm_report_server::get_server();
        if (svr.get_severity_count(UVM_FATAL) +
            svr.get_severity_count(UVM_ERROR) == 0)
          $write("** UVM TEST PASSED **\n");

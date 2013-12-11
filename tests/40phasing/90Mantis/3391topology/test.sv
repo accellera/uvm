@@ -96,10 +96,12 @@ begin
    uvm_root top;
 
    t1 = new("t1");
-   top = uvm_root::get();
+   top = uvm_coreservice.get_root();
+   $display("GOLD-FILE-START");
    top.enable_print_topology = 1;
-
+   top.finish_on_completion=0;
    run_test();
+   $display("GOLD-FILE-END");
 end
 
 endprogram

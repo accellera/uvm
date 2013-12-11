@@ -264,9 +264,10 @@ class test extends uvm_component;
     end
   endfunction
 
-  task run();
+  task run_phase(uvm_phase phase);
+    phase.raise_objection(this);
     #10;
-    global_stop_request();
+    phase.drop_objection(this);
   endtask
 
   function void report();

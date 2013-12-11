@@ -33,22 +33,24 @@ module top;
         `uvm_object_utils(myseq)
 
         function new(string name="myseq");
-            super.new(name);
+           super.new(name);
+           set_automatic_phase_objection(1);
         endfunction
   
         task body();
             string name;
-            if (starting_phase==null)
+	    uvm_phase p;
+
+	    p = get_starting_phase();
+            if (get_starting_phase()==null)
                 `uvm_fatal("STARTING_PHASE_NULL", "Internal error. Sequence's starting_phase member is not defined")
 
-                name = starting_phase.get_name();
+                name = p.get_name();
 
-            starting_phase.raise_objection(this);
             def_seqs[name] = get_name();
-            `uvm_info(starting_phase.get_name(), "Starting myseq!!!", UVM_NONE)
+            `uvm_info(p.get_name(), "Starting myseq!!!", UVM_NONE)
             #10;
-            `uvm_info(starting_phase.get_name(), "Ending myseq!!!", UVM_NONE)
-            starting_phase.drop_objection(this);
+            `uvm_info(p.get_name(), "Ending myseq!!!", UVM_NONE)
         endtask
     endclass
 
@@ -56,22 +58,23 @@ module top;
         `uvm_object_utils(myseq2)
 
         function new(string name="myseq");
-            super.new(name);
+           super.new(name);
+           set_automatic_phase_objection(1);
         endfunction
   
         task body();
             string name;
-            if (starting_phase==null)
+            uvm_phase p;
+            p = get_starting_phase();
+            if (get_starting_phase()==null)
                 `uvm_fatal("STARTING_PHASE_NULL", "Internal error. Sequence's starting_phase member is not defined")
 
-                name = starting_phase.get_name();
+                name = p.get_name();
 
-            starting_phase.raise_objection(this);
             def_seqs[name] = get_name();
-            `uvm_info(starting_phase.get_name(), "Starting myseq2!!!", UVM_NONE)
+            `uvm_info(p.get_name(), "Starting myseq2!!!", UVM_NONE)
             #10;
-            `uvm_info(starting_phase.get_name(), "Ending myseq2!!!", UVM_NONE)
-            starting_phase.drop_objection(this);
+            `uvm_info(p.get_name(), "Ending myseq2!!!", UVM_NONE)
         endtask
     endclass
 
