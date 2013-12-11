@@ -63,6 +63,9 @@ Mantis 3783: all messaging is now routed via uvm_report_server
 
 Mantis 3887: allows the factory to be replaced in order to trace create or override calls as well as to identify unused overrides
 
+(+) Mantis 3893: allows for the hierarchical propagation of
+uvm_objections to be disabled via set_propagate_mode.
+
 Mantis 3901: Feature request to prevent objection from throwing 
 decrement-below-zero error if the count is 0
 
