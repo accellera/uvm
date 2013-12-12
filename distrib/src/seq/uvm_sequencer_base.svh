@@ -59,7 +59,7 @@ class uvm_sequencer_base extends uvm_component;
   protected int                 m_max_zero_time_wait_relevant_count = 10;
   protected time                m_last_wait_relevant_time = 0 ;
 
-  local uvm_sequencer_arb_mode  m_arbitration = SEQ_ARB_FIFO;
+  local uvm_sequencer_arb_mode  m_arbitration = UVM_SEQ_ARB_FIFO;
   local static int              g_request_id;
   local static int              g_sequence_id = 1;
   local static int              g_sequencer_id = 1;
@@ -84,7 +84,7 @@ class uvm_sequencer_base extends uvm_component;
 
   // Function: user_priority_arbitration
   //
-  // When the sequencer arbitration mode is set to SEQ_ARB_USER (via the
+  // When the sequencer arbitration mode is set to UVM_SEQ_ARB_USER (via the
   // <set_arbitration> method), the sequencer will call this function each
   // time that it needs to arbitrate among sequences. 
   //
@@ -93,7 +93,7 @@ class uvm_sequencer_base extends uvm_component;
   // avail_sequences queue, which are indexes into an internal queue,
   // arb_sequence_q. The 
   //
-  // The default implementation behaves like SEQ_ARB_FIFO, which returns the
+  // The default implementation behaves like UVM_SEQ_ARB_FIFO, which returns the
   // entry at avail_sequences[0]. 
   //
   extern virtual function integer user_priority_arbitration(integer avail_sequences[$]);
@@ -317,18 +317,18 @@ class uvm_sequencer_base extends uvm_component;
   //
   // Specifies the arbitration mode for the sequencer. It is one of
   //
-  // SEQ_ARB_FIFO          - Requests are granted in FIFO order (default)
-  // SEQ_ARB_WEIGHTED      - Requests are granted randomly by weight
-  // SEQ_ARB_RANDOM        - Requests are granted randomly
-  // SEQ_ARB_STRICT_FIFO   - Requests at highest priority granted in fifo order
-  // SEQ_ARB_STRICT_RANDOM - Requests at highest priority granted in randomly
-  // SEQ_ARB_USER          - Arbitration is delegated to the user-defined 
-  //                         function, user_priority_arbitration. That function
-  //                         will specify the next sequence to grant.
+  // UVM_SEQ_ARB_FIFO          - Requests are granted in FIFO order (default)
+  // UVM_SEQ_ARB_WEIGHTED      - Requests are granted randomly by weight
+  // UVM_SEQ_ARB_RANDOM        - Requests are granted randomly
+  // UVM_SEQ_ARB_STRICT_FIFO   - Requests at highest priority granted in fifo order
+  // UVM_SEQ_ARB_STRICT_RANDOM - Requests at highest priority granted in randomly
+  // UVM_SEQ_ARB_USER          - Arbitration is delegated to the user-defined 
+  //                             function, user_priority_arbitration. That function
+  //                             will specify the next sequence to grant.
   //
   // The default user function specifies FIFO order.
   //
-  extern function void set_arbitration(SEQ_ARB_TYPE val);
+  extern function void set_arbitration(UVM_SEQ_ARB_TYPE val);
 
 
   // Function: get_arbitration
@@ -336,7 +336,7 @@ class uvm_sequencer_base extends uvm_component;
   // Return the current arbitration mode set for this sequencer. See
   // <set_arbitration> for a list of possible modes.
   //
-  extern function SEQ_ARB_TYPE get_arbitration();
+  extern function UVM_SEQ_ARB_TYPE get_arbitration();
 
 
   // Task: wait_for_sequences
@@ -758,7 +758,7 @@ function int uvm_sequencer_base::m_choose_next_request();
       if (arb_sequence_q[i].request == SEQ_TYPE_REQ)
         if (is_blocked(arb_sequence_q[i].sequence_ptr) == 0)
           if (arb_sequence_q[i].sequence_ptr.is_relevant() == 1) begin
-            if (m_arbitration == SEQ_ARB_FIFO) begin
+            if (m_arbitration == UVM_SEQ_ARB_FIFO) begin
               return i;
             end
             else avail_sequences.push_back(i);
@@ -768,7 +768,7 @@ function int uvm_sequencer_base::m_choose_next_request();
   end
 
   // Return immediately if there are 0 or 1 available sequences
-  if (m_arbitration == SEQ_ARB_FIFO) begin
+  if (m_arbitration == UVM_SEQ_ARB_FIFO) begin
     return -1;
   end
   if (avail_sequences.size() < 1)  begin
@@ -796,7 +796,7 @@ function int uvm_sequencer_base::m_choose_next_request();
 
   //  Weighted Priority Distribution
   // Pick an available sequence based on weighted priorities of available sequences
-  if (m_arbitration == SEQ_ARB_WEIGHTED) begin
+  if (m_arbitration == UVM_SEQ_ARB_WEIGHTED) begin
     sum_priority_val = 0;
     for (i = 0; i < avail_sequences.size(); i++) begin
       sum_priority_val += m_get_seq_item_priority(arb_sequence_q[avail_sequences[i]]);
@@ -816,13 +816,13 @@ function int uvm_sequencer_base::m_choose_next_request();
   end
   
   //  Random Distribution
-  if (m_arbitration == SEQ_ARB_RANDOM) begin
+  if (m_arbitration == UVM_SEQ_ARB_RANDOM) begin
     i = $urandom_range(avail_sequences.size()-1, 0);
     return avail_sequences[i];
   end
 
   //  Strict Fifo
-  if ((m_arbitration == SEQ_ARB_STRICT_FIFO) || m_arbitration == SEQ_ARB_STRICT_RANDOM) begin
+  if ((m_arbitration == UVM_SEQ_ARB_STRICT_FIFO) || m_arbitration == UVM_SEQ_ARB_STRICT_RANDOM) begin
     highest_pri = 0;
     // Build a list of sequences at the highest priority
     for (i = 0; i < avail_sequences.size(); i++) begin
@@ -838,7 +838,7 @@ function int uvm_sequencer_base::m_choose_next_request();
     end
 
     // Now choose one based on arbitration type
-    if (m_arbitration == SEQ_ARB_STRICT_FIFO) begin
+    if (m_arbitration == UVM_SEQ_ARB_STRICT_FIFO) begin
       return(highest_sequences[0]);
     end
     
@@ -846,7 +846,7 @@ function int uvm_sequencer_base::m_choose_next_request();
     return highest_sequences[i];
   end
 
-  if (m_arbitration == SEQ_ARB_USER) begin
+  if (m_arbitration == UVM_SEQ_ARB_USER) begin
     i = user_priority_arbitration( avail_sequences);
 
     // Check that the returned sequence is in the list of available sequences.  Failure to
@@ -1266,7 +1266,7 @@ function void uvm_sequencer_base::remove_sequence_from_queues(
       if (arb_sequence_q.size() > i) begin
         if ((arb_sequence_q[i].sequence_id == seq_id) ||
             (is_child(sequence_ptr, arb_sequence_q[i].sequence_ptr))) begin
-          if (sequence_ptr.get_sequence_state() == FINISHED)
+          if (sequence_ptr.get_sequence_state() == UVM_FINISHED)
             `uvm_error("SEQFINERR", $sformatf("Parent sequence '%s' should not finish before all items from itself and items from descendent sequences are processed.  The item request from the sequence '%s' is being removed.", sequence_ptr.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
           arb_sequence_q.delete(i);
           m_update_lists();
@@ -1285,7 +1285,7 @@ function void uvm_sequencer_base::remove_sequence_from_queues(
       if (lock_list.size() > i) begin
         if ((lock_list[i].get_inst_id() == sequence_ptr.get_inst_id()) ||
             (is_child(sequence_ptr, lock_list[i]))) begin
-          if (sequence_ptr.get_sequence_state() == FINISHED)
+          if (sequence_ptr.get_sequence_state() == UVM_FINISHED)
             `uvm_error("SEQFINERR", $sformatf("Parent sequence '%s' should not finish before locks from itself and descedent sequences are removed.  The lock held by the child sequence '%s' is being removed.",sequence_ptr.get_full_name(), lock_list[i].get_full_name()))
           lock_list.delete(i);
           m_update_lists();
@@ -1371,7 +1371,7 @@ endfunction
 // set_arbitration
 // ---------------
 
-function void uvm_sequencer_base::set_arbitration(SEQ_ARB_TYPE val);
+function void uvm_sequencer_base::set_arbitration(UVM_SEQ_ARB_TYPE val);
   m_arbitration = val;
 endfunction
 
@@ -1379,7 +1379,7 @@ endfunction
 // get_arbitration
 // ---------------
 
-function SEQ_ARB_TYPE uvm_sequencer_base::get_arbitration();
+function UVM_SEQ_ARB_TYPE uvm_sequencer_base::get_arbitration();
   return m_arbitration;
 endfunction
 

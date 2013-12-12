@@ -55,7 +55,7 @@ class tb_test extends uvm_test;
          seq.model = env.regmodel;
 
          seq.start(null);
-         seq.wait_for_sequence_state(FINISHED);
+         seq.wait_for_sequence_state(UVM_FINISHED);
       end
             
       phase.drop_objection(this);

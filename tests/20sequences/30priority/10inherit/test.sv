@@ -131,7 +131,7 @@ class test extends uvm_test;
                                               "default_sequence",
                                               top_seq::get_type());
 
-      sqr.set_arbitration(SEQ_ARB_STRICT_FIFO);
+      sqr.set_arbitration(UVM_SEQ_ARB_STRICT_FIFO);
    endfunction
    
    function void connect_phase(uvm_phase phase);
