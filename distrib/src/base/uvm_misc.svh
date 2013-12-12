@@ -46,6 +46,13 @@ typedef class uvm_object;
 typedef class uvm_coreservice_t;
 typedef class uvm_factory;
 
+typedef class uvm_config_db;
+// uvm_config_obj_misc is an internal typedef for the uvm_misc.svh file
+// to use. UVM users should use the uvm_config_object typedef
+
+typedef uvm_config_db#(uvm_object) m_uvm_config_obj_misc;
+
+
 //----------------------------------------------------------------------------
 //
 // CLASS- uvm_scope_stack
@@ -694,7 +701,7 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
     uvm_object obj;
     TYPE cfg;
 
-    if (!uvm_config_object::get(comp,"",FIELD, obj)) begin
+    if (!m_uvm_config_obj_misc::get(comp,"",FIELD, obj)) begin
       if (is_fatal)
         comp.uvm_report_fatal("NO_SET_CFG", {"no set_config to field '", FIELD,
                            "' for component '",comp.get_full_name(),"'"},
