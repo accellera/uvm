@@ -3,6 +3,7 @@ if 0;
 # -*- mode: cperl -*-
 #----------------------------------------------------------------------
 #   Copyright 2013 Cadence Design Systems, Inc.
+#   Copyright 2013 Synopsys, Inc.
 #   All Rights Reserved Worldwide
 #
 #   Licensed under the Apache License, Version 2.0 (the
@@ -168,22 +169,25 @@ sub replace_trivial{
     $t =~ s/virtual\s+protected\s+(function|task)\s+(void\s+)?(((pre|post)_)?((reset|configure|main|shutdown)|run)_phase)/virtual $1 $2 $3/g;
 
     # FIX replace _global_reporter.get_report_server
-    $t =~ s/_global_reporter\.get_report_server/uvm_coreservice.get_report_server/g;
+    $t =~ s/_global_reporter\.get_report_server/uvm_coreservice_t::get().get_report_server/g;
   
     # FIX replace _global_reporter.report_summarize
-    $t =~ s/_global_reporter\.report_summarize\(\)\s*;/begin uvm_report_server srv = uvm_coreservice.get_report_server(); srv.summarize(); end/g;
+    $t =~ s/_global_reporter\.report_summarize\(\)\s*;/begin uvm_report_server srv = uvm_coreservice_t::get().get_report_server(); srv.summarize(); end/g;
 
-    # FIX replace _global_reporter.report_summarize
-    $t =~ s/_global_reporter\.dump_report_state\(\)\s*;/begin uvm_report_server srv = uvm_coreservice.get_report_server(); srv.summarize(); end/g;
+    # FIX replace _global_reporter.dump_report_state() 
+    $t =~ s/_global_reporter\.dump_report_state\(\)\s*;/begin uvm_report_server srv = uvm_coreservice_t::get().get_report_server(); srv.print(); end/g;
 
-    # FIX replace uvm_factory::get() by uvm_coreservice.get_factory()
-    $t =~ s/uvm_factory::get/uvm_coreservice.get_factory/g if $opt_deprecated;
+    # FIX replace dump_report_server
+    $t =~ s/dump_report_state\(\)\s*;/begin uvm_report_server srv = uvm_coreservice_t::get().get_report_server(); srv.print(); end/g;
+
+    # FIX replace uvm_factory::get() by uvm_coreservice_t::get().get_factory()
+    $t =~ s/uvm_factory::get/uvm_coreservice_t::get().get_factory/g if $opt_deprecated;
  
-    # FIX replace uvm_root::get() by uvm_coreservice.get_root()
-    $t =~ s/uvm_root::get/uvm_coreservice.get_root/g if $opt_deprecated;
+    # FIX replace uvm_root::get() by uvm_coreservice_t::get().get_root()
+    $t =~ s/uvm_root::get/uvm_coreservice_t::get().get_root/g if $opt_deprecated;
 
     # FIX replace uvm_severity_type by uvm_severity
-    $t =~ s/uvm_severity_type/uvm_severity_type/g if $opt_deprecated;
+    $t =~ s/uvm_severity_type/uvm_severity/g if $opt_deprecated;
   
   	# FIX extending uvm_report_server
     $t =~ s/extends\s+uvm_report_server/extends uvm_default_report_server/g;
