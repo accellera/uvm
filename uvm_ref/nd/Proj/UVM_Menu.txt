@@ -290,7 +290,7 @@ Group: Globals  {
 
    File: Types, Enums, Policies       (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_object_globals.svh)
    File: Globals                      (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_globals.svh)
-   File: UVM Core Service             (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_coreservice.svh)
+   File: UVM Core Service             (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_coreservice_t::get().svh)
    }  # Group: Globals
 
 Group: Index  {

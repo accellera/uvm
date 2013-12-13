@@ -64,7 +64,7 @@ module top();
       `uvm_info(get_type_name(), $sformatf("item done, sequence is finishing"), UVM_LOW)
 
   begin
-    uvm_root top = uvm_coreservice.get_root();
+    uvm_root top = uvm_coreservice_t::get().get_root();
 
     $display("START OF GOLD FILE");
 

@@ -99,7 +99,7 @@ class test extends reset_test;
 
     function void report_phase(uvm_phase phase);
       uvm_report_server svr;
-      svr = uvm_pkg::uvm_coreservice.get_report_server();
+      svr = uvm_pkg::uvm_coreservice_t::get().get_report_server();
 
       if (svr.get_id_count("uvm_reg_hw_reset_seq") >0)
 	 `uvm_error("BLK_EXEC", "uvm_reg_hw_reset_seq has been executed on register block");

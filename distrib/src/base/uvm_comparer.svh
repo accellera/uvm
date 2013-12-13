@@ -340,7 +340,7 @@ class uvm_comparer;
   // settings. See the <verbosity> and <sev> variables for more information.
 
   function void print_msg (string msg);
-    uvm_root root = uvm_coreservice.get_root();
+    uvm_root root = uvm_coreservice_t::get().get_root();
      
     result++;
     if(result <= show_max) begin
@@ -359,7 +359,7 @@ class uvm_comparer;
 
   //Need this function because sformat doesn't support objects
   function void print_rollup(uvm_object rhs, uvm_object lhs);
-     uvm_root root = uvm_coreservice.get_root();
+     uvm_root root = uvm_coreservice_t::get().get_root();
 
     string msg;
     if(uvm_object::__m_uvm_status_container.scope.depth() == 0) begin
@@ -383,7 +383,7 @@ class uvm_comparer;
   // ----------------
 
   function void print_msg_object(uvm_object lhs, uvm_object rhs);
-     uvm_root root = uvm_coreservice.get_root();
+     uvm_root root = uvm_coreservice_t::get().get_root();
 
     result++;
     if(result <= show_max) begin

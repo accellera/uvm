@@ -1302,7 +1302,7 @@ task uvm_phase::execute_phase();
   uvm_root top;
   uvm_phase_state_change state_chg;
 
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
 
   // If we got here by jumping forward, we must wait for
   // all its predecessor nodes to be marked DONE.
@@ -2129,7 +2129,7 @@ task uvm_phase::wait_for_self_and_siblings_to_drop() ;
   uvm_root top;
   bit siblings[uvm_phase];
   
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   
   get_predecessors_for_successors(siblings);
   foreach (m_sync[i]) begin
@@ -2192,7 +2192,7 @@ endfunction
 // processes.  By hosting the phase processes here we avoid problems
 // associated with phase processes related as parents/children
 task uvm_phase::m_run_phases();
-  uvm_root top = uvm_coreservice.get_root();
+  uvm_root top = uvm_coreservice_t::get().get_root();
 
   // initiate by starting first phase in common domain
   begin
@@ -2229,7 +2229,7 @@ function void uvm_phase::m_print_termination_state();
   if (phase_done != null) begin
     `uvm_info("PH_TERMSTATE",
               $sformatf("phase %s outstanding objections = %0d",
-                        get_name(), phase_done.get_objection_total(uvm_coreservice.get_root())),
+                        get_name(), phase_done.get_objection_total(uvm_coreservice_t::get().get_root())),
               UVM_DEBUG)
   end
   else begin

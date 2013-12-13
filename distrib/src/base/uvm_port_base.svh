@@ -430,7 +430,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   // port's connect method calls are made.
 
   virtual function void connect (this_type provider);
-    uvm_root top = uvm_coreservice.get_root();
+    uvm_root top = uvm_coreservice_t::get().get_root();
     if (end_of_elaboration_ph.get_state() == UVM_PHASE_EXECUTING || // TBD tidy
         end_of_elaboration_ph.get_state() == UVM_PHASE_DONE ) begin
        m_comp.uvm_report_warning("Late Connection", 
@@ -524,7 +524,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
         save = {"This port's fanout network:\n\n  ",
                get_full_name()," (",get_type_name(),")\n",save,"\n"};
       if (m_imp_list.num() == 0) begin
-        uvm_root top = uvm_coreservice.get_root();
+        uvm_root top = uvm_coreservice_t::get().get_root();
         if (end_of_elaboration_ph.get_state() == UVM_PHASE_EXECUTING ||
             end_of_elaboration_ph.get_state() == UVM_PHASE_DONE )  // TBD tidy
            save = {save,"  Connected implementations: none\n"};

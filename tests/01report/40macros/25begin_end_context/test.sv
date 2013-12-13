@@ -58,7 +58,7 @@ class test extends uvm_test;
     string my_string;
     my_class my_obj;
     uvm_report_message msg;
-    uvm_root root = uvm_coreservice.get_root();
+    uvm_root root = uvm_coreservice_t::get().get_root();
 
     phase.raise_objection(this);
 
