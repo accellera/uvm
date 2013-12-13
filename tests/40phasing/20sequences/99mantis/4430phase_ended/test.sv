@@ -94,14 +94,14 @@ class test extends uvm_test;
    
    function void report_phase(uvm_phase phase);
      bit pass = 1;
-     if (seq_ran.get_sequence_state() != FINISHED) begin
+     if (seq_ran.get_sequence_state() != UVM_FINISHED) begin
          pass = 0;
-         `uvm_error("NOT_FINISHED", "'seq_ran' not in the 'FINISHED' state!")
+         `uvm_error("NOT_FINISHED", "'seq_ran' not in the 'UVM_FINISHED' state!")
      end
 
-     if (seq_killed.get_sequence_state() != STOPPED) begin
+     if (seq_killed.get_sequence_state() != UVM_STOPPED) begin
          pass = 0;
-         `uvm_error("NOT_STOPPED", "'seq_killed' not in the 'STOPPED' state!")
+         `uvm_error("NOT_STOPPED", "'seq_killed' not in the 'UVM_STOPPED' state!")
      end
 
      if (!pass) 

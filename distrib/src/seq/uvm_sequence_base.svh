@@ -321,7 +321,6 @@ class uvm_sequence_base extends uvm_sequence_item;
         m_sequence_process = process::self();
 
         // absorb delta to ensure PRE_START was seen
-        m_sequence_state = UVM_PRE_START;
         #0;
 
         // Raise the objection if enabled

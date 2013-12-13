@@ -131,7 +131,7 @@ class test extends uvm_test;
    endtask : run_phase
 
    function void report_phase(uvm_phase phase);
-      if (p.get_sequence_state() != FINISHED) begin
+      if (p.get_sequence_state() != UVM_FINISHED) begin
          $display("*** UVM TEST FAILED ***");
       end
       else begin
