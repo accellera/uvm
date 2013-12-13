@@ -27,7 +27,7 @@
   typedef class uvm_cmdline_processor;
 
 
-  `include "base/uvm_coreservice_t::get().svh"
+  `include "base/uvm_coreservice.svh"
   
   // Miscellaneous classes and functions. uvm_void is defined in uvm_misc,
   // along with some auxillary functions that UVM needs but are not really
