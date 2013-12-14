@@ -71,7 +71,7 @@ sub scrub {
     $$logfile =~ s/,88 /, 88/mg;
   }
 
-  $$logfile =~ s/\@[\d_]+[^\S\r\n]/\@X/sg;
+  $$logfile =~ s/\@[\d_]+[^\S\r\n]*/\@X/sg;
 
   # strip header
   $$logfile =~ s/.*\nGOLD-FILE-START\n//sx;
