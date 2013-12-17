@@ -194,6 +194,7 @@ exit($failures);
 # Return non-zero if the test fails.
 #
 sub run_one_test {
+    $comp_args = "";
    local($testdir, $_) = @_;
 
    local($dir) = $testdir;
