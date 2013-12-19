@@ -236,7 +236,7 @@ char *uvm_hdl_dtob(long int decimalNumber) {
        (void)strncat(binaryNumber, str, sizeof(binaryNumber) - strlen(binaryNumber) - 1);
   }
   binaryNumber_tmp = (char*)malloc(sizeof(char)*strlen(binaryNumber));
-  binaryNumber_tmp = (char*)binaryNumber;
+  strcpy(binaryNumber_tmp, binaryNumber);
   return(binaryNumber_tmp);
 }
 
