@@ -47,7 +47,7 @@
 // `ifndef UVM_DISABLE_RESOURCE_CONVERTER
 
 //UVM_USE_RESOURCE_CONVERTER enables UVM-1.1d to print resources output to match uvm-1.1c. VCS2014.03 or later does not need resource_converter object.
-// As per agreement in Committee at time of UVM-1.1d, from UVM-1.2 onwards the default is to disable resource converter and allow simulators to deal with %p natively. If a user wishes to enable resource converter then they need to compile using +define+UVM_USE_RESOURCE_CONVERTER. The resource converter was never officail sanctioned by Accellera and is placed in the deprecated directory and may be removed in future version. 
+// As per agreement in Committee at time of UVM-1.1d, from UVM-1.2 onwards the default is to disable resource converter and allow simulators to deal with %p natively. If a user wishes to enable resource converter then they need to compile using +define+UVM_USE_RESOURCE_CONVERTER. The resource converter was never officially sanctioned by Accellera and is placed in the deprecated directory which may be removed in future version. 
 // `define UVM_USE_RESOURCE_CONVERTER
 
 // `endif
