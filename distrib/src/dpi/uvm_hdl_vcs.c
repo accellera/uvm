@@ -200,10 +200,11 @@ long int uvm_hdl_btoi(char *binVal) {
   long int remainder, dec=0, j = 0;
   unsigned long long int bin;
   int i;
-  char *tmp = (char*)malloc(sizeof(char*));;
+  char tmp[2];
+  tmp[1] = '\0';
 
   for(i= strlen(binVal) -1 ; i >= 0 ; i--) {
-    *tmp  = binVal[i];
+    tmp[0] = binVal[i];
     bin = atoi(tmp);
     dec = dec+(bin*(pow(2,j)));
     j++;
@@ -218,26 +219,23 @@ long int uvm_hdl_btoi(char *binVal) {
 char *uvm_hdl_dtob(long int decimalNumber) {
    int remainder, quotient;
   int  i=0,j, length;
-  int binN[100];
-  char *binaryNumber_tmp;
-  char binaryNumber[32]="";
+  int binN[65];
+  static char binaryNumber[65];
   char *str = (char*) malloc(sizeof(char));
 
   quotient = decimalNumber;
 
-  while(quotient!=0){
+  do {
     binN[i++] = quotient%2;
     quotient = quotient/2;
-  }
+  } while (quotient!=0);
   length = i;
 
-  for (i=length-1; i>=0; i--) {
-       sprintf(str, "%d", binN[i]);
-       (void)strncat(binaryNumber, str, sizeof(binaryNumber) - strlen(binaryNumber) - 1);
+  for (i=length-1, j = 0; i>=0; i--) {
+    binaryNumber[j++] = binN[i]?'1':'0';
   }
-  binaryNumber_tmp = (char*)malloc(sizeof(char)*strlen(binaryNumber));
-  strcpy(binaryNumber_tmp, binaryNumber);
-  return(binaryNumber_tmp);
+  binaryNumber[j] = '\0';
+  return(binaryNumber);
 }
 
 
@@ -250,30 +248,31 @@ int uvm_hdl_get_mhdl(char *path, p_vpi_vecval value) {
   long int value_int;
 
   char *binVal;
-  char *tmpbin = (char*)malloc(sizeof(char*)*8);
   int i = 0;
   vhpiValueT value1;
+  p_vpi_vecval vecval;
   mhpi_initialize('/');
   mhpiHandleT mhpiH = mhpi_handle_by_name(path, 0);
   vhpiHandleT vhpiH = (long unsigned int *)mhpi_get_vhpi_handle(mhpiH);
   value1.format=vhpiStrVal;
   value1.bufSize = vhpi_get(vhpiSizeP, vhpiH);
-  value1.value.str = (char*)malloc(value1.bufSize*sizeof(char));
+  value1.value.str = (char*)malloc(value1.bufSize*sizeof(char)+1);
 
 
   if (vhpi_get_value(vhpiH, &value1) == 0) {
     binVal = value1.value.str;
-    tmpbin = binVal;
     
     value_int = uvm_hdl_btoi(binVal);
     value->aval = (PLI_UINT32) value_int;
     value->bval = 0;
     mhpi_release_parent_handle(mhpiH);
+    free(value1.value.str);
     return(1);
     
 
   } else {
     mhpi_release_parent_handle(mhpiH);
+    free(value1.value.str);
     return (0);
   }
 
@@ -317,15 +316,9 @@ int uvm_hdl_set_mhdl(char *path, p_vpi_vecval value, mhpiPutValueFlagsT flags)
     mhpiHandleT h = mhpi_handle_by_name(path, 0);
     mhpiHandleT mhpi_mhRegion = mhpi_handle(mhpiScope, h);
     int val = value->aval;
-    char fin_value[32] = ""; 
-    char *force_value = "0";
-    if(val != 0) { 
-		force_value = uvm_hdl_dtob(val);
-	} 
-    
-    strcpy(fin_value, force_value);
+    char *force_value = uvm_hdl_dtob(val);
 
-    ret = mhpi_force_value(path, mhpi_mhRegion, (char*)&fin_value, flags, forceDelay, cancelDelay); 
+    ret = mhpi_force_value(path, mhpi_mhRegion, force_value, flags, forceDelay, cancelDelay); 
     mhpi_release_parent_handle(h);
     if (ret == mhpiRetOk) {
       return(1);
