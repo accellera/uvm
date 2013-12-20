@@ -711,7 +711,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
     uvm_root top;
     T t;
     void'(get());
-    top = uvm_coreservice.get_root();
+    top = uvm_coreservice_t::get().get_root();
 
     if(cb==null) begin
        uvm_report_error("CBUNREG", { "Null callback object cannot be registered with object(s) ",
@@ -791,7 +791,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
     uvm_root top;
     T t;
     void'(get());
-    top = uvm_coreservice.get_root();
+    top = uvm_coreservice_t::get().get_root();
 
     `uvm_cb_trace_noobj(cb,$sformatf("Delete callback %0s by name from object(s) %0s ",
                     cb.get_name(), name))

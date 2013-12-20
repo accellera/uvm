@@ -1,5 +1,6 @@
 ##---------------------------------------------------------------------- 
 ##   Copyright 2011 Cadence
+##   Copyright 2013 Synopsys, Inc.
 ##   All Rights Reserved Worldwide 
 ## 
 ##   Licensed under the Apache License, Version 2.0 (the 
@@ -70,7 +71,7 @@ sub scrub {
     $$logfile =~ s/,88 /, 88/mg;
   }
 
-  $$logfile =~ s/\@[\d_]+/\@X/sg;
+  $$logfile =~ s/\@[\d_]+[^\S\r\n]*/\@X/sg;
 
   # strip header
   $$logfile =~ s/.*\nGOLD-FILE-START\n//sx;

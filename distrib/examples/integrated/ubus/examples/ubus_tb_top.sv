@@ -52,7 +52,7 @@ module ubus_tb_top;
   );
 
   initial begin
-    uvm_config_db#(virtual ubus_if)::set(uvm_coreservice.get_root(), "*", "vif", vif);
+    uvm_config_db#(virtual ubus_if)::set(uvm_coreservice_t::get().get_root(), "*", "vif", vif);
     run_test();
   end
 

@@ -47,9 +47,8 @@ typedef class uvm_coreservice_t;
 typedef class uvm_factory;
 
 typedef class uvm_config_db;
-// uvm_config_obj_misc is an internal typedef for the uvm_misc.svh file
+// m_uvm_config_obj_misc is an internal typedef for the uvm_misc.svh file
 // to use. UVM users should use the uvm_config_object typedef
-
 typedef uvm_config_db#(uvm_object) m_uvm_config_obj_misc;
 
 
@@ -634,7 +633,6 @@ endfunction
 
 typedef class uvm_component;
 typedef class uvm_root;
-typedef class uvm_object;
 typedef class uvm_report_object;
         
 class uvm_utils #(type TYPE=int, string FIELD="config");
@@ -650,7 +648,7 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
     uvm_component list[$];
     types_t types;
     uvm_root top;
-    top = uvm_coreservice.get_root();
+    top = uvm_coreservice_t::get().get_root();
     top.find_all("*",list,start);
     foreach (list[i]) begin
       TYPE typ;

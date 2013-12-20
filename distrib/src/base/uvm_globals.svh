@@ -37,9 +37,7 @@
 
 task run_test (string test_name="");
   uvm_root top;
-  uvm_coreservice_t cs;
-  cs = uvm_coreservice_t::get();
-  top = cs.get_root();
+  top = uvm_coreservice_t::get().get_root();
   top.run_test(test_name);
 endtask
 
@@ -77,7 +75,7 @@ endfunction
 
 function void set_global_timeout(time timeout, bit overridable = 1);
   uvm_root top;
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   top.set_timeout(timeout,overridable);
 endfunction
 
@@ -108,7 +106,7 @@ endfunction
 // For the global version, it returns uvm_root.
 //
 function uvm_report_object uvm_get_report_object();
-  return uvm_coreservice.get_root();
+  return uvm_coreservice_t::get().get_root();
 endfunction
 
 
@@ -127,7 +125,7 @@ endfunction
 function int uvm_report_enabled (int verbosity,
                                  uvm_severity severity=UVM_INFO, string id="");
   uvm_root top;
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   return top.uvm_report_enabled(verbosity,severity,id);
 endfunction
 
@@ -143,7 +141,7 @@ function void uvm_report( uvm_severity severity,
                           string context_name = "",
                           bit report_enabled_checked = 0);
   uvm_root top;
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   top.uvm_report(severity, id, message, verbosity, filename, line, context_name, report_enabled_checked);
 endfunction 
 
@@ -168,7 +166,7 @@ function void uvm_report_info(string id,
                               string context_name = "",
                               bit report_enabled_checked = 0);
   uvm_root top;
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   top.uvm_report_info(id, message, verbosity, filename, line, context_name,
     report_enabled_checked);
 endfunction
@@ -184,7 +182,7 @@ function void uvm_report_warning(string id,
                                  string context_name = "",
                                  bit report_enabled_checked = 0);
   uvm_root top;
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   top.uvm_report_warning(id, message, verbosity, filename, line, context_name,
     report_enabled_checked);
 endfunction
@@ -200,7 +198,7 @@ function void uvm_report_error(string id,
                                string context_name = "",
                                bit report_enabled_checked = 0);
   uvm_root top;
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   top.uvm_report_error(id, message, verbosity, filename, line, context_name,
     report_enabled_checked);
 endfunction
@@ -225,7 +223,7 @@ function void uvm_report_fatal(string id,
                                string context_name = "",
                                bit report_enabled_checked = 0);
   uvm_root top;
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   top.uvm_report_fatal(id, message, verbosity, filename, line, context_name,
     report_enabled_checked);
 endfunction
@@ -242,7 +240,7 @@ function void uvm_process_report_message(uvm_report_message report_message);
   uvm_root top;
   process p;
   p = process::self();
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   top.uvm_process_report_message(report_message);
 endfunction
 
@@ -304,7 +302,7 @@ function void  set_config_int  (string inst_name,
      `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
      uvm_component::m_config_deprecated_warned = 1;
   end
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   top.set_config_int(inst_name, field_name, value);
 endfunction
 
@@ -326,7 +324,7 @@ function void set_config_object (string inst_name,
      `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
      uvm_component::m_config_deprecated_warned = 1;
   end
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   top.set_config_object(inst_name, field_name, value, clone);
 endfunction
 
@@ -347,7 +345,7 @@ function void set_config_string (string inst_name,
      `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
      uvm_component::m_config_deprecated_warned = 1;
   end
-  top = uvm_coreservice.get_root();
+  top = uvm_coreservice_t::get().get_root();
   top.set_config_string(inst_name, field_name, value);
 endfunction
 `endif

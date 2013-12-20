@@ -19,11 +19,21 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
-program top;
+module top;
+   
+//VHDL DUT   
+   DUT DUTINST();
+
+   //test
+   prg prginst();   
+   
+endmodule // top
+
+program prg;
 
 import uvm_pkg::*;
 `include "uvm_macros.svh"
-
+   
 typedef enum { READ, DEPOSIT, FORCE, RELEASE } op_e;
 
 task automatic op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, int lineno, time force_time=0);
@@ -81,95 +91,96 @@ initial
 begin
    reg [7:0] dat;
    
-   #50; // get between updates to q
+   #51; // get between updates to q
 
    
-   op(READ,   ":q",            , 'h0F, `__LINE__);
-   op(READ,   ":w",            , 'h0F, `__LINE__);
-   op(READ,   ":q[1]",         , 'h01, `__LINE__);
+   op(READ,   "top.DUTINST.q",            , 'h0F, `__LINE__);
+   op(READ,   "top.DUTINST.w",            , 'h0F, `__LINE__);
+   op(READ,   "top.DUTINST.q[1]",         , 'h01, `__LINE__);
 
-   op(DEPOSIT, ":q",       'h3C, 'h3C, `__LINE__);
-   op(DEPOSIT, ":q[4]",    'h00, 'h00, `__LINE__);
-   op(DEPOSIT, ":q[6]",    'h01, 'h01, `__LINE__);
+   op(DEPOSIT, "top.DUTINST.q",       'h3C, 'h3C, `__LINE__);
+   op(DEPOSIT, "top.DUTINST.q[4]",    'h00, 'h00, `__LINE__);
+   op(DEPOSIT, "top.DUTINST.q[6]",    'h01, 'h01, `__LINE__);
 
 /*
-   op(DEPOSIT, ":q[6:4]",  'h02, 'h02, `__LINE__);
-   op(READ,    ":q",           , 'h2C, `__LINE__);
-   op(DEPOSIT, ":q[7:4]",  'h06, 'h06, `__LINE__);
+   op(DEPOSIT, "top.DUTINST.q[6:4]",  'h02, 'h02, `__LINE__);
+   op(READ,    "top.DUTINST.q",           , 'h2C, `__LINE__);
+   op(DEPOSIT, "top.DUTINST.q[7:4]",  'h06, 'h06, `__LINE__);
 */
    
-   #0;
-   op(READ,    ":w",           , 'h6C, `__LINE__); // w is now q
-   op(DEPOSIT, ":w",       'h3C, 'h3C, `__LINE__); // w retains until q drives new value
-   #0;
-   op(READ,    ":w",           , 'h3C, `__LINE__); //
-   op(DEPOSIT, ":q",       'hA5, 'hA5, `__LINE__); // deposit on ':q'
+   #1;
+   op(READ,    "top.DUTINST.w",           , 'h6C, `__LINE__); // w is now q
+   op(DEPOSIT, "top.DUTINST.w",       'h3C, 'h3C, `__LINE__); // w retains until q drives new value
+   #1;
+   op(READ,    "top.DUTINST.w",           , 'h3C, `__LINE__); //
+   op(DEPOSIT, "top.DUTINST.q",       'hA5, 'hA5, `__LINE__); // deposit on 'top.DUTINST.q'
 
-   #0;
+   #1;
 
-   op(READ,    ":w",           , 'hA5, `__LINE__); // w is now q
+   op(READ,    "top.DUTINST.w",           , 'hA5, `__LINE__); // w is now q
 
 
    #100; // d propagates to q,w 
 //#150
 
-   op(READ,    ":q",           , 'hF0, `__LINE__); // q and w are now d again
-   op(READ,    ":w",           , 'hF0, `__LINE__); //
+   op(READ,    "top.DUTINST.q",           , 'hF0, `__LINE__); // q and w are now d again
+   op(READ,    "top.DUTINST.w",           , 'hF0, `__LINE__); //
 
-   op(FORCE,   ":q",       'h3C, 'h3C, `__LINE__); // force q and w
-   op(FORCE,   ":w",       'hA5, 'hA5, `__LINE__); //
+   op(FORCE,   "top.DUTINST.q",       'h3C, 'h3C, `__LINE__); // force q and w
+   op(FORCE,   "top.DUTINST.w",       'hA5, 'hA5, `__LINE__); //
 
    #200; // q = d should not "take"
 //#350
 
-   op(READ,    ":q",           , 'h3C, `__LINE__); // q and w still forced, not d's value (F0)
-   op(READ,    ":w",           , 'hA5, `__LINE__);
+   op(READ,    "top.DUTINST.q",           , 'h3C, `__LINE__); // q and w still forced, not d's value (F0)
+   op(READ,    "top.DUTINST.w",           , 'hA5, `__LINE__);
+   
+   op(RELEASE, "top.DUTINST.q",           , 'h3C, `__LINE__); // q released to value of d or to forced q ??
+   
+   op(RELEASE, "top.DUTINST.w",           , 'h3C, `__LINE__); // w is re-evaluated, now q
 
-   op(RELEASE, ":q",           , 'h3c, `__LINE__); // q stays until reassigned, should be C3?
-   op(RELEASE, ":w",           , 'ha5, `__LINE__); // w is re-evaluated, now q
+   op(READ,    "top.DUTINST.q",           , 'h3C, `__LINE__); // read q just for chuckles
 
-   op(READ,    ":q",           , 'h3c, `__LINE__); // read q just for chuckles
-
-   #100; // d propagates to q,w again
+   #101; // d propagates to q,w again
 //#450
-   op(READ,    ":q",           , 'hF0, `__LINE__); // q and w are now d again
-   op(READ,    ":w",           , 'hF0, `__LINE__); //
+   op(READ,    "top.DUTINST.q",           , 'hF0, `__LINE__); // q and w are now d again
+   op(READ,    "top.DUTINST.w",           , 'hF0, `__LINE__); //
 
-   op(FORCE,   ":d",       'hA5, 'hA5, `__LINE__); // force d
+   op(FORCE,   "top.DUTINST.d",       'hA5, 'hA5, `__LINE__); // force d
 
    #100; // d propagates to q,w again
 // #550
-   op(READ,    ":q",           , 'hA5, `__LINE__); // q and w are now d
-   op(READ,    ":w",           , 'hA5, `__LINE__); //
+   op(READ,    "top.DUTINST.q",           , 'hA5, `__LINE__); // q and w are now d
+   op(READ,    "top.DUTINST.w",           , 'hA5, `__LINE__); //
 
-   op(RELEASE, ":d",           , 'hA5, `__LINE__); // d released, stays the same
+   op(RELEASE, "top.DUTINST.d",           , 'hA5, `__LINE__); // d released, stays the same
 
    #100; // d propagates to q,w again
 // #650
-   op(READ,    ":q",           , 'hA5, `__LINE__); // q and w still d
-   op(READ,    ":w",           , 'hA5, `__LINE__);
+   op(READ,    "top.DUTINST.q",           , 'hA5, `__LINE__); // q and w still d
+   op(READ,    "top.DUTINST.w",           , 'hA5, `__LINE__);
 
-   op(FORCE,   ":d",       'hF0, 'hF0, `__LINE__); // force d back to F0
+   op(FORCE,   "top.DUTINST.d",       'hF0, 'hF0, `__LINE__); // force d back to F0
 
    #100; // d propagates to q,w again
 //#750
-   op(READ,    ":q",           , 'hF0, `__LINE__); // q and w back to d
-   op(READ,    ":w",           , 'hF0, `__LINE__);
+   op(READ,    "top.DUTINST.q",           , 'hF0, `__LINE__); // q and w back to d
+   op(READ,    "top.DUTINST.w",           , 'hF0, `__LINE__);
 
-   op(FORCE,   ":d",       'h0F, 'h0F, `__LINE__, 100); // d forced for 100, then released
+   op(FORCE,   "top.DUTINST.d",       'h0F, 'h0F, `__LINE__, 100); // d forced for 100, then released
 // #850
 
-   op(READ,    ":q",           , 'h0F, `__LINE__); // q and w should be d
-   op(READ,    ":w",           , 'h0F, `__LINE__);
+   op(READ,    "top.DUTINST.q",           , 'h0F, `__LINE__); // q and w should be d
+   op(READ,    "top.DUTINST.w",           , 'h0F, `__LINE__);
 
-   op(FORCE,   ":w",       'hAA, 'haa, `__LINE__, 100); // w is driven to AA for 100, then released,
+   op(FORCE,   "top.DUTINST.w",       'hAA, 'haa, `__LINE__, 100); // w is driven to AA for 100, then released,
  // #950                                                          // which immed re-evaluates to its q driver, which is 'h0F
 
    // TODO: test undriven wire
    
    begin
       uvm_report_server svr;
-      svr = uvm_coreservice.get_report_server();
+      svr = uvm_coreservice_t::get().get_report_server();
 
       svr.report_summarize();
 

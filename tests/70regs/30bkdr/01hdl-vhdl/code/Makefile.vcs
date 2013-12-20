@@ -19,7 +19,7 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../../distrib
+UVM_HOME	= ../../../../../distrib
 
 include $(UVM_HOME)/examples/Makefile.vcs
 export VCS_UVM_HOME = $(UVM_HOME)/src
@@ -27,14 +27,14 @@ export VCS_UVM_HOME = $(UVM_HOME)/src
 all: clean comp run
 
 comp:
-	vlogan -q -ntb_opts uvm -sverilog
-	vhdlan zero.vhd
+	vlogan -q -ntb_opts uvm -sverilog 
+	vhdlan dut.vhd
 	vlogan -q -ntb_opts uvm -sverilog test.sv 
-	vcs -q -nc -noIncrComp -timescale=1ns/1ns +acc +vpi -cflags -DVCSMX -ntb_opts uvm dut top
+	vcs -q -nc -noIncrComp -timescale=1ns/1ns +acc +vpi -cflags -DVCSMX -ntb_opts uvm top -P pli.tab
 
 run:
 	$(SIMV) +UVM_TESTNAME=test
 	$(CHECK)
 
 clean:
-	rm -rf simv* csrc* work/* vc_hdrs.h ucli.key 
+	rm -rf simv* csrc* work/* vc_hdrs.h ucli.key AN.DB DVE* *.db *.log

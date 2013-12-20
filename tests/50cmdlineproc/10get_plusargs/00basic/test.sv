@@ -51,7 +51,7 @@ class test extends uvm_test;
      case (tool)
        "Chronologic Simulation VCS Release " : begin
          $display("Doing VCS checks");
-         if(plus_args.size() != 8)
+         if(plus_args.size() != 9)
            pass_the_test = pass_the_test & 0;
          else
            $display("  Correct number of arguments found");

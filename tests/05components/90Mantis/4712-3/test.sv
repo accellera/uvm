@@ -33,12 +33,9 @@ package test289p;
 
 
 	// a quick and dirty UVC (parameterized)
-	class UVC#(type T=uvm_object) extends uvm_component;
-		`uvm_component_param_utils(UVC#(T))
-
 		class transaction extends uvm_sequence_item;
 			`uvm_object_param_utils(transaction)
-			T key;
+			//T key;
 
 			function new(string name = "transaction");
 				super.new(name);
@@ -76,6 +73,9 @@ package test289p;
 				end
 			endtask
 		endclass
+
+	class UVC#(type T=uvm_object) extends uvm_component;
+		`uvm_component_param_utils(UVC#(T))
 
 		function new (string name, uvm_component parent);
 			super.new(name, parent);
@@ -124,7 +124,7 @@ module test289;
 		function void report_phase(uvm_phase phase);
 			super.report_phase(phase);
 			begin
-				uvm_root top = uvm_coreservice.get_root();
+				uvm_root top = uvm_coreservice_t::get().get_root();
 				uvm_report_server svr = top.get_report_server();
 
 				if (svr.get_id_count("UVM/COMP/NAME")!=16)
@@ -155,7 +155,7 @@ module test289;
 
 		hi_uvc  = new("HI",null);
 
-		uvm_config_wrapper::set(null,"HI.sqr.run_phase","default_sequence",UVC#(int)::transaction_sequence::get_type());
+		uvm_config_wrapper::set(null,"HI.sqr.run_phase","default_sequence",test289p::transaction_sequence::get_type());
 
 		run_test();
 

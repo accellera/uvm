@@ -290,7 +290,7 @@ endclass
 // search interface. See <uvm_root> for more information.
 //------------------------------------------------------------------------------
 
-const uvm_root uvm_top = uvm_coreservice.get_root();
+const uvm_root uvm_top = uvm_coreservice_t::get().get_root();
 
 
 //-----------------------------------------------------------------------------
@@ -778,7 +778,7 @@ endfunction
 function void uvm_root::m_process_config(string cfg, bit is_int);
   uvm_bitstream_t v;
   string split_val[$];
-  uvm_root m_uvm_top = uvm_coreservice.get_root();
+  uvm_root m_uvm_top = uvm_coreservice_t::get().get_root();
 
   uvm_split_string(cfg, ",", split_val);
   if(split_val.size() == 1) begin

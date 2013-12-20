@@ -546,7 +546,7 @@ class uvm_report_object extends uvm_object;
   // Use uvm_root::report_header()
 
   virtual function void report_header(UVM_FILE file = 0);
-    uvm_root l_root = uvm_coreservice.get_root();
+    uvm_root l_root = uvm_coreservice_t::get().get_root();
     l_root.report_header(file);
   endfunction
 
@@ -581,7 +581,7 @@ class uvm_report_object extends uvm_object;
   // Use uvm_report_server::get_server().die()
 
   virtual function void die();
-    uvm_root l_root = uvm_coreservice.get_root();
+    uvm_root l_root = uvm_coreservice_t::get().get_root();
     l_root.die();
   endfunction
 

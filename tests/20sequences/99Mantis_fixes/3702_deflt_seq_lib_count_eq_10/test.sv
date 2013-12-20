@@ -91,7 +91,7 @@ module top;
      endtask
 
      virtual function void report();
-       uvm_root top = uvm_coreservice.get_root();
+       uvm_root top = uvm_coreservice_t::get().get_root();
        uvm_report_server svr = uvm_report_server::get_server();
        if (svr.get_id_count("SEQ_START") != 10) begin
          `uvm_error("SEQ_COUNT_NOT_10",$sformatf("Expected 10 sequences. Got %0d",svr.get_id_count("SEQ_START")))

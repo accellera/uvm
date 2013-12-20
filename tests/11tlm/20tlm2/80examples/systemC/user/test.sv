@@ -30,7 +30,7 @@ class test extends uvm_component;
      // Set verbosity for  demo
      set_report_verbosity_level(UVM_FULL);
      begin
-        uvm_root top = uvm_coreservice.get_root();
+        uvm_root top = uvm_coreservice_t::get().get_root();
         top.print_topology();
      end
   endfunction : end_of_elaboration_phase

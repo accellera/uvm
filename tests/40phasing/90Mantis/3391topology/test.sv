@@ -96,7 +96,7 @@ begin
    uvm_root top;
 
    t1 = new("t1");
-   top = uvm_coreservice.get_root();
+   top = uvm_coreservice_t::get().get_root();
    $display("GOLD-FILE-START");
    top.enable_print_topology = 1;
    top.finish_on_completion=0;

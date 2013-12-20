@@ -15,7 +15,7 @@ module test294;
 			super.new(name,parent);
 		endfunction
 		function void report_phase(uvm_phase phase);
-			uvm_root top = uvm_coreservice.get_root();
+			uvm_root top = uvm_coreservice_t::get().get_root();
 			uvm_report_server svr = top.get_report_server();
 			
 			if (svr.get_id_count("UVM/COMP/NAME")!=6)

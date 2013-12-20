@@ -50,7 +50,7 @@ class test extends test_base;
     //  [top_random_seq]     6
     //  [bot_random_seq]    12
 
-    uvm_report_server svr = uvm_coreservice.get_report_server();
+    uvm_report_server svr = uvm_coreservice_t::get().get_report_server();
     int e_km_c =1;
     int km_c   = svr.get_id_count( "KILLING_MAIN" );
 

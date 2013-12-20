@@ -43,7 +43,7 @@ class test extends uvm_test;
 
   virtual task run_phase(uvm_phase phase);
     uvm_report_message msg;
-    uvm_root top = uvm_coreservice.get_root();
+    uvm_root top = uvm_coreservice_t::get().get_root();
 
     phase.raise_objection(this);
 

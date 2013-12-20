@@ -82,7 +82,7 @@ endclass
 
 initial
   begin
-     uvm_factory fact = uvm_coreservice.get_factory();
+     uvm_factory fact = uvm_coreservice_t::get().get_factory();
      my_server server = new();
      static my_catcher catcher = new();
      uvm_report_cb::add(null, catcher);
