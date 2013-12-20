@@ -29,7 +29,9 @@ void m_uvm_report_dpi( int severity,
 		int verbosity,
 		char* file,
 		int linenum) {
+    svScope old_scope = svSetScope(svGetScopeFromName("uvm_pkg"));
     m__uvm_report_dpi(severity, id, message, verbosity, file, linenum);
+    svSetScope(old_scope);
  }
 
 
