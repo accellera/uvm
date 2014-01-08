@@ -562,7 +562,9 @@ class uvm_report_object extends uvm_object;
   //
   // The run_test method in uvm_top calls this method.
   //
-  // Use uvm_report_server::get_server().report_summarize()
+  // Use:
+  // uvm_report_server rs =uvm_report_server::get_server();
+  // rs.report_summarize();
 
   virtual function void report_summarize(UVM_FILE file = 0);
     uvm_report_server l_rs = uvm_report_server::get_server();
@@ -581,7 +583,9 @@ class uvm_report_object extends uvm_object;
   // It then call calls <report_summarize> and terminates the simulation
   // with ~$finish~.
   //
-  // Use uvm_report_server::get_server().die()
+  // Use:
+  // uvm_report_server rs =uvm_report_server::get_server();
+  // rs.die()
 
   virtual function void die();       
      uvm_root l_root;
@@ -600,7 +604,9 @@ class uvm_report_object extends uvm_object;
   // The default value of 0 indicates that there is no upper limit to the number
   // of UVM_COUNT reports.
   //
-  // Use uvm_report_server::get_server().set_max_quit_count()
+  // Use:
+  // uvm_report_server rs =uvm_report_server::get_server();
+  // rs.set_max_quit_count()
 
   function void set_report_max_quit_count(int max_count);
     uvm_report_server l_rs = uvm_report_server::get_server();
@@ -626,7 +632,9 @@ class uvm_report_object extends uvm_object;
   // information about the maximum quit count, the maximum verbosity, and the
   // action and files associated with severities, ids, and (severity, id) pairs.
   //
-  // Use get_report_handler().print().
+  // Use:
+  // uvm_report_handler rh =get_report_handler();
+  // rh.print().
 
   function void dump_report_state();
     m_rh.dump_state();
