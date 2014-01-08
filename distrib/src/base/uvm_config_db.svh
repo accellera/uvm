@@ -94,9 +94,10 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     uvm_resource#(T) r, rt;
     uvm_resource_pool rp = uvm_resource_pool::get();
     uvm_resource_types::rsrc_q_t rq;
+    uvm_coreservice_t cs = uvm_coreservice_t::get();
 
     if(cntxt == null) 
-      cntxt = uvm_coreservice_t::get().get_root();
+      cntxt = cs.get_root();
     if(inst_name == "") 
       inst_name = cntxt.get_full_name();
     else if(cntxt.get_full_name() != "") 
@@ -243,10 +244,11 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   //
 
   static function bit exists(uvm_component cntxt, string inst_name,
-      string field_name, bit spell_chk=0);
+    string field_name, bit spell_chk=0);
+    uvm_coreservice_t cs = uvm_coreservice_t::get();
 
     if(cntxt == null)
-      cntxt = uvm_coreservice_t::get().get_root();
+      cntxt = cs.get_root();
     if(inst_name == "")
       inst_name = cntxt.get_full_name();
     else if(cntxt.get_full_name() != "")
@@ -267,10 +269,11 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     process p = process::self();
     string rstate = p.get_randstate();
     m_uvm_waiter waiter;
+    uvm_coreservice_t cs = uvm_coreservice_t::get();
 
     if(cntxt == null)
-      cntxt = uvm_coreservice_t::get().get_root();
-    if(cntxt != uvm_coreservice_t::get().get_root()) begin
+      cntxt = cs.get_root();
+    if(cntxt != cs.get_root()) begin
       if(inst_name != "")
         inst_name = {cntxt.get_full_name(),".",inst_name};
       else

@@ -133,8 +133,8 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
 
   static function void set_type_override (uvm_object_wrapper override_type,
                                           bit replace=1);
-                                            uvm_factory factory=uvm_coreservice_t::get().get_factory();
-                                          
+    uvm_coreservice_t cs = uvm_coreservice_t::get();
+    uvm_factory factory=cs.get_factory();                                          
     factory.set_type_override_by_type(get(),override_type,replace);
   endfunction
 
@@ -276,8 +276,8 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
 
   static function void set_type_override (uvm_object_wrapper override_type,
                                           bit replace=1);
-                                            uvm_factory factory=uvm_coreservice_t::get().get_factory();
-                                          
+    uvm_coreservice_t cs = uvm_coreservice_t::get();
+    uvm_factory factory=cs.get_factory();
     factory.set_type_override_by_type(get(),override_type,replace);
   endfunction
 

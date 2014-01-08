@@ -78,12 +78,14 @@ class uvm_heartbeat extends uvm_object;
   //| endclass
 
   function new(string name, uvm_component cntxt, uvm_objection objection=null);
+     uvm_coreservice_t cs;
     super.new(name);
     m_objection = objection;
-    
+    cs  = uvm_coreservice_t::get();
+     
     //if a cntxt is given it will be used for reporting.
     if(cntxt != null) m_cntxt = cntxt;
-    else m_cntxt = uvm_coreservice_t::get().get_root();
+    else m_cntxt = cs.get_root();
 
     m_cb = new({name,"_cb"},m_cntxt);
 
@@ -291,13 +293,14 @@ class uvm_heartbeat_callback extends uvm_objection_callback;
   int  cnt [uvm_object];
   time last_trigger [uvm_object];
   uvm_object target;
+  uvm_coreservice_t cs = uvm_coreservice_t::get();
 
   function new(string name, uvm_object target);
     super.new(name);
     if (target != null)
        this.target = target;
     else
-       this.target = uvm_coreservice_t::get().get_root();
+       this.target = cs.get_root();
   endfunction
 
   virtual function void raised (uvm_objection objection,

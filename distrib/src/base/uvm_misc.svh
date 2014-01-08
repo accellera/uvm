@@ -648,7 +648,9 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
     uvm_component list[$];
     types_t types;
     uvm_root top;
-    top = uvm_coreservice_t::get().get_root();
+    uvm_coreservice_t cs;
+    cs = uvm_coreservice_t::get();
+    top = cs.get_root();
     top.find_all("*",list,start);
     foreach (list[i]) begin
       TYPE typ;

@@ -612,11 +612,13 @@ class uvm_report_handler extends uvm_object;
 
     bit l_report_enabled = 0;
     uvm_report_message l_report_message;
+    uvm_coreservice_t cs;
+    cs = uvm_coreservice_t::get();
     if (!uvm_report_enabled(verbosity_level, UVM_INFO, id))
       return;
 
-    if (client==null)
-      client = uvm_coreservice_t::get().get_root();
+    if (client==null) 
+      client = cs.get_root();
 
     l_report_message = uvm_report_message::new_report_message();
     l_report_message.set_report_message(severity, id, message, 

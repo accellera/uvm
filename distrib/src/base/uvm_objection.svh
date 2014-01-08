@@ -69,8 +69,12 @@ class uvm_objection extends uvm_report_object;
   protected uvm_objection_events m_events [uvm_object];
   /*protected*/ bit     m_top_all_dropped;
 
-  protected uvm_root m_top = uvm_coreservice_t::get().get_root();
-
+`ifdef UVM_CHAINED_FUNC
+   protected uvm_root m_top = uvm_coreservice_t::get().get_root();
+`else //racey code, no guarantee uvm_coreservice is constructed.
+   protected uvm_root m_top = uvm_coreservice.get_root();
+`endif
+     
   static uvm_objection m_objections[$];
 
   //// Drain Logic
@@ -116,8 +120,11 @@ class uvm_objection extends uvm_report_object;
 
   protected bit m_prop_mode = 1;
 
-  uvm_root top = uvm_coreservice_t::get().get_root();
-
+`ifdef UVM_CHAINED_FUNC
+   uvm_root top = uvm_coreservice_t::get().get_root();
+`else //racey code, no guarantee uvm_coreservice is constructed.
+   uvm_root top = uvm_coreservice.get_root();
+`endif
 
   protected bit m_cleared; /* for checking obj count<0 */
 

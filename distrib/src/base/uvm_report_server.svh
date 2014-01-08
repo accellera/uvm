@@ -184,8 +184,9 @@ virtual class uvm_report_server extends uvm_object;
         // from the current report_server to the new one
 
         static function void set_server(uvm_report_server server);
-                server.copy(uvm_coreservice_t::get().get_report_server());
-                uvm_coreservice_t::get().set_report_server(server);
+	        uvm_coreservice_t cs = uvm_coreservice_t::get();
+                server.copy(cs.get_report_server());
+                cs.set_report_server(server);
         endfunction
 
 
@@ -195,7 +196,8 @@ virtual class uvm_report_server extends uvm_object;
         // a valid handle to a report server.
 
         static function uvm_report_server get_server();
-                return uvm_coreservice_t::get().get_report_server();
+	        uvm_coreservice_t cs = uvm_coreservice_t::get();
+                return cs.get_report_server();
         endfunction
 endclass
 
@@ -549,9 +551,9 @@ class uvm_default_report_server extends uvm_report_server;
 
     if(report_ok) begin	
       string m;
-
+      uvm_coreservice_t cs = uvm_coreservice_t::get();
       // give the global server a chance to intercept the calls
-      uvm_report_server svr = uvm_coreservice_t::get().get_report_server();
+      uvm_report_server svr = cs.get_report_server();
 
 `ifdef UVM_DEPRECATED_REPORTING
 
@@ -682,8 +684,11 @@ class uvm_default_report_server extends uvm_report_server;
 
     // Process the UVM_EXIT action
     if(report_message.get_action() & UVM_EXIT) begin
-      uvm_root l_root = uvm_coreservice_t::get().get_root();
-      l_root.die();
+       uvm_root l_root;
+       uvm_coreservice_t cs;
+       cs = uvm_coreservice_t::get();
+       l_root = cs.get_root();
+       l_root.die();
     end
 
     // Process the UVM_STOP action

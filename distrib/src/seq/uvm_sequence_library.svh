@@ -532,12 +532,14 @@ function bit uvm_sequence_library::m_check(uvm_object_wrapper seq_type, this_typ
   uvm_object obj;
   uvm_sequence_base seq;
   uvm_root top;
+  uvm_coreservice_t cs;   
   string name;
   string typ;
   obj = seq_type.create_object();
   name = (lib == null) ? type_name : lib.get_full_name();
   typ = (lib == null) ? type_name : lib.get_type_name();
-  top = uvm_coreservice_t::get().get_root();
+  cs = uvm_coreservice_t::get();   
+  top = cs.get_root();
 
   if (!$cast(seq, obj)) begin
     `uvm_error_context("SEQLIB/BAD_SEQ_TYPE",

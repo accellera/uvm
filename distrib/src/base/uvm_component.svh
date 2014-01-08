@@ -1717,6 +1717,7 @@ endclass : uvm_component
 function uvm_component::new (string name, uvm_component parent);
   string error_str;
   uvm_root top;
+  uvm_coreservice_t cs;
 
   super.new(name);
 
@@ -1726,7 +1727,8 @@ function uvm_component::new (string name, uvm_component parent);
     return;
   end
 
-  top = uvm_coreservice_t::get().get_root();
+  cs = uvm_coreservice_t::get();
+  top = cs.get_root();  
 
   // Check that we're not in or past end_of_elaboration
   begin
@@ -1955,8 +1957,10 @@ function uvm_component uvm_component::lookup( string name );
   string leaf , remainder;
   uvm_component comp;
   uvm_root top;
-  top = uvm_coreservice_t::get().get_root();
-
+  uvm_coreservice_t cs;
+  cs = uvm_coreservice_t::get();
+  top = cs.get_root();
+   
   comp = this;
   
   m_extract_name(name, leaf, remainder);
@@ -2070,7 +2074,8 @@ endfunction
 
 function void  uvm_component::print_override_info (string requested_type_name, 
                                                    string name="");
-                                                  uvm_factory factory=uvm_coreservice_t::get().get_factory();
+  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  uvm_factory factory=cs.get_factory();
   factory.debug_create_by_name(requested_type_name, get_full_name(), name);
 endfunction
 
@@ -3356,7 +3361,10 @@ function void uvm_component::m_set_cl_verb;
   static bit first = 1;
   string args[$];
   uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
-  uvm_root top = uvm_coreservice_t::get().get_root();
+  uvm_root top;
+  uvm_coreservice_t cs;
+  cs = uvm_coreservice_t::get();
+  top = cs.get_root();
 
   if(!values.size())
     void'(uvm_cmdline_proc.get_arg_values("+uvm_set_verbosity=",values));

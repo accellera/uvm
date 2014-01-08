@@ -289,10 +289,11 @@ endclass
 // This is the top-level that governs phase execution and provides component
 // search interface. See <uvm_root> for more information.
 //------------------------------------------------------------------------------
-
+`ifdef UVM_CHAINED_FUNC
 const uvm_root uvm_top = uvm_coreservice_t::get().get_root();
-
-
+`else //racey code, no guarantee uvm_coreservice is constructed.
+const uvm_root uvm_top = uvm_coreservice.get_root();
+`endif
 //-----------------------------------------------------------------------------
 // IMPLEMENTATION
 //-----------------------------------------------------------------------------
@@ -777,8 +778,12 @@ endfunction
 
 function void uvm_root::m_process_config(string cfg, bit is_int);
   uvm_bitstream_t v;
-  string split_val[$];
-  uvm_root m_uvm_top = uvm_coreservice_t::get().get_root();
+  string split_val[$];  
+  uvm_root m_uvm_top;
+  uvm_coreservice_t cs;
+  cs = uvm_coreservice_t::get();
+  m_uvm_top = cs.get_root();
+
 
   uvm_split_string(cfg, ",", split_val);
   if(split_val.size() == 1) begin
