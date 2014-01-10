@@ -69,11 +69,7 @@ class uvm_objection extends uvm_report_object;
   protected uvm_objection_events m_events [uvm_object];
   /*protected*/ bit     m_top_all_dropped;
 
-`ifdef UVM_CHAINED_FUNC
-   protected uvm_root m_top = uvm_coreservice_t::get().get_root();
-`else //racey code, no guarantee uvm_coreservice is constructed.
-   protected uvm_root m_top = uvm_coreservice.get_root();
-`endif
+  protected uvm_root m_top;
      
   static uvm_objection m_objections[$];
 
@@ -119,13 +115,6 @@ class uvm_objection extends uvm_report_object;
   local uvm_objection_context_object m_forked_contexts[uvm_object];
 
   protected bit m_prop_mode = 1;
-
-`ifdef UVM_CHAINED_FUNC
-   uvm_root top = uvm_coreservice_t::get().get_root();
-`else //racey code, no guarantee uvm_coreservice is constructed.
-   uvm_root top = uvm_coreservice.get_root();
-`endif
-
   protected bit m_cleared; /* for checking obj count<0 */
 
 
@@ -137,8 +126,11 @@ class uvm_objection extends uvm_report_object;
 
   function new(string name="");
     uvm_cmdline_processor clp;
+    uvm_coreservice_t cs_ = uvm_coreservice_t::get();
     string trace_args[$];
     super.new(name);
+    m_top  = cs_.get_root();
+     
     set_report_verbosity_level(m_top.get_report_verbosity_level());
 
     // Get the command line trace mode setting

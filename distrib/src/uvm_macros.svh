@@ -44,7 +44,6 @@
 `endif
 
 `ifdef VCS
-`define UVM_CHAINED_FUNC
 // `ifndef UVM_DISABLE_RESOURCE_CONVERTER
 
 //UVM_USE_RESOURCE_CONVERTER enables UVM-1.1d to print resources output to match uvm-1.1c. VCS2014.03 or later does not need resource_converter object.

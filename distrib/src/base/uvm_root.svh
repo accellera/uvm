@@ -274,6 +274,11 @@ class uvm_root extends uvm_component;
 	 adapter.accept(this, v, p);
  endfunction
 
+   // internal function not to be used 
+   static function uvm_root m_uvm_get_root();
+      uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+      return cs_.get_root();
+   endfunction
 
 endclass
 
@@ -289,11 +294,8 @@ endclass
 // This is the top-level that governs phase execution and provides component
 // search interface. See <uvm_root> for more information.
 //------------------------------------------------------------------------------
-`ifdef UVM_CHAINED_FUNC
-const uvm_root uvm_top = uvm_coreservice_t::get().get_root();
-`else //racey code, no guarantee uvm_coreservice is constructed.
-const uvm_root uvm_top = uvm_coreservice.get_root();
-`endif
+const uvm_root uvm_top = uvm_root::m_uvm_get_root();
+
 //-----------------------------------------------------------------------------
 // IMPLEMENTATION
 //-----------------------------------------------------------------------------
