@@ -3,7 +3,6 @@ if 0;
 # -*- mode: cperl -*-
 #----------------------------------------------------------------------
 #   Copyright 2013 Cadence Design Systems, Inc.
-#   Copyright 2013 Synopsys, Inc.
 #   All Rights Reserved Worldwide
 #
 #   Licensed under the Apache License, Version 2.0 (the
@@ -32,6 +31,8 @@ use File::Path;
 use File::Copy;
 use Data::Dumper;
 use File::stat;
+use Text::Balanced qw(extract_tagged);
+
 # Tar module may not be available
 if (eval {require Archive::Tar; 1;}) {
   $Tar_Pm = 1;
@@ -65,7 +66,7 @@ my @Options=(
  
 
 if(!GetOptions(map ( @$_[0], @Options))) {
-   ErrorMessage("Error during option parsing"); 
+   ErrorMessage("Error during option parsing");
 }
 if (defined $opt_help) { PrintUsage(@Options); exit(1);}
 
@@ -77,6 +78,7 @@ $DUMMY='-' x 80;
 NoteMessage("$DUMMY");
 NoteMessage("$VerID");
 
+NoteMessage("requires at least perl v5.10");
 NoteMessage("traversing directory [$opt_top_dir] to find files");
 NoteMessage("-*- this script requires a gtar compatible tar to make backups -*-");
 
@@ -164,49 +166,123 @@ sub search_all_relevant_files {
 sub replace_trivial{
     my($t,$fname) = @_;
     no warnings "uninitialized";
+    my($prefix)="uvm_coreservice_t cs_=uvm_coreservice_t::get();\n";
 
     # FIX remove the protected keyword from phases 
     $t =~ s/virtual\s+protected\s+(function|task)\s+(void\s+)?(((pre|post)_)?((reset|configure|main|shutdown)|run)_phase)/virtual $1 $2 $3/g;
 
     # FIX replace _global_reporter.get_report_server
-    $t =~ s/_global_reporter\.get_report_server/uvm_coreservice_t::get().get_report_server/g;
-  
+    $t = coreservice_repl_fct($t,'_global_reporter\.get_report_server','cs_.get_report_server',1,$prefix);
+    $t = coreservice_repl_initial($t,'_global_reporter\.get_report_server','cs_.get_report_server',1,$prefix);
+
     # FIX replace _global_reporter.report_summarize
-    $t =~ s/_global_reporter\.report_summarize\(\)\s*;/begin uvm_report_server srv = uvm_coreservice_t::get().get_report_server(); srv.summarize(); end/g;
+    $t =~ s/_global_reporter\.report_summarize\(\)\s*;/begin uvm_coreservice_t cs = uvm_coreservice_t::get(); uvm_report_server srv = cs.get_report_server(); srv.summarize(); end/g;
 
-    # FIX replace _global_reporter.dump_report_state() 
-    $t =~ s/_global_reporter\.dump_report_state\(\)\s*;/begin uvm_report_server srv = uvm_coreservice_t::get().get_report_server(); srv.print(); end/g;
+    # FIX replace _global_reporter.dump_report_state
+    $t =~ s/_global_reporter\.dump_report_state\(\)\s*;/begin uvm_coreservice_t cs = uvm_coreservice_t::get(); uvm_report_server srv = cs.get_report_server(); srv.summarize(); end/g;
 
-    # FIX replace dump_report_server
-    $t =~ s/dump_report_state\(\)\s*;/begin uvm_report_server srv = uvm_coreservice_t::get().get_report_server(); srv.print(); end/g;
+    # FIX replace uvm_factory::get() with new uvm_coreservice.get_factory()
+    $t = coreservice_repl_fct($t,'uvm_factory::get','cs_.get_factory',$opt_deprecated,$prefix);
+    $t = coreservice_repl_initial($t,'uvm_factory::get','cs_.get_factory',$opt_deprecated,$prefix);
 
-    # FIX replace uvm_factory::get() by uvm_coreservice_t::get().get_factory()
-    $t =~ s/uvm_factory::get/uvm_coreservice_t::get().get_factory/g if $opt_deprecated;
- 
-    # FIX replace uvm_root::get() by uvm_coreservice_t::get().get_root()
-    $t =~ s/uvm_root::get/uvm_coreservice_t::get().get_root/g if $opt_deprecated;
+    # FIX replace uvm_root::get() with new uvm_coreservice.get_root()
+    $t = coreservice_repl_fct($t,'uvm_root::get','cs_.get_root',$opt_deprecated,$prefix);
+    $t = coreservice_repl_initial($t,'uvm_root::get','cs_.get_root',$opt_deprecated,$prefix);
 
     # FIX replace uvm_severity_type by uvm_severity
     $t =~ s/uvm_severity_type/uvm_severity/g if $opt_deprecated;
-  
-  	# FIX extending uvm_report_server
+
+    # FIX extending uvm_report_server
     $t =~ s/extends\s+uvm_report_server/extends uvm_default_report_server/g;
 
+    # FIX uvm_report_server::get_server with new uvm_coreservice.get_report_server()
+    $t = coreservice_repl_fct($t,'uvm_report_server::get_server','cs_.get_report_server',$opt_deprecated,$prefix);
+    $t = coreservice_repl_initial($t,'uvm_report_server::get_server','cs_.get_report_server',$opt_deprecated,$prefix);
+
     # FIX Mantis 4431 (starting_phase ==)
-    $t =~ s/starting_phase(\s*)==/get_starting_phase()$1==/g;
-    # FIX Mantis 4431 (starting_phase !=)
-    $t =~ s/starting_phase(\s*)!=/get_starting_phase()$1!=/g;
+    $t =~ s/starting_phase\s*([!=]+)/get_starting_phase()$1/g;
     # FIX Mantis 4431 (starting_phase =)
     $t =~ s/starting_phase\s*=\s*(\w+)/set_starting_phase($1)/g;
     # FIX Mantis 4431 (starting_phase.)
-    $t =~ s/starting_phase\./get_starting_phase()./g;
+    $prefix="uvm_phase phase_=get_starting_phase();\n";
+    $t = coreservice_repl_fct($t,'starting_phase\.','phase_.',1,$prefix);
 
-    # FIX Mantis 3472: set_config_*/get_config_* are deprecated
-    $t =~ s/set_config_((int)|(string)|(object))\(/uvm_config_$1::set(this, /g;
-    $t =~ s/get_config_((int)|(string)|(object))\(/uvm_config_$1::get(this, "", /g;
-     
+    # FIX Mantis 3472: set_config_*/get_config_* are deprecated TODO context outside of classes should be "null"
+    $prefix="";
+    foreach $o ('int','string','object') {
+	$t = coreservice_repl_fct($t,"set_config_$o\\(","uvm_config_$o\::set(this, ",1,$prefix);
+	$t = coreservice_repl_initial($t,"set_config_$o\\(","uvm_config_$o\::set(, ",1,$prefix);
+	$t = coreservice_repl_fct($t,"get_config_$o\\(","uvm_config_$o\::get(this, \"\",",1,$prefix);
+	$t = coreservice_repl_initial($t,"get_config_$o\\(","uvm_config_$o\::get(,\"\", ",1,$prefix);
+      }
+
     $t;
+}
 
+sub coreservice_repl_fct {
+  my ($text,$match,$repl,$depr,$prefix)=@_; #
+  my($last)=0;
+  my(@blks)=();
+  my($q,$tf,$bd);
+
+  return $text unless defined $depr;
+
+  while( $text =~ /((extern|virtual|protected|local|static)\s+)*((task|function)\s+[^;]+;)(.*?end\4)?/gsx ) {
+    ($q,$tf,$bd,$pre,$post)=($1,$3,$5,$-[0],$+[0]);
+
+    $q="" unless defined $q;
+
+    next if($q =~ /extern/); # dont deal with extern decl
+    next if($prefix ne "" && $bd =~ /\s*$prefix/); # dont insert again
+
+    # deal with the body
+    if($bd =~ s{$match}{$repl}g ) {
+#      print "found [$q|$tf|$bd]\n";
+
+      push @blks,substr($text,$last,$pre-$last);
+      push @blks,"$q$tf $prefix$bd";
+      $last=$post;
+    }
+  }
+#  foreach $f (@blks) {
+#    if($f =~ /$match/) { print "LOOP failed with $match $repl [$f]" } ;
+#  }
+
+  # now recreate output
+  push @blks,substr($text,$last);
+  return join("",@blks);
+}
+
+sub coreservice_repl_initial {
+  my ($text,$match,$repl,$depr,$prefix)=@_; #
+  my($last)=0;
+  my(@blks)=();
+  my($bd);
+
+  return $text unless defined $depr;
+
+  while( $text =~ /initial\s+begin/gsx ) {
+    ($pre,$post)=($-[0],$+[0]);
+    $bd=substr($text,$pre+7);
+    my (@set) = extract_tagged($bd, "begin", "end");
+    $bd=$set[4];
+    $post=length($text)-length($set[1]);
+
+    $bd="" unless defined $bd;
+    next if($prefix ne "" && $bd =~ /\s*$prefix/); # dont insert again
+
+    # deal with the body
+    if($bd =~ s{$match}{$repl}g ) {
+#      print "[$bd]\n";
+      push @blks,substr($text,$last,$pre-$last);
+      push @blks,"initial begin $prefix$bd". "end";
+      $last=$post;
+    }
+  }
+  # now recreate output
+  push @blks,substr($text,$last);
+
+  return join("",@blks);
 }
 
 sub pattern {
@@ -219,9 +295,9 @@ sub pattern {
 	
 # NOTE directories are not handled (a directory uvm_bla has to be renamed manually)
 	return 0 if (-d $filename);
-	warn("file $filename is a link and may lead to strange results") if -l $filename;
 	return 0 if $filename =~ /${file_ignore_pattern}/;
 	return unless $filename =~ $opt_sv_ext;
+	warn("file $filename is a link and may lead to strange results") if -l $filename;
 
 	push @all_files,$filename;
 }
