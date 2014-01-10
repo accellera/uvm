@@ -57,11 +57,12 @@ package mypkg;
   
     static uvm_phase my_sched;
 
-    protected function void define_domain(uvm_domain domain);
+    protected function void define_domain(uvm_domain domain); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
   
       uvm_phase cfg_phase;
       uvm_phase sched;
-      uvm_root top  = uvm_coreservice_t::get().get_root();
+      uvm_root top  = cs_.get_root();
 
       // adds the "uvm_sched" to 'domain', if not already added,
       // then adds 'domain' to the master graph, if not already added

@@ -40,8 +40,8 @@ class c;
    endfunction
 endclass
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    uvm_in_order_class_comparator#(c) sb;
 
    uvm_analysis_port#(c) exp;
@@ -72,7 +72,7 @@ begin
    
    begin
       uvm_report_server svr;
-      svr = uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       svr.report_summarize();
 

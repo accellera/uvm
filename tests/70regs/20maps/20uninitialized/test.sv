@@ -240,9 +240,10 @@ program two_sequencers_with_same_map;
             phase.drop_objection(this);
         endtask
  
-        virtual function void report();
+        virtual function void report(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
             uvm_report_server svr;
-            svr = uvm_coreservice_t::get().get_report_server();
+            svr = cs_.get_report_server();
 
             if (svr.get_severity_count(UVM_FATAL) == 0 &&
                     svr.get_severity_count(UVM_ERROR) == 0 &&

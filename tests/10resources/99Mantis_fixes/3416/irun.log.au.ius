@@ -22,7 +22,7 @@ UVM_INFO FILE-LINE @ 0: reporter [UVM/RESOURCE/DUMP]
  * [/^my_obj$/] : (p.my_obj extends p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"mo", m_inst_id:X, m_inst_count:X, __m_uvm_status_container:uvm_pkg::uvm_status_container@X, uvm_global_copy_map:'{}}, i:0, type_name:"an_obj"}, type_name:"my_obj"}   
  * [/^yr_obj$/] : (p.your_obj extends p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{null}   
  * [/^yr_obj$/] : (p.your_obj extends p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"yo", m_inst_id:X, m_inst_count:X, __m_uvm_status_container:uvm_pkg::uvm_status_container@X, uvm_global_copy_map:'{}}, i:0, type_name:"an_obj"}, type_name:"your_obj"}   
- entry [/^vif$/] : (virtual interface intf) virtual interface intf@X   
+ entry [/^vif$/] : (virtual interface intf) virtual interface intf@X
  no-uvm-object [/^.*$/] : (p.some_none_uvm_object) '{i:-559038737}   
  para1 [/^.*$/] : (logic signed[4095:0]) 3   
  para2 [/^.*$/] : (int) 4   

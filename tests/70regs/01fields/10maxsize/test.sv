@@ -86,8 +86,8 @@ class my_catcher extends uvm_report_catcher;
 endclass
 
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    blk b; my_catcher c;
    b = new;
 
@@ -102,7 +102,7 @@ begin
    
    begin
       uvm_report_server svr;
-      svr = uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       svr.report_summarize();
 

@@ -94,13 +94,14 @@ endclass: oc_ethernet_env
 
 
 
-initial begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
 
    oc_ethernet_env env;
 
    begin
      uvm_report_server svr;
-     svr = uvm_coreservice_t::get().get_report_server();
+     svr = cs_.get_report_server();
      svr.set_max_quit_count(10);
    end
 

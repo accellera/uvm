@@ -216,6 +216,11 @@ sub replace_trivial{
 	$t = coreservice_repl_initial($t,"get_config_$o\\(","uvm_config_$o\::get(,\"\", ",1,$prefix);
       }
 
+    # DISABLED reverse chained function calls
+#    $prefix="uvm_coreservice_t cs_ = uvm_coreservice_t::get();\n";
+#    $t = coreservice_repl_fct($t,'uvm_coreservice_t::get\(\)\.','cs_.',1,$prefix);
+#    $t = coreservice_repl_initial($t,'uvm_coreservice_t::get\(\)\.','cs_.',1,$prefix);
+
     $t;
 }
 

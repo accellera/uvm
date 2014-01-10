@@ -90,13 +90,13 @@ class test extends uvm_test;
    endfunction
 endclass
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    trunk t1;
    uvm_root top;
 
    t1 = new("t1");
-   top = uvm_coreservice_t::get().get_root();
+   top = cs_.get_root();
    $display("GOLD-FILE-START");
    top.enable_print_topology = 1;
    top.finish_on_completion=0;

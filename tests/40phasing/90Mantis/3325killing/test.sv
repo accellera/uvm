@@ -42,7 +42,8 @@ class test extends test_base;
 
   endtask : main_phase
 
-  function void check_phase(uvm_phase phase);
+  function void check_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
     //normal test
     //  [top_random_seq]    10
     //  [bot_random_seq]    24
@@ -50,7 +51,7 @@ class test extends test_base;
     //  [top_random_seq]     6
     //  [bot_random_seq]    12
 
-    uvm_report_server svr = uvm_coreservice_t::get().get_report_server();
+    uvm_report_server svr = cs_.get_report_server();
     int e_km_c =1;
     int km_c   = svr.get_id_count( "KILLING_MAIN" );
 

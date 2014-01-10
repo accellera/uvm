@@ -162,7 +162,8 @@ module test;
 		endfunction
 	endclass    
 
-	initial begin
+	initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
 		uvm_override_logging_factory f;
 		uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
   		uvm_factory factory=cs.get_factory();
@@ -172,7 +173,7 @@ module test;
 		// set the delegate
 		f.delegate=factory;
 		// enable new factory
-		uvm_coreservice_t::get().set_factory(f);
+		cs_.set_factory(f);
 
 		// do an override
 		a::type_id::set_type_override(b::get_type());

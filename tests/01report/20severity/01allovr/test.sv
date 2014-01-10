@@ -36,11 +36,12 @@ class my_catcher extends uvm_report_catcher;
    int sev[uvm_severity];
    uvm_severity s;
 
-   virtual function action_e catch(); 
+   virtual function action_e catch(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+ 
       s = uvm_severity'(get_severity());
 
       // Ignore messages from root component
-      if(get_client() == uvm_coreservice_t::get().get_root())
+      if(get_client() == cs_.get_root())
         return THROW;
  
       sev[s] ++;

@@ -215,8 +215,8 @@ class dut extends uvm_reg_frontdoor;
 endclass
 
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    uvm_reg_data_t data;
    a_blk blk; 
    a_reg rg;
@@ -245,7 +245,7 @@ begin
    
    begin
       uvm_report_server svr;
-      svr = uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       svr.report_summarize();
 

@@ -53,12 +53,13 @@ class test extends uvm_test;
      super.new(name, parent);
   endfunction
 
-  virtual task run_phase(uvm_phase phase);
+  virtual task run_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
     int my_int;
     string my_string;
     my_class my_obj;
     uvm_report_message msg;
-    uvm_root root = uvm_coreservice_t::get().get_root();
+    uvm_root root = cs_.get_root();
 
     phase.raise_objection(this);
 
@@ -66,7 +67,7 @@ class test extends uvm_test;
     my_string = "foo";
     my_obj = new("my_obj");
 
-    $display("START OF GOLD FILE");
+    $display("GOLD-FILE-START");
 
     `uvm_info_context_begin("TEST", "Testing message...", UVM_LOW, root)
     `uvm_message_add_tag("my_color", "red")
@@ -96,7 +97,7 @@ class test extends uvm_test;
     `uvm_message_add_object(my_obj)
     `uvm_fatal_context_end
 
-    $display("END OF GOLD FILE");
+    $display("GOLD-FILE-END");
 
     phase.drop_objection(this);
   endtask

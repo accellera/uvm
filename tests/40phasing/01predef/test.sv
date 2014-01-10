@@ -153,8 +153,8 @@ class test extends uvm_test;
    
 endclass
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    uvm_top.finish_on_completion = 0;
    `uvm_info("Test", "Phasing one component through default phases...", UVM_NONE);
    
@@ -176,7 +176,7 @@ begin
    
    begin
       uvm_report_server svr;
-      svr = uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       // Phasing will do this, unneeded
       //svr.report_summarize();

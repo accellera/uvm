@@ -91,8 +91,8 @@ endtask
 //           if not driven, retains value until next direct assignment
 
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    reg [7:0] dat;
    
    #50; // get between updates to q
@@ -109,7 +109,7 @@ begin
   
    begin
       uvm_report_server svr;
-      svr = uvm_pkg::uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       svr.report_summarize();
 

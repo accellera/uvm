@@ -143,8 +143,8 @@ function void check_name(string act, string exp);
 endfunction
 
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    blk2 blk;
   
    blk = blk2::type_id::create("blk");
@@ -161,7 +161,7 @@ begin
           
    begin
       uvm_report_server svr;
-      svr = uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       svr.report_summarize();
 

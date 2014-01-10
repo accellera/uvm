@@ -203,13 +203,14 @@ class phasing_test extends uvm_test;
 endclass
 
 
-initial begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
   uvm_top.finish_on_completion = 0;
   run_test();
   phasing_test::check_phasing();
   begin
     uvm_report_server svr;
-    svr = uvm_coreservice_t::get().get_report_server();
+    svr = cs_.get_report_server();
     svr.report_summarize();
     if (phasing_test::pass &&
         (svr.get_severity_count(UVM_FATAL) +

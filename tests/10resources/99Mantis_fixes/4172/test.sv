@@ -6,7 +6,8 @@ module test184;
         `uvm_new_func
         `uvm_component_utils(test)
 
-        task run;
+        task run; uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
             uvm_resource_pool rp = uvm_resource_pool::get();  
             uvm_pool#(string,uvm_resource#(int)) m;
             int f;
@@ -17,7 +18,7 @@ module test184;
             uvm_config_db#(int)::set(null,"env.driver", "value1", 8);
 
             assert(uvm_config_db#(int)::m_rsc.size() == 1); //same context used
-            m = uvm_config_db#(int)::m_rsc[uvm_coreservice_t::get().get_root()];
+            m = uvm_config_db#(int)::m_rsc[cs_.get_root()];
             
             assert(uvm_config_db#(int)::get(null,"env.driver", "value", f));
             assert(f==4);

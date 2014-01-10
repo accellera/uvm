@@ -128,9 +128,10 @@ class test extends uvm_component;
      void'(uvm_resource_db#(int)::write_by_type("a", a, this));
   endtask
 
-  function void report();
+  function void report(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
      uvm_report_server svr;
-     svr = uvm_coreservice_t::get().get_report_server();
+     svr = cs_.get_report_server();
 
      if (my_catcher::seen != 23) begin
         `uvm_error("TEST", $sformatf("Saw %0d messages instead of 23",

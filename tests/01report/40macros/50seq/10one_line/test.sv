@@ -57,16 +57,17 @@ module top();
     task pre_body();
       `uvm_info(get_type_name(), $sformatf("pre_body starting"), UVM_LOW)
     endtask
-    task body();
+    task body(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
       `uvm_info(get_type_name(), $sformatf("body starting"), UVM_LOW)
       #100;
       `uvm_do(req)
       `uvm_info(get_type_name(), $sformatf("item done, sequence is finishing"), UVM_LOW)
 
   begin
-    uvm_root top = uvm_coreservice_t::get().get_root();
+    uvm_root top = cs_.get_root();
 
-    $display("START OF GOLD FILE");
+    $display("GOLD-FILE-START");
 
     `uvm_info("I_TEST", "Testing info macro...", UVM_LOW)
     `uvm_warning("W_TEST", "Testing warning macro...")
@@ -78,7 +79,7 @@ module top();
     `uvm_error_context("E_TEST", "Testing error macro...", top)
     `uvm_fatal_context("F_TEST", "Testing fatal macro...", top)
 
-    $display("END OF GOLD FILE");
+    $display("GOLD-FILE-END");
   end
 
     endtask

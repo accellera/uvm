@@ -145,8 +145,8 @@ function void check(uvm_reg_data_t data, uvm_reg_data_t exp, string txt);
 endfunction
 
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    b1_typ model;
    uvm_status_e status;
    uvm_reg_data_t data;
@@ -205,7 +205,7 @@ begin
 
    begin
       uvm_report_server svr;
-      svr = uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       svr.report_summarize();
       

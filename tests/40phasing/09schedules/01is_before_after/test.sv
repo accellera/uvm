@@ -259,10 +259,11 @@ module test;
         `uvm_error("NOT ENOUGH PHASES", "Expected 21 phases to be started")
     endfunction
 
-    function void report_phase(uvm_phase phase);
+    function void report_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
       int failed;
       uvm_report_server svr;
-      svr = uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
       if (svr.get_id_count("EXP_AFTER")      > 0) failed = 1;
       if (svr.get_id_count("EXP_BEFORE")     > 0) failed = 1;
       if (svr.get_id_count("EXP_IS")         > 0) failed = 1;

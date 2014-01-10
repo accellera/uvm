@@ -218,18 +218,18 @@ endclass
 //----------------------------------------------------------------------
 module top;
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    uvm_root top;
    
-   top = uvm_coreservice_t::get().get_root();
+   top = cs_.get_root();
 
    top.finish_on_completion = 0;
    run_test("test");
 
    begin
       uvm_report_server svr;
-      svr = uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0)

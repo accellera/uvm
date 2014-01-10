@@ -27,7 +27,7 @@ uvm_report_object urm1 = new("urm1");
 
 initial
   begin
-    $display("START OF GOLD FILE");
+    $display("GOLD-FILE-START");
     `uvm_info("ID0", "Message 0", UVM_NONE)
     `uvm_info("ID1", "Message 1", UVM_NONE)
 
@@ -42,7 +42,7 @@ initial
     `uvm_info_context("IDA", "Message A", UVM_NONE, urm1)
 
     `uvm_info_context("IDB", "Message B", UVM_NONE, uvm_top)
-    $display("END OF GOLD FILE");
+    $display("GOLD-FILE-END");
   end
 
 endmodule

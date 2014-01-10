@@ -28,12 +28,12 @@ class obj extends uvm_object;
 endclass
 
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    uvm_report_server svr;
    obj o;
    
-   svr = uvm_coreservice_t::get().get_report_server();
+   svr = cs_.get_report_server();
 
    $write("Testing obsolete object constructor...\n");
    o = new();

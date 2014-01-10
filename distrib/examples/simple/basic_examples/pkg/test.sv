@@ -110,8 +110,9 @@ module test;
       return "lower";
     endfunction
   
-    static function bit register_me();
-      uvm_factory factory = uvm_coreservice_t::get().get_factory();
+    static function bit register_me(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
+      uvm_factory factory = cs_.get_factory();
       lower_wrapper w; w = new;
       factory.register(w);
       return 1;
@@ -135,8 +136,9 @@ module test;
       return "myunit";
     endfunction
 
-    static function bit register_me();
-      uvm_factory factory = uvm_coreservice_t::get().get_factory();
+    static function bit register_me(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
+      uvm_factory factory = cs_.get_factory();
       myunit_wrapper w; w = new;
       factory.register(w);
       return 1;
@@ -186,8 +188,9 @@ module test;
       return "myobject";
     endfunction
 
-    static function bit register_me();
-      uvm_factory factory = uvm_coreservice_t::get().get_factory();
+    static function bit register_me(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
+      uvm_factory factory = cs_.get_factory();
       mydata_wrapper w; w = new;
       factory.register(w);
       return 1;
@@ -199,9 +202,10 @@ module test;
 
   mydata bar = new;
 
-  initial begin
+  initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
     uvm_factory factory;
-    factory=uvm_coreservice_t::get().get_factory();
+    factory=cs_.get_factory();
     uvm_config_int::set(null, "mu.*", "data", 101);
     uvm_config_string::set(null, "mu.*", "str", "hi");
     uvm_config_int::set(null, "mu.l1", "data", 55);

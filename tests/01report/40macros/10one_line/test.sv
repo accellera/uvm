@@ -41,13 +41,14 @@ class test extends uvm_test;
      super.new(name, parent);
   endfunction
 
-  virtual task run_phase(uvm_phase phase);
+  virtual task run_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
     uvm_report_message msg;
-    uvm_root top = uvm_coreservice_t::get().get_root();
+    uvm_root top = cs_.get_root();
 
     phase.raise_objection(this);
 
-    $display("START OF GOLD FILE");
+    $display("GOLD-FILE-START");
 
     `uvm_info("I_TEST", "Testing info macro...", UVM_LOW)
     `uvm_warning("W_TEST", "Testing warning macro...")
@@ -59,7 +60,7 @@ class test extends uvm_test;
     `uvm_error_context("E_TEST", "Testing error macro...", top)
     `uvm_fatal_context("F_TEST", "Testing fatal macro...", top)
 
-    $display("END OF GOLD FILE");
+    $display("GOLD-FILE-END");
 
     phase.drop_objection(this);
   endtask

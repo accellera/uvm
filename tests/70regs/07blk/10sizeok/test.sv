@@ -34,14 +34,14 @@ class my_blk extends uvm_reg_block;
 endclass
 
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    my_blk blk;
    blk = new;
    
    begin
       uvm_report_server svr;
-      svr = uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       svr.report_summarize();
 

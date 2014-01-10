@@ -74,8 +74,8 @@ class blk2 extends uvm_reg_block;
 endclass
 
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    my_catcher c;
    c = new;
    uvm_report_cb::add(null, c);
@@ -113,7 +113,7 @@ begin
    
    begin
       uvm_report_server svr;
-      svr = uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       svr.report_summarize();
 

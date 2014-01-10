@@ -73,9 +73,10 @@ class test extends mem_base_test;
       seq.start(top_env.mem_agt.sequencer, , -1, 1);
   endtask // run
    
-      function void final_phase(uvm_phase phase);
+      function void final_phase(uvm_phase phase); uvm_pkg::uvm_coreservice_t cs_ = uvm_pkg::uvm_coreservice_t::get();
+
       uvm_pkg::uvm_report_server svr;
-      svr = uvm_pkg::uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0)

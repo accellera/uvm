@@ -57,14 +57,14 @@ class comp extends uvm_component;
 endclass
 
 
-initial
-begin
+initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+
    uvm_report_server svr;
    obj o;
    comp c;
    comp p;
    
-   svr = uvm_coreservice_t::get().get_report_server();
+   svr = cs_.get_report_server();
 
    $write("Testing raw object constructor...\n");
    obj::exp_name = "X";

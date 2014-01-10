@@ -121,9 +121,20 @@ sub ReadFileAsText {
 
 #print "alive";
 #print Dumper(@sources);
+my($vendorspecial)=();
 LOOP: foreach my $goldfile (@sources) {
   my $current = $goldfile;
   $current =~ s/\.au(\.$tool)?$//g;
+
+  # if its a vendor specific gold file then all vendors should have at least a goldfile
+  if(defined $1) {
+      foreach $v (keys %known_logs) {
+	  my @sources = bsd_glob("$dir/*.au.$v",GLOB_CSH);
+	  if(!scalar(@sources)) {
+	      push @diffs,"no vendor specific log avail but vendor $v has one";
+	  }
+      }
+  }
 
   if(!(-e $current)) {
     if(!(-e $known_logs{$tool})) {

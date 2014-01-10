@@ -22,11 +22,11 @@
 
 UVM_HOME	= ../../../../../distrib
 
-include $(UVM_HOME)/examples/Makefile.ius
-
 all: run
+
+include $(UVM_HOME)/examples/Makefile.ius
 
 run:
 	$(CLEAN)
-	$(IUS) zero.vhd test.sv -top top -top dut -access rw +UVM_TESTNAME=test
+	$(IUS) -access rw zero.vhd test.sv -top top -top dut +UVM_TESTNAME=test
 

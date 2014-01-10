@@ -46,8 +46,8 @@ module snps_env_top();
  dut dut(drv_if.wdata, drv_if.rdata, drv_if.addr, drv_if.direction, drv_if.enable, clk, rst);
  
    //Driver reset depending on rst_delay
-   initial
-      begin
+   initial begin uvm_pkg::uvm_coreservice_t cs_ = uvm_pkg::uvm_coreservice_t::get();
+
          clk = 0;
          rst = 0;
       #1 rst = 1;
@@ -59,7 +59,7 @@ module snps_env_top();
    end
 	 begin
       uvm_pkg::uvm_report_server svr;
-      svr = uvm_pkg::uvm_coreservice_t::get().get_report_server();
+      svr = cs_.get_report_server();
 
       svr.report_summarize();
 

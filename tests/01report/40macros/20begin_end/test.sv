@@ -65,7 +65,7 @@ class test extends uvm_test;
     my_string = "foo";
     my_obj = new("my_obj");
 
-    $display("START OF GOLD FILE");
+    $display("GOLD-FILE-START");
 
     `uvm_info_begin("TEST", "Testing message...", UVM_LOW)
     `uvm_message_add_tag("my_color", "red")
@@ -95,7 +95,7 @@ class test extends uvm_test;
     `uvm_message_add_object(my_obj)
     `uvm_fatal_end
 
-    $display("END OF GOLD FILE");
+    $display("GOLD-FILE-END");
 
     phase.drop_objection(this);
   endtask
