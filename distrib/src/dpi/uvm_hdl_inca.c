@@ -28,7 +28,10 @@
 #include <stdio.h>
 
 static void m_uvm_error(const char *ID, const char *msg, ...);
+static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag);
 static void m_uvm_get_object_handle(const char* path, vhpiHandleT *handle,int *language);
+static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag);
+static int uvm_hdl_max_width();
 
 // static print buffer
 static char m_uvm_temp_print_buffer[1024];
@@ -45,6 +48,154 @@ static void m_uvm_get_object_handle(const char* path, vhpiHandleT *handle,int *l
 	  *language = vhpi_get(vhpiLanguageP, *handle);
 }
 
+// returns 0 if the name is NOT a slice
+// returns 1 if the name is a slice
+static int is_valid_path_slice(const char* path) {
+	  char *path_ptr = (char *) path;
+	  int path_len;
+
+	  path_len = strlen(path);
+	  path_ptr = (char*)(path+path_len-1);
+
+	  if (*path_ptr != ']')
+	    return 0;
+
+	  while(path_ptr != path && *path_ptr != ':' && *path_ptr != '[')
+	    path_ptr--;
+
+	  if (path_ptr == path || *path_ptr != ':')
+	    return 0;
+
+	  while(path_ptr != path && *path_ptr != '[')
+	    path_ptr--;
+
+	  if (path_ptr == path || *path_ptr != '[')
+	    return 0;
+
+	  return 1;
+}
+
+static int uvm_hdl_set_vlog_partsel(char *path, p_vpi_vecval value, PLI_INT32 flag)
+{
+  char *path_ptr = path;
+  int path_len;
+  svLogicVecVal bit_value;
+
+  if(!is_valid_path_slice(path)) return 0;
+  path_len = strlen(path);
+  path_ptr = (char*)(path+path_len-1);
+
+  if (*path_ptr != ']')
+    return 0;
+
+  while(path_ptr != path && *path_ptr != ':' && *path_ptr != '[')
+    path_ptr--;
+
+  if (path_ptr == path || *path_ptr != ':')
+    return 0;
+
+  while(path_ptr != path && *path_ptr != '[')
+    path_ptr--;
+
+  if (path_ptr == path || *path_ptr != '[')
+    return 0;
+
+  int lhs, rhs, width, incr;
+
+  // extract range from path
+  if (sscanf(path_ptr,"[%u:%u]",&lhs, &rhs)) {
+    char index_str[20];
+    int i;
+    path_ptr++;
+    path_len = (path_len - (path_ptr - path));
+    incr = (lhs>rhs) ? 1 : -1;
+    width = (lhs>rhs) ? lhs-rhs+1 : rhs-lhs+1;
+
+    // perform set for each individual bit
+    for (i=0; i < width; i++) {
+      sprintf(index_str,"%u]",rhs);
+      strncpy(path_ptr,index_str,path_len);
+      svGetPartselLogic(&bit_value,value,i,1);
+      rhs += incr;
+      if (uvm_hdl_set_vlog_partsel(path,&bit_value,flag)==0) {
+    	  if(uvm_hdl_set_vlog(path,&bit_value,flag)==0) { return 0; };
+      }
+    }
+    return 1;
+  }
+}
+
+
+/*
+ * Given a path with part-select, break into individual bit accesses
+ * path = pointer to user string
+ * value = pointer to logic vector
+ * flag = deposit vs force/release options, etc
+ */
+static int uvm_hdl_get_vlog_partsel(char *path, p_vpi_vecval value, PLI_INT32 flag)
+{
+  char *path_ptr = path;
+  int path_len;
+  svLogicVecVal bit_value;
+
+  path_len = strlen(path);
+  path_ptr = (char*)(path+path_len-1);
+
+  if (*path_ptr != ']')
+    return 0;
+
+  while(path_ptr != path && *path_ptr != ':' && *path_ptr != '[')
+    path_ptr--;
+
+  if (path_ptr == path || *path_ptr != ':')
+    return 0;
+
+  while(path_ptr != path && *path_ptr != '[')
+    path_ptr--;
+
+  if (path_ptr == path || *path_ptr != '[')
+    return 0;
+
+  int lhs, rhs, width, incr;
+
+  // extract range from path
+  if (sscanf(path_ptr,"[%u:%u]",&lhs, &rhs)) {
+    char index_str[20];
+    int i;
+    path_ptr++;
+    path_len = (path_len - (path_ptr - path));
+    incr = (lhs>rhs) ? 1 : -1;
+    width = (lhs>rhs) ? lhs-rhs+1 : rhs-lhs+1;
+    bit_value.aval = 0;
+    bit_value.bval = 0;
+    for (i=0; i < width; i++) {
+      svLogic logic_bit;
+      sprintf(index_str,"%u]",rhs);
+      strncpy(path_ptr,index_str,path_len);
+
+      if(uvm_hdl_get_vlog_partsel(path,&bit_value,flag) == 0) {
+    	  if(uvm_hdl_get_vlog(path,&bit_value,flag)==0) { return 0; }
+      }
+
+      logic_bit = svGetBitselLogic(&bit_value,0);
+      svPutPartselLogic(value,bit_value,i,1);
+      rhs += incr;
+    }
+    return 1;
+  } else {
+	  return 0;
+  }
+}
+
+static void clear_value(p_vpi_vecval value) {
+    int chunks;
+    int maxsize = uvm_hdl_max_width();
+    chunks = (maxsize-1)/32 + 1;
+    for(int i=0;i<chunks-1; ++i) {
+      value[i].aval = 0;
+      value[i].bval = 0;
+    }
+}
 
 /*
  * This C code checks to see if there is PLI handle
@@ -201,7 +352,6 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
   int i, size, chunks;
   vpiHandle r;
   s_vpi_value value_s;
-
 
   r = vpi_handle_by_name(path, 0);
 
@@ -419,11 +569,17 @@ int uvm_hdl_read(char *path, p_vpi_vecval value)
 {
 		vhpiHandleT handle;
 		int language;
+
+		if(is_valid_path_slice(path)) {
+			clear_value(value);
+			return uvm_hdl_get_vlog_partsel(path, value, vpiNoDelay);
+		}
+
 		m_uvm_get_object_handle(path,&handle,&language);
 		switch(language) {
 			case vhpiVerilog:  return uvm_hdl_get_vlog(path, value, vpiNoDelay);
 			case vhpiVHDL: return uvm_hdl_get_vhdl(path, value);
-			default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path); return 0;
+			default:m_uvm_error("UVM/DPI/NOBJ1","name %s cannot be resolved to a hdl object (vlog,vhdl,vlog-slice)",path); return 0;
 		}
 }
 
@@ -435,11 +591,15 @@ int uvm_hdl_deposit(char *path, p_vpi_vecval value)
 {
 	vhpiHandleT handle;
 	int language;
+
+	if(is_valid_path_slice(path))
+		return uvm_hdl_set_vlog_partsel(path, value, vpiNoDelay);
+
 	m_uvm_get_object_handle(path,&handle,&language);
 	switch(language) {
 		case vhpiVerilog:  return uvm_hdl_set_vlog(path, value, vpiNoDelay);
 		case vhpiVHDL: return uvm_hdl_set_vhdl(path, value, vhpiDepositPropagate);
-		default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path); return 0;
+		default:m_uvm_error("UVM/DPI/NOBJ2","name %s cannot be resolved to a hdl object (vlog,vhdl,vlog-slice)",path); return 0;
 	}
 }
 
@@ -452,11 +612,15 @@ int uvm_hdl_force(char *path, p_vpi_vecval value)
 {
 	vhpiHandleT handle;
 	int language;
+
+	if(is_valid_path_slice(path))
+		return uvm_hdl_set_vlog_partsel(path, value, vpiForceFlag);
+
 	m_uvm_get_object_handle(path,&handle,&language);
 	switch(language) {
 		case vhpiVerilog:  return uvm_hdl_set_vlog(path, value, vpiForceFlag);
 		case vhpiVHDL: return uvm_hdl_set_vhdl(path, value, vhpiForcePropagate);
-		default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path); return 0;
+		default:m_uvm_error("UVM/DPI/NOBJ3","name %s cannot be resolved to a hdl object (vlog,vhdl,vlog-slice)",path); return 0;
 	}
 }
 
@@ -469,11 +633,18 @@ int uvm_hdl_release_and_read(char *path, p_vpi_vecval value)
 {
 	vhpiHandleT handle;
 	int language;
+
+	if(is_valid_path_slice(path)) {
+		uvm_hdl_set_vlog_partsel(path, value, vpiReleaseFlag);
+		clear_value(value);
+		return uvm_hdl_get_vlog_partsel(path, value, vpiNoDelay);
+	}
+
 	m_uvm_get_object_handle(path,&handle,&language);
 	switch(language) {
 		case vhpiVerilog:      uvm_hdl_set_vlog(path, value, vpiReleaseFlag); return uvm_hdl_get_vlog(path, value, vpiNoDelay);
 		case vhpiVHDL:    uvm_hdl_set_vhdl(path, value, vhpiReleaseKV); return uvm_hdl_get_vhdl(path, value);
-		default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path); return 0;
+		default:m_uvm_error("UVM/DPI/NOBJ4","name %s cannot be resolved to a hdl object (vlog,vhdl,vlog-slice)",path); return 0;
 	}
 }
 
@@ -486,10 +657,14 @@ int uvm_hdl_release(char *path)
 	s_vpi_vecval value;
 	vhpiHandleT handle;
 	int language;
+
+	if(is_valid_path_slice(path))
+		return uvm_hdl_set_vlog_partsel(path, &value, vpiReleaseFlag);
+
 	m_uvm_get_object_handle(path,&handle,&language);
 	switch(language) {
 		case vhpiVerilog:  return uvm_hdl_set_vlog(path, &value, vpiReleaseFlag);
 		case vhpiVHDL: return uvm_hdl_set_vhdl(path, &value, vhpiReleaseKV);
-		default: m_uvm_error("UVM/DPI/NOBJ","name %s cannot be resolved to a hdl object",path); return 0;
+		default:m_uvm_error("UVM/DPI/NOBJ5","name %s cannot be resolved to a hdl object (vlog,vhdl,vlog-slice)",path); return 0;
 	}
 }
