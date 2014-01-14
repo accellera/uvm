@@ -25,20 +25,20 @@ $prefix    =           $ARGV[2]; # "uvm-1.1d";
 $tag       =           "$branch\_RELEASE";
 $localBranch     =     "$branch._local";
 #my $debug  =           1; # Do everything except push if TRUE
-my $debug  =           1; # Do everything except push if TRUE
+my $debug  =           0; # Do everything except push if TRUE
 #die "Please set params above\n";
 
 ##################################
 
-my $tar = "${prefix}_$rc.tar";
+my $tar = "${prefix}_$rc.tar.gz";
 
 die "uvm already exists" if (-e "uvm");
 die "$tar already exists" if -e $tar;
 
-my $cmd = "git clone git://git.code.sf.net/p/uvm/code";
+my $cmd = "git clone git://git.code.sf.net/p/uvm/code uvm";
 system ("echo $cmd"); system ("$cmd");
 
-chdir "uvm" or die "Failed to cd to uvm\n";
+chdir "uvm" or die "Failed to cd uvm\n";
 
 $cmd = "git checkout -b $localBranch origin/$branch";
 system ("echo $cmd"); system ("$cmd");
@@ -77,10 +77,10 @@ system ("echo $cmd"); system ("$cmd") unless $debug;
 $commit_id = `git describe`; chomp $commit_id;
 $cmd = "git tag -f -a -m \"Release candidate with tag $tag\" $tag\_".$rc."_WITHHTMLDOC $commit_id;";
 $cmd .= "git push --tags;";
-system ("echo $cmd"); system ("$cmd") unless $debug;
+system ("echo \"$cmd\""); system ("$cmd") unless $debug;
 
 # Generate the tarball
-$cmd = "git archive --prefix=$prefix/  $commit_id > ../../$tar";
+$cmd = "git archive --format tar.gz --prefix=$prefix/  $commit_id > ../../$tar";
 system ("echo $cmd"); system ("$cmd");
 
 print "Tarball ready: $tar\n";
