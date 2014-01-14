@@ -8,7 +8,7 @@ use strict;
 # to appropriate values, comment the die message below and go ahead.
 #
 #
-# ./tarBallGen.pl <branch> <RC-label> <directory-prefix>
+# ./tarBallGen.pl <branch> <RC-label> <directory-prefix> <sf-user>
 #
 # ./tarBallGen.pl UVM_1_1_d RC7 uvm-1.1d
 
@@ -17,13 +17,15 @@ my $rc = undef;
 my $prefix = undef;
 my $branch = undef;
 my $localBranch = undef;
-
+my $user = undef;
 
 $branch       =        $ARGV[0]; #"UVM_1_1_d";
 $rc        =           $ARGV[1]; #"RC7";
 $prefix    =           $ARGV[2]; # "uvm-1.1d";
 $tag       =           "$branch\_RELEASE";
 $localBranch     =     "$branch._local";
+$user = $ARGV[3];
+
 #my $debug  =           1; # Do everything except push if TRUE
 my $debug  =           0; # Do everything except push if TRUE
 #die "Please set params above\n";
@@ -35,7 +37,7 @@ my $tar = "${prefix}_$rc.tar.gz";
 die "uvm already exists" if (-e "uvm");
 die "$tar already exists" if -e $tar;
 
-my $cmd = "git clone git://git.code.sf.net/p/uvm/code uvm";
+my $cmd = "git clone ssh://${user}\@git.code.sf.net/p/uvm/code uvm";
 system ("echo $cmd"); system ("$cmd");
 
 chdir "uvm" or die "Failed to cd uvm\n";
