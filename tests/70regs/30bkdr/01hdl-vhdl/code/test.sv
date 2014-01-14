@@ -75,6 +75,8 @@ task automatic op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, 
 
 endtask
 
+// release semantic might differ per simulator
+// VCS:
 // Regs:
 // Deposit - overwrites value, DUT may change procedurally anytime
 // Force - forces value until released
@@ -85,7 +87,9 @@ endtask
 // Force - forces value until released
 // Release - if continuously driven, immediately gets driven value accordingly.
 //           if not driven, retains value until next direct assignment
-
+//
+// IUS release commands are done with vhpiReleaseKV which means the entity will preserve the current value UNTIL
+// a new data value is progated to the signal/wire. this can make a difference when an intermediate wire si being forced and released. 
 
 initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
@@ -137,7 +141,7 @@ initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
    
    op(RELEASE, "top.DUTINST.q",           , 'h3C, `__LINE__); // q released to value of d or to forced q ??
    
-   op(RELEASE, "top.DUTINST.w",           , 'h3C, `__LINE__); // w is re-evaluated, now q
+   op(RELEASE, "top.DUTINST.w",           , 'hA5, `__LINE__); // w is re-evaluated, now q
 
    op(READ,    "top.DUTINST.q",           , 'h3C, `__LINE__); // read q just for chuckles
 
