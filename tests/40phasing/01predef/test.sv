@@ -153,7 +153,7 @@ class test extends uvm_test;
    
 endclass
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    uvm_top.finish_on_completion = 0;
    `uvm_info("Test", "Phasing one component through default phases...", UVM_NONE);

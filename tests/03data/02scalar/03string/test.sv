@@ -118,8 +118,8 @@ module test;
     endtask
   endclass
 
-  initial begin
-    set_config_string("*", "cfg_field_set", "all set");
+  initial begin 
+    uvm_config_string::set(null, "*", "cfg_field_set", "all set");
     run_test();
   end
 

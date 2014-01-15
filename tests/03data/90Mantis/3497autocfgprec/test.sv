@@ -41,10 +41,10 @@ module top;
 
     `uvm_component_utils(test)
 
-    function void build_phase(uvm_phase phase);
+    function void build_phase(uvm_phase phase); 
       //set configuration prior to creating the environment
-      set_config_int("topenv.*.u1", "v", 30);
-      set_config_int("topenv.inst2.u1", "v", 10);
+      uvm_config_int::set(this, "topenv.*.u1", "v", 30);
+      uvm_config_int::set(this, "topenv.inst2.u1", "v", 10);
 
       topenv = new("topenv", this);
     endfunction

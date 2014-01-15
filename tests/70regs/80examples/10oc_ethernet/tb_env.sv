@@ -43,7 +43,7 @@ class oc_ethernet_env extends uvm_env;
       super.new(name, parent);
    endfunction: new
 
-   virtual function void build_phase(uvm_phase phase);
+   virtual function void build_phase(uvm_phase phase); 
 
       string hdl_root = "tb_top.dut";
 
@@ -57,7 +57,7 @@ class oc_ethernet_env extends uvm_env;
 
       model.set_hdl_path_root(hdl_root);
 
-      set_config_int("host.seqr", "count", 0);
+      uvm_config_int::set(this, "host.seqr", "count", 0);
 
    endfunction: build_phase
 
@@ -94,7 +94,7 @@ endclass: oc_ethernet_env
 
 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
 
    oc_ethernet_env env;

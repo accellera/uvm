@@ -213,4 +213,4 @@ module test;
   endclass
 
   initial run_test();
-endmodule
+endmodule // test

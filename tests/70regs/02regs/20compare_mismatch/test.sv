@@ -92,8 +92,8 @@ module testm();
     test_seq seq;
     uvc_pkg::uvc_env#(virtual uvc_intf) uenv;
   
-    virtual function void build();
-      set_config_int("uenv.uos", "count", 0);
+    virtual function void build(); 
+      uvm_config_int::set(this, "uenv.uos", "count", 0);
       super.build();
       uvm_reg::include_coverage("*", UVM_CVR_ALL);
       // Create register model

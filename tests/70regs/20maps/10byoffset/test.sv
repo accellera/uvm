@@ -106,7 +106,7 @@ class catcher extends uvm_report_catcher;
 endclass
 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    uvm_reg rg;
    dut blk; catcher ctchr;

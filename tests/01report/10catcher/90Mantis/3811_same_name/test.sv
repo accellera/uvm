@@ -32,7 +32,7 @@ class my_catcher extends uvm_report_catcher;
    endfunction
 endclass
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    my_catcher ct;
    uvm_root top;

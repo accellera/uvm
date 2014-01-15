@@ -32,9 +32,9 @@ module test;
     `uvm_new_func
     `uvm_component_utils(test)
 
-    function void build();
-      set_config_int("agent1","is_active",UVM_ACTIVE);
-      set_config_int("agent2","is_active",UVM_PASSIVE);
+    function void build(); 
+      uvm_config_int::set(this, "agent1","is_active",UVM_ACTIVE);
+      uvm_config_int::set(this, "agent2","is_active",UVM_PASSIVE);
       agent1 = new("agent1", this);
       agent2 = new("agent2", this);
     endfunction

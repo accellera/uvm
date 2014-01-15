@@ -28,14 +28,14 @@ module test;
     `uvm_new_func
     `uvm_component_utils(mycomp)
 
-    function void build();
+    function void build(); 
       super.build();
-      void'(get_config_int("value", build_val));
+      void'(uvm_config_int::get(this, "","value", build_val));
     endfunction
-    task run_phase(uvm_phase phase);
+    task run_phase(uvm_phase phase); 
       phase.raise_objection(this);
       #2;
-      void'(get_config_int("value", run_val));
+      void'(uvm_config_int::get(this, "","value", run_val));
       phase.drop_objection(this);
     endtask
   endclass
@@ -47,17 +47,17 @@ module test;
     endfunction
     `uvm_component_utils(test)
 
-    function void build();
+    function void build(); 
       super.build();
-      set_config_int("mc", "value", 22);
-      set_config_int("mc", "value", 33);
+      uvm_config_int::set(this, "mc", "value", 22);
+      uvm_config_int::set(this, "mc", "value", 33);
       mc = new("mc", this);
     endfunction
 
-    task run_phase(uvm_phase phase);
+    task run_phase(uvm_phase phase); 
       bit failed = 0;
       phase.raise_objection(this);
-      set_config_int("mc", "value", 44);
+      uvm_config_int::set(this, "mc", "value", 44);
       #10;
       if(mc.build_val != 33) begin 
         $display("*** UVM TEST FAILED, expected mc.build_val=33 but got %0d ***", mc.build_val);

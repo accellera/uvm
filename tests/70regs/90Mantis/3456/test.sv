@@ -112,7 +112,7 @@ function void check_address(uvm_reg rg,
    end
 endfunction
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    blk2 blk;
    blk = blk2::type_id::create("blk");

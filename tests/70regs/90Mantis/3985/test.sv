@@ -47,7 +47,7 @@ class blk extends uvm_reg_block;
 endclass
 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    blk b;
    b = new;

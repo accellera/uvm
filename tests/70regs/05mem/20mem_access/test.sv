@@ -112,7 +112,7 @@ module tbtest();
   `uvm_blocking_put_imp_decl(_reg)
   
   class user_sequencer extends uvm_sequencer#(user_transaction);
-    `uvm_sequencer_utils(user_sequencer)
+    `uvm_component_utils(user_sequencer)
     function new (string name, uvm_component parent);
       super.new(name, parent);
     endfunction : new

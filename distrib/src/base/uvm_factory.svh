@@ -1675,7 +1675,6 @@ function void uvm_default_factory::print (int all_types=1);
   if (all_types >= 1 && m_type_names.first(key)) begin
     bit banner;
     qs.push_back($sformatf("\nAll types registered with the factory: %0d total\n",m_types.num()));
-    qs.push_back("(types without type names will not be printed)\n");
     do begin
       // filter out uvm_ classes (if all_types<2) and non-types (lookup strings)
       if (!(all_types < 2 && uvm_is_match("uvm_*",

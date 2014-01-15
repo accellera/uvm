@@ -145,7 +145,7 @@ function void check(uvm_reg_data_t data, uvm_reg_data_t exp, string txt);
 endfunction
 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    b1_typ model;
    uvm_status_e status;

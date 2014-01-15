@@ -44,7 +44,7 @@ class test extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  task run();
+  task run();  
     uvm_resource_pool rp = uvm_resource_pool::get();
     uvm_bitstream_t val;
     uvm_resource_types::rsrc_q_t rq;
@@ -67,8 +67,8 @@ class test extends uvm_component;
       end
 
       // Do a set_config
-      set_config_int("", "val", 25*i);
-      void'(get_config_int("val", val));
+      uvm_config_int::set(this, "", "val", 25*i);
+      void'(uvm_config_int::get(this, "","val", val));
       if(val != 25*i) begin
         $display("Got wrong config value: expected %0d, got %0d", 25*i, val);
         failed=1;

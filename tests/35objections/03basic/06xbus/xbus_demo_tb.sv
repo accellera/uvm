@@ -49,10 +49,10 @@ class xbus_demo_tb extends uvm_env;
   endfunction : new
 
   // build
-  virtual function void build();
+  virtual function void build(); 
     super.build();
-    set_config_int("xbus0", "num_masters", 1);
-    set_config_int("xbus0", "num_slaves", 1);
+    uvm_config_int::set(this, "xbus0", "num_masters", 1);
+    uvm_config_int::set(this, "xbus0", "num_slaves", 1);
     xbus0 = xbus_env::type_id::create("xbus0", this);
     scoreboard0 = xbus_demo_scoreboard::type_id::create("scoreboard0", this);
   endfunction : build

@@ -27,8 +27,8 @@ module top;
 
     `uvm_component_utils(test)
 
-    function void build;
-      set_config_int("*","value",20);
+    function void build; 
+      uvm_config_int::set(this, "*","value",20);
       l = new("l",this);
       l.build();
     endfunction

@@ -22,7 +22,7 @@ program top;
 
 import uvm_pkg::*;
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    uvm_in_order_built_in_comparator#(int) sb;
    uvm_analysis_port#(int) exp,obs;

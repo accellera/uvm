@@ -80,11 +80,11 @@ class test extends uvm_test;
 
 endclass
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-
-     uvm_factory fact = cs_.get_factory();
-     my_server server = new();
-     static my_catcher catcher = new();
+initial begin 
+   automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+   automatic  uvm_factory fact = cs_.get_factory();
+     automatic my_server server = new();
+     automatic my_catcher catcher = new();
      uvm_report_cb::add(null, catcher);
      uvm_report_server::set_server(server);
      fact.set_type_override_by_type(uvm_report_handler::get_type(), my_handler::get_type());

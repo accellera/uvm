@@ -145,11 +145,11 @@ module test;
     endtask
   endclass
 
-  initial begin
+  initial begin 
     uvm_default_printer = uvm_default_line_printer;
-    set_config_int("*", "cfg_field_set", 3);
+    uvm_config_int::set(null, "*", "cfg_field_set", 3);
     for(int i=0;i<3;++i)
-      set_config_int("*", $sformatf("cfg_field_set[%0d]",i), 'haa+i);
+      uvm_config_int::set(null, "*", $sformatf("cfg_field_set[%0d]",i), 'haa+i);
     run_test();
   end
 

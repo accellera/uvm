@@ -90,7 +90,7 @@ class test extends uvm_test;
    endfunction
 endclass
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    trunk t1;
    uvm_root top;

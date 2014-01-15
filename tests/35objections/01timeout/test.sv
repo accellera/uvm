@@ -29,11 +29,11 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    function void start_of_simulation();
+    function void start_of_simulation(); 
       // This will be the last setting, so it should be the
       // one used.
       `uvm_info("SETTO","Setting timeout to 33ms", UVM_NONE)
-      //uvm_top.set_config_int("", "timeout", 33ms);
+      //uvm_top.uvm_config_int::set(this, "", "timeout", 33ms);
       uvm_top.set_timeout(33ms);
       
     endfunction
@@ -44,9 +44,9 @@ module top;
       super.new(name,parent);
       lc = new("lc", this);
     endfunction
-    function void end_of_elaboration();
+    function void end_of_elaboration(); 
       `uvm_info("SETTO","Setting timeout to 88ns", UVM_NONE)
-      //uvm_top.set_config_int("", "timeout", 88ns);
+      //uvm_top.uvm_config_int::set(this, "", "timeout", 88ns);
       uvm_top.set_timeout(88ns);
     endfunction
   endclass
@@ -56,9 +56,9 @@ module top;
       super.new(name,parent);
       mc = new("mc", this);
     endfunction
-    function void build();
+    function void build(); 
       `uvm_info("SETTO","Setting timeout to 7s", UVM_NONE)
-      //uvm_top.set_config_int("", "timeout", 7s);
+      //uvm_top.uvm_config_int::set(this, "", "timeout", 7s);
       uvm_top.set_timeout(7s);
     endfunction
   endclass

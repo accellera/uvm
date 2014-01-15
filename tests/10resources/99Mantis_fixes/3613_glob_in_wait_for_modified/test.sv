@@ -50,10 +50,10 @@ class test extends uvm_component;
       `uvm_info("WildField1", $sformatf("c1.field1 changed to %0d",act),UVM_NONE)
   endtask
 
-  task run_phase(uvm_phase phase);
+  task run_phase(uvm_phase phase); 
     phase.raise_objection(this);
-      set_config_int("test.c1","field1",10);
-      set_config_int("test.c2","field1",20);
+      uvm_config_int::set(this, "test.c1","field1",10);
+      uvm_config_int::set(this, "test.c2","field1",20);
     begin
       fork
         wait_for_c1_field1_via_wildcard();

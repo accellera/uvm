@@ -28,9 +28,9 @@ module test;
     `uvm_new_func
     `uvm_component_utils(test)
 
-    task run;
-      uvm_top.set_config_int("*","achoo",10);
-      void'(get_config_int("achoo", achoo));
+    task run;  
+      uvm_config_int::set(uvm_top, "*","achoo",10);
+      void'(uvm_config_int::get(this, "","achoo", achoo));
       $display("achoo: %0d", achoo);
       if(achoo != 10) $display("*** UVM TEST FAILED ***");
       else $display("*** UVM TEST PASSED ***");
