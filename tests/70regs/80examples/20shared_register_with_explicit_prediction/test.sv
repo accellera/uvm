@@ -162,8 +162,8 @@ module testm();
     test_seq seq;
     uvm_reg_predictor#(transaction) predictor;
   
-    virtual function void build();
-      set_config_int("seqr", "count", 0);
+    virtual function void build(); 
+      uvm_config_int::set(this, "seqr", "count", 0);
       super.build();
       uvm_reg::include_coverage("*", UVM_CVR_ALL);
       // Create register model

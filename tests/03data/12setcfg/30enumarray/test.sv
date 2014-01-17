@@ -62,12 +62,12 @@ module top;
     endfunction
   endclass
 
-  initial begin
-    set_config_int("uvm_test_top", "sa_num[0]", ONE);
-    set_config_int("uvm_test_top", "da_num", 3);
-    set_config_int("uvm_test_top", "da_num[0]", TWO);
-    set_config_int("uvm_test_top", "q_num", 1);
-    set_config_int("uvm_test_top", "q_num[0]", THREE);
+  initial begin 
+    uvm_config_int::set(null, "uvm_test_top", "sa_num[0]", ONE);
+    uvm_config_int::set(null, "uvm_test_top", "da_num", 3);
+    uvm_config_int::set(null, "uvm_test_top", "da_num[0]", TWO);
+    uvm_config_int::set(null, "uvm_test_top", "q_num", 1);
+    uvm_config_int::set(null, "uvm_test_top", "q_num[0]", THREE);
     run_test();
   end
 endmodule

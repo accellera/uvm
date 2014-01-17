@@ -51,7 +51,7 @@ class mycomp extends uvm_component;
     join_none
   endfunction
 
-  task watch_field1;
+  task watch_field1; 
     int prev;
     int exp;
 
@@ -60,7 +60,7 @@ class mycomp extends uvm_component;
       cfg_settings++;
 
       prev = field1;
-      void'(get_config_int("field1",field1));
+      void'(uvm_config_int::get(this, "","field1",field1));
 
       if(!f1_init) begin
         f1_init = 1;
@@ -125,27 +125,27 @@ class test extends uvm_component;
   endfunction
 
   cfgobj obj;
-  function void build();
+  function void build(); 
     c1.f1_start = 10;
     c2.f1_start = 20;
 
     c1.f2_start = 30;
     c2.f2_start = 40;
 
-    set_config_int("c1","field1",10);
-    set_config_int("c2","field1",20);
+    uvm_config_int::set(this, "c1","field1",10);
+    uvm_config_int::set(this, "c2","field1",20);
     obj = new(30);
     uvm_config_db#(cfgobj)::set(this,"c1","field2",obj);
     obj = new(40);
     uvm_config_db#(cfgobj)::set(this,"c2","field2",obj);
   endfunction
 
-  task run_phase(uvm_phase phase);
+  task run_phase(uvm_phase phase); 
     phase.raise_objection(this);
     for(int i= 30; i<130; i+=20) begin
       #10;
-      set_config_int("c1","field1",i);
-      set_config_int("c2","field1",i+10);
+      uvm_config_int::set(this, "c1","field1",i);
+      uvm_config_int::set(this, "c2","field1",i+10);
       obj = new(i+20);
       uvm_config_db#(cfgobj)::set(this,"c1","field2",obj);
       obj = new(i+30);

@@ -42,9 +42,9 @@ class test extends uvm_env;
        super.new(name, parent);
     endfunction : new
    
-   virtual function void build();
+   virtual function void build(); 
       super.build();
-      set_config_string("sequencer0", "default_sequence", "root_seq");
+      uvm_config_string::set(this, "sequencer0", "default_sequence", "root_seq");
       sequencer0 = my_uvc_sequencer::type_id::create("sequencer0", this);
 
       // Instatiate the seqer stub and associate it with the env's actual sequencer.

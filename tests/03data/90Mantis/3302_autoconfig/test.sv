@@ -83,25 +83,25 @@ class test extends uvm_test;
     super.new(name,parent);
   endfunction
 
-  function void build();
+  function void build();  
     super.build();
     component = my_component::type_id::create("component",this);
     
     // Works
     object_field = 'hbe;
-    set_config_int("component","object.field",object_field);
+    uvm_config_int::set(this, "component","object.field",object_field);
 
     // Works
     object_msg = "goodbye";
-    set_config_string("component","object.msg",object_msg);
+    uvm_config_string::set(this, "component","object.msg",object_msg);
 
     // Didn't work
     array_field = 'h7a;
-    set_config_int("component","array[0].field",array_field);
+    uvm_config_int::set(this, "component","array[0].field",array_field);
 
     // Didn't work
     array_msg = "hello";
-    set_config_string("component","array[1].msg",array_msg);
+    uvm_config_string::set(this, "component","array[1].msg",array_msg);
 
   endfunction
 

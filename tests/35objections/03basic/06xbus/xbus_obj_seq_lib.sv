@@ -29,7 +29,7 @@ class obj_example_seq extends uvm_sequence #(xbus_transfer);
     super.new(name);
   endfunction : new
 
-  `uvm_sequence_utils(obj_example_seq, xbus_master_sequencer)
+  `uvm_object_utils(obj_example_seq)
 
   write_byte_seq write_byte_seq0;
   rand int unsigned count;

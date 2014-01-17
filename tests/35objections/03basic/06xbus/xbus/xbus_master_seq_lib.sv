@@ -70,7 +70,7 @@ class read_byte_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_byte_seq, xbus_master_sequencer)    
+  `uvm_object_utils(read_byte_seq)    
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
@@ -105,7 +105,7 @@ class read_half_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_half_word_seq, xbus_master_sequencer)
+  `uvm_object_utils(read_half_word_seq)
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
@@ -139,7 +139,7 @@ class read_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_word_seq, xbus_master_sequencer)
+  `uvm_object_utils(read_word_seq)
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
@@ -175,7 +175,7 @@ class read_double_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_double_word_seq, xbus_master_sequencer)    
+  `uvm_object_utils(read_double_word_seq)    
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
@@ -213,7 +213,7 @@ class write_byte_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_byte_seq, xbus_master_sequencer)
+  `uvm_object_utils(write_byte_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0;
@@ -249,7 +249,7 @@ class write_half_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_half_word_seq, xbus_master_sequencer)
+  `uvm_object_utils(write_half_word_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0;
@@ -285,7 +285,7 @@ class write_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_word_seq, xbus_master_sequencer)
+  `uvm_object_utils(write_word_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0; rand bit [7:0] data1;
@@ -325,7 +325,7 @@ class write_double_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_double_word_seq, xbus_master_sequencer)
+  `uvm_object_utils(write_double_word_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0; rand bit [7:0] data1;

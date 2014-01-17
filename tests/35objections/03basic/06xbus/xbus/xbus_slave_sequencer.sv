@@ -37,7 +37,7 @@ class xbus_slave_sequencer extends uvm_sequencer #(xbus_transfer);
   uvm_blocking_peek_port#(xbus_transfer) addr_ph_port;
 
   // Provide implementations of virtual methods such as get_type_name and create
-  `uvm_sequencer_utils(xbus_slave_sequencer)
+  `uvm_component_utils(xbus_slave_sequencer)
 
   // new - constructor
   function new (string name, uvm_component parent);

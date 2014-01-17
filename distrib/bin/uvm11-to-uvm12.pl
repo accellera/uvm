@@ -207,20 +207,39 @@ sub replace_trivial{
     $prefix="uvm_phase phase_=get_starting_phase();\n";
     $t = coreservice_repl_fct($t,'starting_phase\.','phase_.',1,$prefix);
 
-    # FIX Mantis 3472: set_config_*/get_config_* are deprecated TODO context outside of classes should be "null"
+    # FIX Mantis 3472: set_config_*/get_config_* are deprecated
+    # remove the clone=0 because that is the semantic now
+    $t =~ s/([sg])(et_config_object\([^\)]+),\s*0\s*\)/$1~XYZ~$2)/g if $opt_deprecated;
+    $t =~ s/([sg]et_config_object\(.*?)\n/$1 \/\/ $opt_marker semantic changed see mantis3472 (clone bit)\n/g if $opt_deprecated;
+    $t =~ s/([sg])~XYZ~/$1/g if $opt_deprecated;
+
     $prefix="";
     foreach $o ('int','string','object') {
 	$t = coreservice_repl_fct($t,"set_config_$o\\(","uvm_config_$o\::set(this, ",1,$prefix);
-	$t = coreservice_repl_initial($t,"set_config_$o\\(","uvm_config_$o\::set(, ",1,$prefix);
+	$t = coreservice_repl_initial($t,"set_config_$o\\(","uvm_config_$o\::set(null, ",1,$prefix);
 	$t = coreservice_repl_fct($t,"get_config_$o\\(","uvm_config_$o\::get(this, \"\",",1,$prefix);
 	$t = coreservice_repl_initial($t,"get_config_$o\\(","uvm_config_$o\::get(,\"\", ",1,$prefix);
       }
-
+    # NOTE set_config_object( ....., clone=1) => [sg]et_config_object() with the clone arg=1 (which is the default) doesnt map to the ::[sg]et
+    
     # DISABLED reverse chained function calls
 #    $prefix="uvm_coreservice_t cs_ = uvm_coreservice_t::get();\n";
 #    $t = coreservice_repl_fct($t,'uvm_coreservice_t::get\(\)\.','cs_.',1,$prefix);
 #    $t = coreservice_repl_initial($t,'uvm_coreservice_t::get\(\)\.','cs_.',1,$prefix);
 
+    # FIX uvm_sequencer_utils -> uvm_component_utils
+    $t =~ s/uvm_sequencer_utils/uvm_component_utils/g if $opt_deprecated;
+
+    # FIX uvm_sequence_utils -> uvm_object_utils
+    $t =~ s/uvm_sequence_utils(_begin)?\s*\((\s*\S+\s*)\,(\s*\S+\s*)\)/uvm_object_utils$1($2)/g if $opt_deprecated;
+
+    # FIX uvm_sequence_utils_end
+    $t =~ s/`uvm_sequence_utils_end/`uvm_object_utils_end/g if $opt_deprecated; 
+
+    # MARKER sequence association seqr-seq needs an update
+    $t =~ s/^\s*`uvm_update_sequence_lib_and_item/\/\/ $opt_marker association seqr-seq has changed `uvm_update_sequence_lib_and_item/g if $opt_deprecated; 
+
+    # MARKER report_summarize() -> report
     $t;
 }
 

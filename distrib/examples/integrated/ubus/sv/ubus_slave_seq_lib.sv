@@ -32,7 +32,7 @@ class simple_response_seq extends uvm_sequence #(ubus_transfer);
     super.new(name);
   endfunction
 
-//  `uvm_sequence_utils(simple_response_seq, ubus_slave_sequencer)
+//  `uvm_object_utils(simple_response_seq)
     
   `uvm_object_utils(simple_response_seq)
 
@@ -73,7 +73,7 @@ class slave_memory_seq extends uvm_sequence #(ubus_transfer);
     super.new(name);
   endfunction
 
-//  `uvm_sequence_utils(slave_memory_seq, ubus_slave_sequencer)
+//  `uvm_object_utils(slave_memory_seq)
 
   `uvm_object_utils(slave_memory_seq)
   `uvm_declare_p_sequencer(ubus_slave_sequencer)

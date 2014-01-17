@@ -5,7 +5,7 @@ module top;
   typedef class seqr;
   class seq extends uvm_sequence;
     static int exec=0;
-    `uvm_sequence_utils(seq,seqr)
+    `uvm_object_utils(seq)
     task body;
       `uvm_info("SEQ", "Starting seq...", UVM_NONE)
       exec++;
@@ -24,7 +24,7 @@ module top;
       `uvm_update_sequence_lib
     endfunction
 
-    `uvm_sequencer_utils(seqr)
+    `uvm_component_utils(seqr)
   endclass
 
   class test extends uvm_component;
@@ -36,9 +36,9 @@ module top;
 
     `uvm_component_utils(test)
 
-    function void build;
+    function void build; 
 //      uvm_config_db #(uvm_object_wrapper)::set(this,"s1.run_phase","default_sequence",seq::type_id::get());
-      void'(set_config_string("s1","default_sequence","seq"));
+      void'(uvm_config_string::set(this, "s1","default_sequence","seq"));
 
       s1 = new("s1",this);
       s1.build();

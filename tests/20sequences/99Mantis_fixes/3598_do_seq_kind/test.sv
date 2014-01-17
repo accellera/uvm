@@ -34,7 +34,7 @@ module top();
   endclass
 
   class my_sequencer extends uvm_sequencer #(my_item);
-    `uvm_sequencer_utils(my_sequencer)
+    `uvm_component_utils(my_sequencer)
 
     function new(string name, uvm_component parent);
       super.new(name, parent);
@@ -43,7 +43,7 @@ module top();
   endclass
 
   class my_sub_sequence extends uvm_sequence #(my_item);
-    `uvm_sequence_utils(my_sub_sequence,my_sequencer)
+    `uvm_object_utils(my_sub_sequence)
     function new(string name = "my_sub_sequence");
       super.new(name);
     endfunction
@@ -56,7 +56,7 @@ module top();
   endclass  
 
   class my_sequence extends uvm_sequence #(my_item);
-    `uvm_sequence_utils(my_sequence,my_sequencer)
+    `uvm_object_utils(my_sequence)
     function new(string name = "my_sequence");
       super.new(name);
     endfunction
@@ -118,10 +118,10 @@ module top();
       super.new(name, parent);
     endfunction
 
-    function void build();
+    function void build(); 
       super.build();
       ma0 = my_agent::type_id::create("ma0", this);
-      set_config_string("ma0.ms","default_sequence","my_sequence");
+      uvm_config_string::set(this, "ma0.ms","default_sequence","my_sequence");
     endfunction
 
     function void report();

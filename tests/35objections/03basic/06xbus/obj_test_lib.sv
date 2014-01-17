@@ -33,10 +33,10 @@ class xbus_demo_base_test extends uvm_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build();
+  virtual function void build(); 
     super.build();
     // Enable transaction recording for everything
-    set_config_int("*", "recording_detail", UVM_FULL);
+    uvm_config_int::set(this, "*", "recording_detail", UVM_FULL);
     // Create the tb
     xbus_demo_tb0 = xbus_demo_tb::type_id::create("xbus_demo_tb0", this);
     // Create a specific depth printer for printing the created topology
@@ -63,11 +63,11 @@ class test extends xbus_demo_base_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build();
+  virtual function void build(); 
     // Set the default sequence for the master and slave
-    set_config_string("xbus_demo_tb0.xbus0.masters[0].sequencer",
+    uvm_config_string::set(this, "xbus_demo_tb0.xbus0.masters[0].sequencer",
       "default_sequence", "obj_example_seq");
-    set_config_string("xbus_demo_tb0.xbus0.slaves[0].sequencer", 
+    uvm_config_string::set(this, "xbus_demo_tb0.xbus0.slaves[0].sequencer", 
       "default_sequence", "slave_memory_seq");
     // Create the tb
     super.build();

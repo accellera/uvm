@@ -73,7 +73,7 @@ class basic_sequencer extends uvm_sequencer #(basic_item);
     `uvm_update_sequence_lib_and_item(basic_item)
     count = 0;
   endfunction : new
-  `uvm_sequencer_utils(basic_sequencer)
+  `uvm_component_utils(basic_sequencer)
 endclass : basic_sequencer
 
 class basic_default_seq extends uvm_sequence #(basic_item);
@@ -141,9 +141,9 @@ class test extends uvm_test;
     $display( "\nTest %s created.\n\n", n );
   endfunction : new
 
-  function void build();
+  function void build(); 
     super.build();
-//    set_config_string("sequencer", "default_sequence", "basic_default_seq");
+//    uvm_config_string::set(this, "sequencer", "default_sequence", "basic_default_seq");
 
     sequencer = basic_sequencer::type_id::create("sequencer", this);
     driver    = basic_driver::type_id::create("driver", this);

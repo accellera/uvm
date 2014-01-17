@@ -34,7 +34,7 @@ class simple_response_seq extends uvm_sequence #(xbus_transfer);
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(simple_response_seq, xbus_slave_sequencer)
+  `uvm_object_utils(simple_response_seq)
 
   xbus_transfer util_transfer;
 
@@ -71,7 +71,7 @@ class slave_memory_seq extends uvm_sequence #(xbus_transfer);
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(slave_memory_seq, xbus_slave_sequencer)
+  `uvm_object_utils(slave_memory_seq)
 
   xbus_transfer util_transfer;
 

@@ -39,11 +39,11 @@ class leaf extends uvm_component;
     super.new(name, parent);
   endfunction
   
-  function void build();
+  function void build(); 
     // set A to a pseudo-default value.  If get_config_int fails then A
     // will have the value of 39
     A = 39;
-    if(!get_config_int("A", A)) begin
+    if(!uvm_config_int::get(this, "","A", A)) begin
       `uvm_error("TESTERROR", "Did not get setting for A");
       test_error = 1;
     end
@@ -88,15 +88,15 @@ class component extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build();
+  function void build();  
     l1 = new("leaf1", this);
     l2 = new("leaf2", this);
 
     // This is the default value of A for all the leaves (*.leaf*)
-    set_config_int("*", "A", 11);
+    uvm_config_int::set(this, "*", "A", 11);
 
     // What's the value in THIS component?
-    void'(get_config_int("A", A));
+    void'(uvm_config_int::get(this, "","A", A));
   endfunction
 
   function void check();
@@ -131,18 +131,18 @@ class env extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build();
+  function void build(); 
 
     c1 = new("c1", this);
     c2 = new("c2", this);
     c23 = new("c23", this);
 
     // set resource named A in component c1
-    set_config_int("c1", "A", 5);
+    uvm_config_int::set(this, "c1", "A", 5);
 
     // set resource named A in any component whose name has a prefix of
     // c2.  This overrides the default set in the child of env
-    set_config_int("c2*", "A", 7);
+    uvm_config_int::set(this, "c2*", "A", 7);
   endfunction
 
 endclass

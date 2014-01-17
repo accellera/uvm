@@ -43,7 +43,7 @@ endclass : packet
 
    
 class my_uvc_sequencer extends uvm_sequencer #(packet);
-    `uvm_sequencer_utils(my_uvc_sequencer)
+    `uvm_component_utils(my_uvc_sequencer)
 
     function new (string name, uvm_component parent);
       super.new(name, parent);
@@ -149,10 +149,10 @@ class short_packet_seq extends uvm_sequence;
 	super.new(name);
      endfunction // new
 
-    `uvm_sequence_utils_begin(short_packet_seq, my_uvc_sequencer)
+    `uvm_object_utils_begin(short_packet_seq)
         `uvm_field_int(data_in, UVM_ALL_ON)
 	`uvm_field_int(data_out, UVM_ALL_ON)
-    `uvm_sequence_utils_end
+    `uvm_object_utils_end
       
     virtual task body();
        #10;
@@ -188,10 +188,10 @@ class long_packet_seq extends uvm_sequence;
         //super.enable_stop_interrupt = 1;
      endfunction // new
 
-    `uvm_sequence_utils_begin(long_packet_seq, my_uvc_sequencer)
+    `uvm_object_utils_begin(long_packet_seq)
         `uvm_field_int(data_in, UVM_ALL_ON)
 	`uvm_field_int(data_out, UVM_ALL_ON)
-    `uvm_sequence_utils_end
+    `uvm_object_utils_end
       
     virtual task body();
        #10;
@@ -228,7 +228,7 @@ class root_seq extends uvm_sequence #(packet);
 	super.new(name);
      endfunction 
      
-    `uvm_sequence_utils(root_seq, my_uvc_sequencer)
+    `uvm_object_utils(root_seq)
       
    virtual task body();
       fork

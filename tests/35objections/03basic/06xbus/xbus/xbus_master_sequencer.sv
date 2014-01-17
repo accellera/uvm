@@ -36,9 +36,9 @@ class xbus_master_sequencer extends uvm_sequencer #(xbus_transfer);
   // Master Id
   protected int master_id;
 
-  `uvm_sequencer_utils_begin(xbus_master_sequencer)
+  `uvm_component_utils_begin(xbus_master_sequencer)
     `uvm_field_int(master_id, UVM_ALL_ON)
-  `uvm_sequencer_utils_end
+  `uvm_component_utils_end
 
   // new - constructor
   function new (string name, uvm_component parent);

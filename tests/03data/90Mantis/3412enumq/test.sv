@@ -82,11 +82,11 @@ module test;
     endtask
   endclass
 
-  initial begin
-    set_config_int("*", "cfg_field_enum[2]", FOUR);
-    set_config_int("*", "cfg_field_int[2]", 55);
-    set_config_string("*", "cfg_field_string[2]", "howdy");
-    set_config_object("*", "cfg_field_obj[2]", theobj, 0);
+  initial begin   
+    uvm_config_int::set(null, "*", "cfg_field_enum[2]", FOUR);
+    uvm_config_int::set(null, "*", "cfg_field_int[2]", 55);
+    uvm_config_string::set(null, "*", "cfg_field_string[2]", "howdy");
+    uvm_config_object::set(null, "*", "cfg_field_obj[2]", theobj);
     run_test();
   end
 
