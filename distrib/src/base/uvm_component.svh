@@ -3555,7 +3555,8 @@ endfunction
 // --------------------------
 
 function void uvm_component::m_apply_verbosity_settings(uvm_phase phase);
-  foreach(m_verbosity_settings[i]) begin
+  int i;
+  while (i < m_verbosity_settings.size()) begin
     if(phase.get_name() == m_verbosity_settings[i].phase) begin
       if( m_verbosity_settings[i].offset == 0 ) begin
           if(m_verbosity_settings[i].id == "_ALL_") 
@@ -3578,8 +3579,10 @@ function void uvm_component::m_apply_verbosity_settings(uvm_phase phase);
       end
       // Remove after use
       m_verbosity_settings.delete(i);
-    end
-  end
+      continue;
+    end // if (phase.get_name() == m_verbosity_settings[i].phase)
+    i++;
+  end // while (i < m_verbosity_settings.size())
 endfunction
 
 
