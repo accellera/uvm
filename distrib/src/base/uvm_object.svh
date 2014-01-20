@@ -1083,11 +1083,16 @@ function bit  uvm_object::compare (uvm_object rhs,
     end
   end
 
+  // Have we hit rhs before in this call chain?
   if(!done && comparer.compare_map.exists(rhs)) begin
-    if(comparer.compare_map[rhs] != this) begin
-      comparer.print_msg_object(this, comparer.compare_map[rhs]);
-    end 
-    done = 1;  //don't do any more work after this case, but do cleanup
+    // When we hit rhs before, was it for this lhs?
+    if (comparer.compare_map[rhs].exists(this)) begin
+       // We've already done this compare
+       done = 1;
+       // Set 'dc' to 1, as we're skipping the compare
+       // and any miscompare would have already been counted
+       dc = 1;
+    end
   end
 
   if(!done && comparer.check_type && (rhs != null) && (get_type_name() != rhs.get_type_name())) begin
@@ -1097,7 +1102,7 @@ function bit  uvm_object::compare (uvm_object rhs,
   end
 
   if(!done) begin
-    comparer.compare_map[rhs]= this;
+    comparer.compare_map[rhs][this] = 1;
     __m_uvm_field_automation(rhs, UVM_COMPARE, "");
     dc = do_compare(rhs, comparer);
   end

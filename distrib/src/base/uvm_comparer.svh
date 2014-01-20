@@ -415,7 +415,7 @@ class uvm_comparer;
 
  
   int depth;                      //current depth of objects
-  uvm_object compare_map[uvm_object];
+  bit compare_map[uvm_object][uvm_object];
   uvm_scope_stack scope    = new;
 
 endclass
