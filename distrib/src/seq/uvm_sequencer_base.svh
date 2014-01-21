@@ -1662,7 +1662,7 @@ endtask
 // get_seq_kind
 // ------------
 // Returns an int seq_kind correlating to the sequence of type type_name
-// in the sequencer���s sequence library. If the named sequence is not
+// in the sequencers sequence library. If the named sequence is not
 // registered a SEQNF warning is issued and -1 is returned.
 
 function int uvm_sequencer_base::get_seq_kind(string type_name);
