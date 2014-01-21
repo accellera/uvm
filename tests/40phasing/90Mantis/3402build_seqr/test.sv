@@ -7,9 +7,12 @@ module top;
     static int exec=0;
     `uvm_object_utils(seq)
     task body;
+	  uvm_phase phase = get_starting_phase();
+	  phase.raise_objection(this);
       `uvm_info("SEQ", "Starting seq...", UVM_NONE)
       exec++;
       `uvm_info("SEQ", "Ending seq...", UVM_NONE)
+  	  phase.drop_objection(this);     
     endtask 
 
   function new(string name="seq");
@@ -21,7 +24,6 @@ module top;
   class seqr extends uvm_sequencer;
     function new(string name,uvm_component parent);
       super.new(name,parent);
-      `uvm_update_sequence_lib
     endfunction
 
     `uvm_component_utils(seqr)
@@ -36,12 +38,16 @@ module top;
 
     `uvm_component_utils(test)
 
-    function void build; 
-//      uvm_config_db #(uvm_object_wrapper)::set(this,"s1.run_phase","default_sequence",seq::type_id::get());
+    function void build_phase(uvm_phase phase);
+      super.build_phase(phase);
       void'(uvm_config_string::set(this, "s1","default_sequence","seq"));
 
       s1 = new("s1",this);
       s1.build();
+
+       begin
+	  phase.print();
+       end
     endfunction
 
     function void report_phase(uvm_phase phase);

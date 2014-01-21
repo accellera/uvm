@@ -26,7 +26,6 @@ class wb_sequencer extends uvm_sequencer #(wb_cycle);
 
    function new(string name = "", uvm_component parent = null);
       super.new(name, parent);
-      `uvm_update_sequence_lib_and_item(wb_cycle)
    endfunction
 endclass
 

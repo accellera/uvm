@@ -157,7 +157,7 @@ $display("BYTES: %0d", bytes.size());
     cfg_container.object.color = BLUE; 
     cfg_container.object.i = 55; 
     cfg_container.object.str = "from cfg"; 
-    uvm_config_object::set(null, "*", "cfg_field_set_clone", cfg_container); // -*- semantic changed see mantis3472 (clone bit)
+    uvm_config_object::set(null, "*", "cfg_field_set_clone", cfg_container.clone()); 
     uvm_config_object::set(null, "*", "cfg_field_set_ref", cfg_container);
     run_test();
   end

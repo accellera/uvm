@@ -44,7 +44,7 @@ module test;
     function new(string name, uvm_component parent); 
       super.new(name, parent);
       uvm_report_cb::add(null,ctch);
-      uvm_config_object::set(this, "foo", "bar", null); // -*- semantic changed see mantis3472 (clone bit)
+      set_config_object("foo", "bar", null); 
     endfunction
     `uvm_component_utils(test)
     task run_phase(uvm_phase phase);

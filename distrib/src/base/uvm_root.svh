@@ -840,8 +840,9 @@ endfunction
 
 function void uvm_root::m_process_default_sequence(string cfg);
   string split_val[$];
-  uvm_root m_uvm_top = uvm_root::get();
-  uvm_factory f = uvm_factory::get();
+  uvm_coreservice_t cs = uvm_coreservice_t::get();
+  uvm_root m_uvm_top = cs.get_root();   
+  uvm_factory f = cs.get_factory();
   uvm_object_wrapper w;
 
   uvm_split_string(cfg, ",", split_val);

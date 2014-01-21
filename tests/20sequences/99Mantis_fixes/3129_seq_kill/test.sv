@@ -33,7 +33,7 @@ module top;
 
 class test extends uvm_env;
    my_uvc_sequencer sequencer0;
-   //ml_uvm_seq::ml_uvm_sequencer_stub sequencer_stub;
+
    my_uvc_driver driver0;
    
    `uvm_component_utils(test)
@@ -47,10 +47,6 @@ class test extends uvm_env;
       uvm_config_string::set(this, "sequencer0", "default_sequence", "root_seq");
       sequencer0 = my_uvc_sequencer::type_id::create("sequencer0", this);
 
-      // Instatiate the seqer stub and associate it with the env's actual sequencer.
-      //sequencer_stub = ml_uvm_seq::ml_uvm_sequencer_stub::type_id::create("sequencer_stub", this);
-      //sequencer_stub.set_sv_seqr(sequencer0);
-      
        driver0 = my_uvc_driver::type_id::create("driver0", this);
    endfunction 
    

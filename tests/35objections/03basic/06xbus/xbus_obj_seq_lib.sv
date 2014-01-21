@@ -34,14 +34,14 @@ class obj_example_seq extends uvm_sequence #(xbus_transfer);
   write_byte_seq write_byte_seq0;
   rand int unsigned count;
     constraint count_ct { count inside {[5:10]}; }
-
+  `uvm_declare_p_sequencer(xbus_master_sequencer)
   virtual task pre_body();
     p_sequencer.uvm_report_info(get_type_name(),
       $sformatf("%s pre_body() raising an uvm_test_done objection", 
       get_sequence_path()), UVM_MEDIUM);
     uvm_test_done.raise_objection(this);
   endtask
-  
+
   virtual task body();
     p_sequencer.uvm_report_info(get_type_name(),
       $sformatf("%s body() starting with count = %0d", 

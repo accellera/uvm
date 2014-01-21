@@ -95,7 +95,7 @@ class test extends uvm_test;
       oc0 = new("oc0", this);
       $cast(oc1, oc0.clone());
       co0.config_comp = c1;
-      uvm_config_object::set(this, "*", "co", co0, 1); // -*- semantic changed see mantis3472 (clone bit)
+      uvm_config_object::set(this, "*", "co", co0.clone()); 
    endfunction
 
    function void report_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();

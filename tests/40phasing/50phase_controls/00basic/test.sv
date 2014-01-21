@@ -70,7 +70,6 @@ endclass : basic_driver
 class basic_sequencer extends uvm_sequencer #(basic_item);
   function new (string name, uvm_component parent);
     super.new(name, parent);
-    `uvm_update_sequence_lib_and_item(basic_item)
     count = 0;
   endfunction : new
   `uvm_component_utils(basic_sequencer)

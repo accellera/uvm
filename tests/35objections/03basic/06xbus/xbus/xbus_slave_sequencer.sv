@@ -42,7 +42,6 @@ class xbus_slave_sequencer extends uvm_sequencer #(xbus_transfer);
   // new - constructor
   function new (string name, uvm_component parent);
     super.new(name, parent);
-    `uvm_update_sequence_lib_and_item(xbus_transfer)
     addr_ph_port = new("addr_ph_port", this);
   endfunction : new
 

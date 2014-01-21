@@ -118,11 +118,11 @@ cfg_field_set_clone.print();
     cfg_container.object[0].i = 55; 
     cfg_container.object[0].str = "from cfg"; 
     uvm_config_int::set(null, "*", "cfg_field_set_clone.object", 1);
-    uvm_config_object::set(null, "*", "cfg_field_set_clone.object[0]", cfg_container.object[0]); // -*- semantic changed see mantis3472 (clone bit)
+    uvm_config_object::set(null, "*", "cfg_field_set_clone.object[0]", cfg_container.object[0].clone()); 
     uvm_config_int::set(null, "*", "cfg_field_set_ref.object", 1);
     uvm_config_object::set(null, "*", "cfg_field_set_ref.object[0]", cfg_container.object[0]);
     uvm_config_int::set(null, "*", "cfg_field_set_sub.object", 1);
-    uvm_config_object::set(null, "*", "cfg_field_set_sub.object[0]", cfg_container.object[0]); // -*- semantic changed see mantis3472 (clone bit)
+    uvm_config_object::set(null, "*", "cfg_field_set_sub.object[0]", cfg_container.object[0].clone());
     run_test();
   end
 
