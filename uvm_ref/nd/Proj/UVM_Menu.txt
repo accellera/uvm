@@ -214,6 +214,7 @@ Group: Macros  {
    File: Callbacks                    (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_callback_defines.svh)
    File: TLM                          (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_tlm_defines.svh)
    File: Registers                    (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_reg_defines.svh)
+   File: Version Macros               (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_version_defines.svh)
    }  # Group: Macros
 
 Group: Policies  {

@@ -69,6 +69,27 @@ endclass
 //
 
 virtual class uvm_factory;
+
+  // Group: Retrieving the factory
+
+ 
+  // Function: get
+  // Static accessor for <uvm_factory>
+  //
+  // The static accessor is provided as a convenience wrapper
+  // around retrieving the factory via the <uvm_coreservice_t::get_factory>
+  // method.
+  //
+  // | // Using the uvm_coreservice_t:
+  // | uvm_coreservice_t cs;
+  // | uvm_factory f;
+  // | cs = uvm_coreservice_t::get();
+  // | f = cs.get_factory();
+  //
+  // | // Not using the uvm_coreservice_t:
+  // | uvm_factory f;
+  // | f = uvm_factory::get();
+  //         
   static function uvm_factory get();
 	  	uvm_coreservice_t s = uvm_coreservice_t::get();
 	  	return s.get_factory();
