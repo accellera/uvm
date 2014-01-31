@@ -61,7 +61,8 @@ default_sequence (+uvm_set_default_sequence)
 
 Mantis 3783: all messaging is now routed via uvm_report_server
 
-Mantis 3887: allows the factory to be replaced in order to trace create or override calls as well as to identify unused overrides
+(*) Mantis 3887: allows the factory to be replaced in order to trace create or override calls as well as to identify unused 
+overrides. Code referencing uvm_pkg::factory needs to be upgraded to retrieve the factory via uvm_factory::get 
 
 (+) Mantis 3893: allows for the hierarchical propagation of
 uvm_objections to be disabled via set_propagate_mode.
