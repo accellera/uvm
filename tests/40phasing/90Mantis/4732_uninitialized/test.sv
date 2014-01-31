@@ -40,7 +40,7 @@ class my_phase_cb extends uvm_phase_cb;
    bit seen[uvm_phase_state];
    bit fail;
    
-   function new(name="unnamed-my_phase_cb");
+   function new(string name="unnamed-my_phase_cb");
       super.new(name);
       states[UVM_PHASE_DORMANT] = UVM_PHASE_UNINITIALIZED;
       states[UVM_PHASE_SCHEDULED] = UVM_PHASE_DORMANT;

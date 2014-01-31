@@ -83,9 +83,10 @@ class test extends uvm_test;
     uvm_config_db#(logic [3:0])::set(this, "*", "C", 'hCC); // Should not report message
   endfunction
   
-  function void report_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-
+  function void report_phase(uvm_phase phase);
+    uvm_coreservice_t cs_;
     uvm_report_server svr;
+    cs_ = uvm_coreservice_t::get();
     svr = cs_.get_report_server();
 
     if ((svr.get_severity_count(UVM_FATAL) +

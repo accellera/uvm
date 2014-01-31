@@ -120,7 +120,9 @@ module test289;
 			super.new(name, parent);
 		endfunction     
 
-		function void report_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+		function void report_phase(uvm_phase phase);
+			uvm_coreservice_t cs_;
+			cs_ = uvm_coreservice_t::get();
 
 			super.report_phase(phase);
 			begin

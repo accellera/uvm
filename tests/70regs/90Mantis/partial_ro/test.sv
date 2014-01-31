@@ -168,7 +168,9 @@ class test extends uvm_test;
      phase.drop_objection(this);
    endtask
 
-   function void final_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+   function void final_phase(uvm_phase phase);
+      uvm_coreservice_t cs_;
+      cs_ = uvm_coreservice_t::get();
 
       uvm_report_server svr;
       svr = cs_.get_report_server();

@@ -31,17 +31,24 @@ class test extends test_base;
   endfunction : new
   `uvm_component_utils(test)
 
-  function void check_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+  function void check_phase(uvm_phase phase);
+    uvm_coreservice_t cs_;
+    uvm_report_server svr;
+    int e_trs_c;
+    int trs_c;
+    int e_brs_c;
+    int brs_c;
+    cs_ = uvm_coreservice_t::get();
+    svr = cs_.get_report_server();
 
     //normal test
     //  [top_random_seq]    10
     //  [bot_random_seq]    24
-    uvm_report_server svr = cs_.get_report_server();
-    int e_trs_c=10;
-    int trs_c  = svr.get_id_count( "top_random_seq" );
+    e_trs_c=10;
+    trs_c  = svr.get_id_count( "top_random_seq" );
 
-    int e_brs_c=24;
-    int brs_c  = svr.get_id_count( "bot_random_seq" );
+    e_brs_c=24;
+    brs_c  = svr.get_id_count( "bot_random_seq" );
 
     if( trs_c != e_trs_c ) begin
       `uvm_error( "ID_COUNT", $sformatf( "Expected %1d [%s] message(s).  Got %1d",

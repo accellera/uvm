@@ -44,8 +44,9 @@ module tb_top();
     $display("UVM TEST PASSED");
 
    begin
+      uvm_coreservice_t cs;
       uvm_report_server svr;
-      uvm_coreservice_t cs = uvm_coreservice_t::get();
+      cs = uvm_coreservice_t::get();
       svr = cs.get_report_server();
 
       svr.report_summarize();

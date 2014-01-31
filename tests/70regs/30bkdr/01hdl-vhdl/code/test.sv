@@ -87,7 +87,8 @@ endtask
 //           if not driven, retains value until next direct assignment
 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    reg [7:0] dat;
    

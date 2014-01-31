@@ -163,7 +163,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
      
     //take care of random stability during allocation
     process p = process::self();
-    if(p) 
+    if(p != null) 
   		rstate = p.get_randstate();
   		
     top = uvm_root::get();
@@ -223,7 +223,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       end
     end
 
-    if(p)
+    if(p != null)
     	p.set_randstate(rstate);
 
     if(uvm_config_db_options::is_tracing())

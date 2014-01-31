@@ -70,7 +70,8 @@ endclass
 
 virtual class uvm_factory;
   static function uvm_factory get();
-	  	uvm_coreservice_t s = uvm_coreservice_t::get();
+	  	uvm_coreservice_t s;
+	  	s = uvm_coreservice_t::get();
 	  	return s.get_factory();
   endfunction	
   
@@ -1481,7 +1482,9 @@ function uvm_object_wrapper uvm_default_factory::find_override_by_type(uvm_objec
   uvm_object_wrapper override;
   uvm_factory_override lindex;
   
-  uvm_factory_queue_class qc = m_inst_override_queues[requested_type];
+  uvm_factory_queue_class qc;
+  qc = m_inst_override_queues.exists(requested_type) ?
+       m_inst_override_queues[requested_type] : null;
 
   foreach (m_override_info[index]) begin
     if ( //index != m_override_info.size()-1 &&
@@ -1607,7 +1610,8 @@ function void uvm_default_factory::print (int all_types=1);
       qs.push_back("No instance overrides are registered with this factory\n");
     else begin
       foreach(sorted_override_queues[j]) begin
-        uvm_factory_queue_class qc = sorted_override_queues[j];
+        uvm_factory_queue_class qc;
+        qc = sorted_override_queues[j];
         for (int i=0; i<qc.queue.size(); ++i) begin
           if (qc.queue[i].orig_type_name.len() > max1)
             max1=qc.queue[i].orig_type_name.len();
@@ -1630,7 +1634,8 @@ function void uvm_default_factory::print (int all_types=1);
                                  dash.substr(1,max3)));
 
       foreach(sorted_override_queues[j]) begin
-        uvm_factory_queue_class qc = sorted_override_queues[j];
+        uvm_factory_queue_class qc;
+        qc = sorted_override_queues[j];
         for (int i=0; i<qc.queue.size(); ++i) begin
           qs.push_back($sformatf("  %0s%0s  %0s%0s",qc.queue[i].orig_type_name,
                  space.substr(1,max1-qc.queue[i].orig_type_name.len()),

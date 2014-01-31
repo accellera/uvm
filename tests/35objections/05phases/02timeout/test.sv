@@ -138,7 +138,7 @@ module test;
   my_catcher ctchr = new;
 
   initial begin
-    uvm_root l_rt = uvm_root::get();
+    static uvm_root l_rt = uvm_root::get();
     uvm_report_cb::add(null,ctchr);
     l_rt.set_timeout(1000);
     run_test("test");

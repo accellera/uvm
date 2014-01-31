@@ -66,7 +66,7 @@ module test;
 					override_type_name,
 					full_inst_path)
 				,UVM_NONE)
-			delegate.set_type_override_by_name(original_type_name,override_type_name,full_inst_path);
+			delegate.set_inst_override_by_name(original_type_name,override_type_name,full_inst_path);
 		endfunction
 
 		virtual function void set_type_override_by_type (uvm_object_wrapper original_type,
@@ -95,11 +95,15 @@ module test;
 		endfunction 
 	endclass    
 
-	initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-
+	initial begin
+		uvm_coreservice_t cs_;
+		uvm_coreservice_t cs;
+		uvm_factory factory;
 		uvm_trace_override_factory f;
-  		uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
-  		uvm_factory factory=cs.get_factory();
+
+		cs = uvm_coreservice_t::get();
+		factory = cs.get_factory();
+		cs_ = uvm_coreservice_t::get();
   		
 		// create new factory
 		f = new();

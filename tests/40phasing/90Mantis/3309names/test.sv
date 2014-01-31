@@ -150,7 +150,8 @@ class test extends base;
    endfunction
 endclass
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    uvm_top.finish_on_completion = 0;
    `uvm_info("Test", "Phasing one component common phases...", UVM_NONE);

@@ -161,8 +161,9 @@ begin
 `endif
 
    begin
+      uvm_coreservice_t cs_;
       uvm_report_server svr;
-      uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+      cs_ = uvm_coreservice_t::get();
       svr = cs_.get_report_server();
 
       svr.report_summarize();

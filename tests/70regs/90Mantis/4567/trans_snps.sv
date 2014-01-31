@@ -23,6 +23,7 @@
 `ifndef TRANS_SNPS__SV
 `define TRANS_SNPS__SV
 
+`include "uvm_macros.svh"
 
 class trans_snps extends uvm_sequence_item;
 

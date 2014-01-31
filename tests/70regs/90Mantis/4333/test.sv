@@ -23,7 +23,7 @@
 `include "uvm_macros.svh"
 
 
-module dut();
+module dut;
 
 bit [31:0] r1;
 
@@ -193,9 +193,10 @@ class test extends uvm_test;
    endtask
 
 
-   function void final_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-
+   function void final_phase(uvm_phase phase);
+      uvm_coreservice_t cs_;
       uvm_report_server svr;
+      cs_ = uvm_coreservice_t::get();
       svr = cs_.get_report_server();
 
       if (svr.get_severity_count(UVM_FATAL) +

@@ -24,7 +24,7 @@
 `ifndef SNPS_ENV_TOP__SV
 `define SNPS_ENV_TOP__SV
 
-module snps_env_top();
+module snps_env_top;
 
    logic clk;
    logic rst;
@@ -46,7 +46,8 @@ module snps_env_top();
  dut dut(drv_if.wdata, drv_if.rdata, drv_if.addr, drv_if.direction, drv_if.enable, clk, rst);
  
    //Driver reset depending on rst_delay
-   initial begin uvm_pkg::uvm_coreservice_t cs_ = uvm_pkg::uvm_coreservice_t::get();
+   initial begin
+     static uvm_pkg::uvm_coreservice_t cs_ = uvm_pkg::uvm_coreservice_t::get();
 
          clk = 0;
          rst = 0;

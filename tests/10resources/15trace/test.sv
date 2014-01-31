@@ -128,9 +128,10 @@ class test extends uvm_component;
      void'(uvm_resource_db#(int)::write_by_type("a", a, this));
   endtask
 
-  function void report(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-
+  function void report();
+     uvm_coreservice_t cs_;
      uvm_report_server svr;
+     cs_ = uvm_coreservice_t::get();
      svr = cs_.get_report_server();
 
      if (my_catcher::seen != 23) begin

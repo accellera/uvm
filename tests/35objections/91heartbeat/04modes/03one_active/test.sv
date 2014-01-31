@@ -19,6 +19,10 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
+//
+// These tests are highly ordering dependent as written and need refactoring
+//
+
 module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
@@ -28,17 +32,30 @@ module test;
     "triggered components is:\n",
     "  uvm_test_top.env.agent.mc1 (updated: 200)\n",
     "  uvm_test_top.env.agent.mc2 (updated: 200)" };
-  string message_1 = {"Recieved update of myobj from more than one",
+
+  string message_1_a = {"Recieved update of myobj from more than one",
     " component since last event trigger at time 240. The list of ",
     "triggered components is:\n",
     "  uvm_test_top.env.agent (updated: 290)\n",
     "  uvm_test_top.env.agent.mc2 (updated: 300)"};
-  string message_2 = {"Did not recieve an update of myobj on any ",
+  string message_1_b = {"Recieved update of myobj from more than one",
+    " component since last event trigger at time 240. The list of ",
+    "triggered components is:\n",
+    "  uvm_test_top.env.agent.mc2 (updated: 300)\n",
+    "  uvm_test_top.env.agent (updated: 290)"};
+
+  string message_2_a = {"Did not recieve an update of myobj on any ",
     "component since last event trigger at time 480. The list of ",
     "registered components is:\n",
     "  uvm_test_top.env.agent\n",
     "  uvm_test_top.env.agent.mc1\n",
     "  uvm_test_top.env.agent.mc2"};
+  string message_2_b = {"Did not recieve an update of myobj on any ",
+    "component since last event trigger at time 480. The list of ",
+    "registered components is:\n",
+    "  uvm_test_top.env.agent.mc1\n",
+    "  uvm_test_top.env.agent.mc2\n",
+    "  uvm_test_top.env.agent"};
 
   class my_catcher extends uvm_report_catcher;
      int id_cnt;
@@ -158,14 +175,14 @@ module test;
         $display("** UVM TEST FAILED **");
         return;
       end
-      if((mc.msg[1] != message_1)) begin
-        $display("Expected: \"%s\"",message_1);
+      if((mc.msg[1] != message_1_a && mc.msg[1] != message_1_b )) begin
+        $display("Expected: \"%s\"\nOr: \"%s\"",message_1_a , message_1_b );
         $display("Got: \"%s\"",mc.msg[1]);
         $display("** UVM TEST FAILED **");
         return;
       end
-      if((mc.msg[2] != message_2)) begin
-        $display("Expected: \"%s\"",message_2);
+      if((mc.msg[2] != message_2_a &&mc.msg[2] != message_2_b  )) begin
+        $display("Expected: \"%s\"\nOr: \"%s\"",message_2_a , message_2_b );
         $display("Got: \"%s\"",mc.msg[2]);
         $display("** UVM TEST FAILED **");
         return;
