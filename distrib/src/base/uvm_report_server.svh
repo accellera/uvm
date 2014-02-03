@@ -104,7 +104,7 @@ virtual class uvm_report_server extends uvm_object;
                 uvm_report_server rhs_;
 
                 super.do_copy(rhs);
-                assert($cast(rhs_,rhs)) else `uvm_error("UVM/REPORT/SERVER/RPTCOPY","cannot copy to report_server from the given datatype")
+                if(!$cast(rhs_,rhs)) `uvm_error("UVM/REPORT/SERVER/RPTCOPY","cannot copy to report_server from the given datatype")
 
                 begin
                         uvm_severity q[$];
