@@ -181,23 +181,11 @@ sub replace_trivial{
     # FIX replace _global_reporter.dump_report_state
     $t =~ s/_global_reporter\.dump_report_state\(\)\s*;/begin uvm_coreservice_t cs = uvm_coreservice_t::get(); uvm_report_server srv = cs.get_report_server(); srv.summarize(); end/g;
 
-    # FIX replace uvm_factory::get() with new uvm_coreservice.get_factory()
-    $t = coreservice_repl_fct($t,'uvm_factory::get','cs_.get_factory',$opt_deprecated,$prefix);
-    $t = coreservice_repl_initial($t,'uvm_factory::get','cs_.get_factory',$opt_deprecated,$prefix);
-
-    # FIX replace uvm_root::get() with new uvm_coreservice.get_root()
-    $t = coreservice_repl_fct($t,'uvm_root::get','cs_.get_root',$opt_deprecated,$prefix);
-    $t = coreservice_repl_initial($t,'uvm_root::get','cs_.get_root',$opt_deprecated,$prefix);
-
     # FIX replace uvm_severity_type by uvm_severity
     $t =~ s/uvm_severity_type/uvm_severity/g if $opt_deprecated;
 
     # FIX extending uvm_report_server
     $t =~ s/extends\s+uvm_report_server/extends uvm_default_report_server/g;
-
-    # FIX uvm_report_server::get_server with new uvm_coreservice.get_report_server()
-    $t = coreservice_repl_fct($t,'uvm_report_server::get_server','cs_.get_report_server',$opt_deprecated,$prefix);
-    $t = coreservice_repl_initial($t,'uvm_report_server::get_server','cs_.get_report_server',$opt_deprecated,$prefix);
 
     # FIX Mantis 4431 (starting_phase ==)
     $t =~ s/starting_phase\s*([!=]+)/get_starting_phase()$1/g;

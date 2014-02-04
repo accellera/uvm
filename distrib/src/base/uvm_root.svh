@@ -71,7 +71,21 @@ typedef class uvm_top_down_visitor_adapter;
 class uvm_root extends uvm_component;
 
   // Function: get()
-  // Get the factory singleton
+  // Static accessor for <uvm_root>.
+  //
+  // The static accessor is provided as a convenience wrapper
+  // around retrieving the root via the <uvm_coreservice_t::get_root>
+  // method.
+  //
+  // | // Using the uvm_coreservice_t:
+  // | uvm_coreservice_t cs;
+  // | uvm_root r;
+  // | cs = uvm_coreservice_t::get();
+  // | r = cs.get_root();
+  // |
+  // | // Not using the uvm_coreservice_t:
+  // | uvm_root r;
+  // | r = uvm_root::get();
   //
   extern static function uvm_root get();
 
