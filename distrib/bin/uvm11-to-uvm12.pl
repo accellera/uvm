@@ -172,14 +172,13 @@ sub replace_trivial{
     $t =~ s/virtual\s+protected\s+(function|task)\s+(void\s+)?(((pre|post)_)?((reset|configure|main|shutdown)|run)_phase)/virtual $1 $2 $3/g;
 
     # FIX replace _global_reporter.get_report_server
-    $t = coreservice_repl_fct($t,'_global_reporter\.get_report_server','cs_.get_report_server',1,$prefix);
-    $t = coreservice_repl_initial($t,'_global_reporter\.get_report_server','cs_.get_report_server',1,$prefix);
+    $t =~ s/_global_reporter\.get_report_server/uvm_report_server::get_server/g;
 
     # FIX replace _global_reporter.report_summarize
-    $t =~ s/_global_reporter\.report_summarize\(\)\s*;/begin uvm_coreservice_t cs = uvm_coreservice_t::get(); uvm_report_server srv = cs.get_report_server(); srv.summarize(); end/g;
+    $t =~ s/_global_reporter\.report_summarize\(\)\s*;/begin uvm_root r = uvm_root::get(); r.report_summarize(); end/g;
 
     # FIX replace _global_reporter.dump_report_state
-    $t =~ s/_global_reporter\.dump_report_state\(\)\s*;/begin uvm_coreservice_t cs = uvm_coreservice_t::get(); uvm_report_server srv = cs.get_report_server(); srv.summarize(); end/g;
+    $t =~ s/_global_reporter\.dump_report_state\(\)\s*;/begin uvm_root r = uvm_root::get(); r.dump_report_state(); end/g;
 
     # FIX replace uvm_severity_type by uvm_severity
     $t =~ s/uvm_severity_type/uvm_severity/g if $opt_deprecated;
