@@ -40,15 +40,15 @@ module top;
 
     `uvm_component_utils(test)
 
-    function void build_phase(uvm_phase phase);
+    function void build_phase(uvm_phase phase);  
       //set configuration prior to creating the environment
-      set_config_int("topenv.*.u1", "v", 30);
-      set_config_int("topenv.inst2.u1", "v", 10);
-      set_config_string("*", "myaa[foo]", "hi");
-      set_config_string("*", "myaa[bar]", "bye");
-      set_config_string("*", "myaa[foobar]", "howdy");
-      set_config_string("topenv.inst1.u1", "myaa[foo]", "boo");
-      set_config_string("topenv.inst1.u1", "myaa[foobar]", "boobah");
+      uvm_config_int::set(this, "topenv.*.u1", "v", 30);
+      uvm_config_int::set(this, "topenv.inst2.u1", "v", 10);
+      uvm_config_string::set(this, "*", "myaa[foo]", "hi");
+      uvm_config_string::set(this, "*", "myaa[bar]", "bye");
+      uvm_config_string::set(this, "*", "myaa[foobar]", "howdy");
+      uvm_config_string::set(this, "topenv.inst1.u1", "myaa[foo]", "boo");
+      uvm_config_string::set(this, "topenv.inst1.u1", "myaa[foobar]", "boobah");
 
       topenv = new("topenv", this);
     endfunction

@@ -30,13 +30,13 @@ module test;
        super.new(name, parent);
     endfunction : new
 
-    function void build();
+    function void build(); 
       super.build();
 
-      void'(get_config_object("set_with_clone", sy_gn, 0));
-      void'(get_config_object("set_with_clone", sy_gy, 1));
-      void'(get_config_object("set_without_clone", sn_gn, 0));
-      void'(get_config_object("set_without_clone", sn_gy, 1));
+      void'(get_config_object("set_with_clone", sy_gn,0));
+      void'(get_config_object("set_with_clone", sy_gy,1)); 
+      void'(get_config_object("set_without_clone", sn_gn,0));
+      void'(get_config_object("set_without_clone", sn_gy,1)); 
     endfunction // build
      
   endclass
@@ -49,13 +49,13 @@ module test;
     endfunction
     `uvm_component_utils(test)
 
-    function void build();
+    function void build(); 
       super.build();
        mo = myobj::type_id::create("mo");
-       set_config_object("mc", "sn_acs", mo, 0);
-       set_config_object("mc", "sy_acs", mo, 1);
-       set_config_object("mc", "set_with_clone", mo, 1);
-       set_config_object("mc", "set_without_clone", mo, 0);
+       uvm_config_object::set(this, "mc", "sn_acs", mo);
+       uvm_config_object::set(this, "mc", "sy_acs", mo.clone()); 
+       uvm_config_object::set(this, "mc", "set_with_clone", mo.clone());
+       uvm_config_object::set(this, "mc", "set_without_clone", mo);
        mc = new("mc", this);
     endfunction
 

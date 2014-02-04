@@ -88,14 +88,14 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
          
-   function void build_phase(uvm_phase phase);
+   function void build_phase(uvm_phase phase); 
       co0 = new("co0");
       c0 = new("c0", this);
       c1 = new("c1", this);
       oc0 = new("oc0", this);
       $cast(oc1, oc0.clone());
       co0.config_comp = c1;
-      set_config_object("*", "co", co0, 1);
+      uvm_config_object::set(this, "*", "co", co0.clone()); 
    endfunction
 
    function void report_phase(uvm_phase phase);

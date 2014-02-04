@@ -34,9 +34,9 @@ class B extends uvm_component;
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction
-  function void build_phase(uvm_phase phase);
+  function void build_phase(uvm_phase phase); 
     super.build_phase(phase);
-    set_config_int("u1", "v", 0);
+    uvm_config_int::set(this, "u1", "v", 0);
 
     $display("%s: In Build: debug = %0d", get_full_name(), debug);
 

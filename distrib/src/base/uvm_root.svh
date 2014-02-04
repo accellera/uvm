@@ -264,6 +264,16 @@ class uvm_root extends uvm_component;
 
   bit m_phase_all_done;
 
+   // internal function not to be used
+   // get the initialized singleton instance of uvm_root
+   static function uvm_root m_uvm_get_root();
+      if (m_inst == null) begin
+	 m_inst = new();
+	 void'(uvm_domain::get_common_domain());
+	 m_inst.m_domain = uvm_domain::get_uvm_domain();
+      end
+      return m_inst;
+   endfunction
 
 `ifndef UVM_NO_DEPRECATED
   // stop_request
@@ -288,12 +298,6 @@ class uvm_root extends uvm_component;
 	 adapter.accept(this, v, p);
  endfunction
 
-   // internal function not to be used 
-   static function uvm_root m_uvm_get_root();
-      uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-      return cs_.get_root();
-   endfunction
-
 endclass
 
 
@@ -308,7 +312,7 @@ endclass
 // This is the top-level that governs phase execution and provides component
 // search interface. See <uvm_root> for more information.
 //------------------------------------------------------------------------------
-const uvm_root uvm_top = uvm_root::m_uvm_get_root();
+const uvm_root uvm_top = uvm_root::get();
 
 //-----------------------------------------------------------------------------
 // IMPLEMENTATION
@@ -318,12 +322,8 @@ const uvm_root uvm_top = uvm_root::m_uvm_get_root();
 // ---
 
 function uvm_root uvm_root::get();
-  if (m_inst == null) begin
-    m_inst = new();
-    void'(uvm_domain::get_common_domain());
-    m_inst.m_domain = uvm_domain::get_uvm_domain();
-  end
-  return m_inst;
+   uvm_coreservice_t cs = uvm_coreservice_t::get();
+   return cs.get_root();
 endfunction
 
 
@@ -854,8 +854,9 @@ endfunction
 
 function void uvm_root::m_process_default_sequence(string cfg);
   string split_val[$];
-  uvm_root m_uvm_top = uvm_root::get();
-  uvm_factory f = uvm_factory::get();
+  uvm_coreservice_t cs = uvm_coreservice_t::get();
+  uvm_root m_uvm_top = cs.get_root();   
+  uvm_factory f = cs.get_factory();
   uvm_object_wrapper w;
 
   uvm_split_string(cfg, ",", split_val);

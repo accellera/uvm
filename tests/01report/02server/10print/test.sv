@@ -50,9 +50,9 @@ module top;
 
       l_rs.set_max_quit_count(5);
 
-      $display("START OF GOLD FILE");
+      $display("GOLD-FILE-START");
       l_rs.print();
-      $display("END OF GOLD FILE");
+      $display("GOLD-FILE-END");
 
     endfunction : report_phase
 

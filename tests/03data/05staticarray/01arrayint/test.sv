@@ -143,9 +143,9 @@ module test;
     endtask
   endclass
 
-  initial begin
+  initial begin 
     for(int i=0;i<3;++i)
-      set_config_int("*", $sformatf("cfg_field_set[%0d]",i), 'haa+i);
+      uvm_config_int::set(null, "*", $sformatf("cfg_field_set[%0d]",i), 'haa+i);
     run_test();
   end
 

@@ -35,12 +35,12 @@ package my_env_pkg;
       super.new(name, parent);
     endfunction
   
-    function void build_phase(uvm_phase phase);
+    function void build_phase(uvm_phase phase); 
       super.build_phase(phase);
-      set_config_int("inst1.u2", "v", 5);
-      set_config_int("inst2.u1", "v", 3);
-      set_config_int("inst?.*", "s", 'h10);
-      set_config_int("inst2.*", "s", 'h20);
+      uvm_config_int::set(this, "inst1.u2", "v", 5);
+      uvm_config_int::set(this, "inst2.u1", "v", 3);
+      uvm_config_int::set(this, "inst?.*", "s", 'h10);
+      uvm_config_int::set(this, "inst2.*", "s", 'h20);
   
       $display("%s: In Build: debug = %0d", get_full_name(), debug);
   

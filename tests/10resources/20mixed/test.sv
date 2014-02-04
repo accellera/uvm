@@ -42,12 +42,12 @@ class  env extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build();
+  function void build();  
     if(!uvm_resource_db#(uvm_bitstream_t)::read_by_name(get_full_name(), "A", A, this))
       `uvm_error("NOCONFIG", "A not located in resource pool")
     $display("A = %0d", A);
 
-    if(!get_config_int("B", B))
+    if(!uvm_config_int::get(this, "","B", B))
       `uvm_error("NOCONFIG", "B not located in resource pool")
     $display("B = %0d", B);
 
@@ -59,7 +59,7 @@ class  env extends uvm_component;
       else
         $display("C = %s", C.convert2string());
 
-    if(!get_config_object("D", dummy, 0))
+    if(!uvm_config_object::get(this, "","D", dummy))
       `uvm_error("NOCONFIG", "D not located in resource pool")
     else
       if(!$cast(D, dummy))
@@ -86,18 +86,18 @@ class test extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build();
+  function void build();  
     cfg c, d;
 
     e = new("env", this);
 
-    set_config_int("*", "A", 14);
+    uvm_config_int::set(this, "*", "A", 14);
 
     uvm_resource_db#(uvm_bitstream_t)::set("*", "B", 98, this);
 
     c = new();
     c.z = -122;
-    set_config_object("*", "C", c, 0);
+    uvm_config_object::set(this, "*", "C", c);
 
     d = new();
     d.z = 88;

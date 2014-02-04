@@ -139,11 +139,11 @@ module test;
     endtask
   endclass
 
-  initial begin
-    set_config_int("*", "cfg_field_set", 3);
-    set_config_int("*", "cfg_field_set[0]", TWO);
-    set_config_int("*", "cfg_field_set[1]", THREE);
-    set_config_int("*", "cfg_field_set[2]", FOUR);
+  initial begin 
+    uvm_config_int::set(null, "*", "cfg_field_set", 3);
+    uvm_config_int::set(null, "*", "cfg_field_set[0]", TWO);
+    uvm_config_int::set(null, "*", "cfg_field_set[1]", THREE);
+    uvm_config_int::set(null, "*", "cfg_field_set[2]", FOUR);
     run_test();
   end
 

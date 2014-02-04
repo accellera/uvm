@@ -30,23 +30,23 @@ module top();
 		`uvm_component_utils_end
 		`uvm_new_func
 
-		function void build_phase(uvm_phase phase);
+		function void build_phase(uvm_phase phase);  
 			int i;
-			set_config_int("","/z?mycomplexint/",4);
-			set_config_int("","/mycomplexint/",1);
-			set_config_int("","mycomplexint",10);			
-			set_config_int("","/my*int/",2);
-			set_config_int("","/my_complex.*/",3);
+			uvm_config_int::set(this, "","/z?mycomplexint/",4);
+			uvm_config_int::set(this, "","/mycomplexint/",1);
+			uvm_config_int::set(this, "","mycomplexint",10);			
+			uvm_config_int::set(this, "","/my*int/",2);
+			uvm_config_int::set(this, "","/my_complex.*/",3);
 
 			super.build_phase(phase);
 
 			// check the settings
 			// fail plain
-			assert(get_config_int("mycomplexint",i)) else `uvm_error("TEST","LOOKUPFAIL")
+			assert(uvm_config_int::get(this, "","mycomplexint",i)) else `uvm_error("TEST","LOOKUPFAIL")
 			assert(i==10) else `uvm_error("TEST","LOOKUPVALUEFAIL")
 
 				// since field names are plain (=no regex) we lookup this field 
-			assert(get_config_int("/z?mycomplexint/",i)) else `uvm_error("TEST","LOOKUPFAIL")
+			assert(uvm_config_int::get(this, "","/z?mycomplexint/",i)) else `uvm_error("TEST","LOOKUPFAIL")
 			assert(i==4) else `uvm_error("TEST","LOOKUPVALUEFAIL")
 
 		endfunction

@@ -41,10 +41,10 @@ module test;
 
   class test extends uvm_component;
     catcher ctch = new;
-    function new(string name, uvm_component parent);
+    function new(string name, uvm_component parent); 
       super.new(name, parent);
       uvm_report_cb::add(null,ctch);
-      set_config_object("foo", "bar", null);
+      set_config_object("foo", "bar", null); 
     endfunction
     `uvm_component_utils(test)
     task run_phase(uvm_phase phase);

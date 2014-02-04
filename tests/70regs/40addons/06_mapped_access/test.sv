@@ -189,9 +189,9 @@ module test();
     user_ovc_driver apb_drv;
     sub_system_seq seq;
   
-    virtual function void build();
-      set_config_int("ahb_seqr*", "count", 0);
-      set_config_int("apb_seqr*", "count", 0);
+    virtual function void build(); 
+      uvm_config_int::set(this, "ahb_seqr*", "count", 0);
+      uvm_config_int::set(this, "apb_seqr*", "count", 0);
       super.build();
       uvm_reg::include_coverage("*", UVM_CVR_ALL);
       // Create register model

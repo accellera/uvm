@@ -57,13 +57,13 @@ class test extends uvm_test;
    `uvm_component_utils_end    
    my_class c;
         
-   virtual function void build_phase(uvm_phase phase);
+   virtual function void build_phase(uvm_phase phase);  
     super.build_phase(phase);
     c   = new("class_a",this);      
     cfg = new("cfg");  
     cfg.parent_component=this;
-    set_config_int("class_a","tp",EB);        
-    set_config_object("class_a","parent_config",cfg,0);
+    uvm_config_int::set(this, "class_a","tp",EB);        
+    uvm_config_object::set(this, "class_a","parent_config",cfg);
     endfunction
 
   task run_phase(uvm_phase phase);

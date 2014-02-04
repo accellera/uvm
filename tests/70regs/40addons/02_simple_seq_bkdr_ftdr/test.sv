@@ -185,8 +185,8 @@ module test_top();
     uvc_pkg::uvc_env#(virtual uvc_intf) uenv;
     uvm_reg_predictor#(uvc_pkg::transaction) predictor;
   
-    virtual function void build();
-      set_config_int("uenv.seqr", "count", 0);
+    virtual function void build(); 
+      uvm_config_int::set(this, "uenv.seqr", "count", 0);
       uvm_reg::include_coverage("*", UVM_CVR_ALL);
       super.build();
       // Create register model

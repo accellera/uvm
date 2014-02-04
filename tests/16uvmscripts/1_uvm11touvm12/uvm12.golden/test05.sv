@@ -88,7 +88,7 @@ class req extends uvm_sequence_item ;
       phase.drop_objection(this);
     endtask
 
-   function void report_phase(uvm_phase phase); uvm_coreservice_t cs_=uvm_coreservice_t::get();
+   function void report_phase(uvm_phase phase); automatic uvm_coreservice_t cs_=uvm_coreservice_t::get();
 
       uvm_root top = cs_.get_root();
       uvm_report_server svr = top.get_report_server();

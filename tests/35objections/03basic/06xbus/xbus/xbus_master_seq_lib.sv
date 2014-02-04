@@ -70,12 +70,12 @@ class read_byte_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_byte_seq, xbus_master_sequencer)    
+  `uvm_object_utils(read_byte_seq)    
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
   constraint transmit_del_ct { (transmit_del <= 10); }
-
+  `uvm_declare_p_sequencer(xbus_master_sequencer)
   virtual task body();
     `uvm_do_with(req, 
       { req.addr == start_addr;
@@ -105,12 +105,13 @@ class read_half_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_half_word_seq, xbus_master_sequencer)
+  `uvm_object_utils(read_half_word_seq)
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
   constraint transmit_del_ct { (transmit_del <= 10); }
-
+  `uvm_declare_p_sequencer(xbus_master_sequencer)
+  
   virtual task body();
     `uvm_do_with(req, 
       { req.addr == start_addr;
@@ -139,12 +140,12 @@ class read_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_word_seq, xbus_master_sequencer)
+  `uvm_object_utils(read_word_seq)
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
   constraint transmit_del_ct { (transmit_del <= 10); }
-
+  `uvm_declare_p_sequencer(xbus_master_sequencer)
   virtual task body();
     `uvm_do_with(req, 
       { req.addr == start_addr;
@@ -175,12 +176,12 @@ class read_double_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_double_word_seq, xbus_master_sequencer)    
+  `uvm_object_utils(read_double_word_seq)    
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
   constraint transmit_del_ct { (transmit_del <= 10); }
-
+  `uvm_declare_p_sequencer(xbus_master_sequencer)
   virtual task body();
     `uvm_do_with(req, 
       { req.addr == start_addr;
@@ -213,13 +214,13 @@ class write_byte_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_byte_seq, xbus_master_sequencer)
+  `uvm_object_utils(write_byte_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0;
   rand int unsigned transmit_del = 0;
   constraint transmit_del_ct { (transmit_del <= 10); }
-
+  `uvm_declare_p_sequencer(xbus_master_sequencer)
   virtual task body();
     `uvm_do_with(req, 
       { req.addr == start_addr;
@@ -249,14 +250,14 @@ class write_half_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_half_word_seq, xbus_master_sequencer)
+  `uvm_object_utils(write_half_word_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0;
   rand bit [7:0] data1;
   rand int unsigned transmit_del = 0;
   constraint transmit_del_ct { transmit_del <= 10; }
-
+  `uvm_declare_p_sequencer(xbus_master_sequencer)
   virtual task body();
     `uvm_do_with(req, 
       { req.addr == start_addr; 
@@ -285,14 +286,14 @@ class write_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_word_seq, xbus_master_sequencer)
+  `uvm_object_utils(write_word_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0; rand bit [7:0] data1;
   rand bit [7:0] data2; rand bit [7:0] data3;
   rand int unsigned transmit_del = 0;
   constraint transmit_del_ct { (transmit_del <= 10); }
-
+  `uvm_declare_p_sequencer(xbus_master_sequencer)
   virtual task body();
     `uvm_do_with(req, 
       { req.addr == start_addr;
@@ -325,7 +326,7 @@ class write_double_word_seq extends xbus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_double_word_seq, xbus_master_sequencer)
+  `uvm_object_utils(write_double_word_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0; rand bit [7:0] data1;
@@ -334,7 +335,7 @@ class write_double_word_seq extends xbus_base_sequence;
   rand bit [7:0] data6; rand bit [7:0] data7;
   rand int unsigned transmit_del = 0;
   constraint transmit_del_ct { (transmit_del <= 10); }
-
+  `uvm_declare_p_sequencer(xbus_master_sequencer)
   virtual task body();
     `uvm_do_with(req, 
       { req.addr == start_addr;
