@@ -96,7 +96,8 @@ class top_blk extends uvm_reg_block;
 endclass
 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    uvm_hdl_path_concat paths[$];
    uvm_hdl_path_slice slice;

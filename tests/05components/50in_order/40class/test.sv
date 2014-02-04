@@ -40,7 +40,8 @@ class c;
    endfunction
 endclass
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    uvm_in_order_class_comparator#(c) sb;
 

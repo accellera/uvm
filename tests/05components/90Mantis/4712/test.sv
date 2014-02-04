@@ -14,10 +14,13 @@ module test294;
 		function new(string name,uvm_component parent);
 			super.new(name,parent);
 		endfunction
-		function void report_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-
-			uvm_root top = cs_.get_root();
-			uvm_report_server svr = top.get_report_server();
+		function void report_phase(uvm_phase phase);
+			uvm_coreservice_t cs_;
+			uvm_root top;
+			uvm_report_server svr;
+			cs_ = uvm_coreservice_t::get();
+			top = cs_.get_root();
+			svr = top.get_report_server();
 			
 			if (svr.get_id_count("UVM/COMP/NAME")!=6)
 				$write("** UVM TEST FAILED **\n");

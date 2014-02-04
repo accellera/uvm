@@ -91,7 +91,8 @@ endtask
 // IUS release commands are done with vhpiReleaseKV which means the entity will preserve the current value UNTIL
 // a new data value is progated to the signal/wire. this can make a difference when an intermediate wire si being forced and released. 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    reg [7:0] dat;
    

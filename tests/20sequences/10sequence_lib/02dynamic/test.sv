@@ -118,10 +118,13 @@ module top;
        driver.seq_item_port.connect(sequencer.seq_item_export);
      endfunction
 
-     virtual function void report(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-
-       uvm_root top = cs_.get_root();
-       uvm_report_server svr = uvm_report_server::get_server();
+     virtual function void report();
+       uvm_coreservice_t cs_;
+       uvm_root top;
+       uvm_report_server svr;
+       cs_ = uvm_coreservice_t::get();
+       top = cs_.get_root();
+       svr = uvm_report_server::get_server();
        if (svr.get_severity_count(UVM_FATAL) +
            svr.get_severity_count(UVM_ERROR) == 0)
          $write("** UVM TEST PASSED **\n");

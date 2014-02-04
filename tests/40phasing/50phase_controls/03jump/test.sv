@@ -51,7 +51,23 @@ class test extends test_base;
     phase.drop_objection(this);
   endtask : main_phase
 
-  function void check_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+  function void check_phase(uvm_phase phase);
+    uvm_coreservice_t cs_;
+    uvm_report_server svr;
+    int e_jr_c;
+    int jr_c;
+    int e_js_c;
+    int js_c;
+    int e_trs_c;
+    int trs_c;
+    int e_brs_c;
+    int brs_c;
+    int e_pm_c;  // Due to jump to shutdown from main, no post_main messages
+    int pm_c;
+    int e_prs_c; // Due to jump to shutdown from main, no post_main messages
+    int prs_c;
+    cs_ = uvm_coreservice_t::get();
+    svr = cs_.get_report_server();
 
 //normal test
 //  [top_random_seq]    10
@@ -60,25 +76,24 @@ class test extends test_base;
 //  [top_random_seq]    26
 //  [bot_random_seq]    56
 
-    uvm_report_server svr = cs_.get_report_server();
 
-    int e_jr_c =3;
-    int jr_c   = svr.get_id_count( "JUMP_RESET" );
+    e_jr_c =3;
+    jr_c   = svr.get_id_count( "JUMP_RESET" );
 
-    int e_js_c =1;
-    int js_c   = svr.get_id_count( "JUMP_SHUTDOWN" );
+    e_js_c =1;
+    js_c   = svr.get_id_count( "JUMP_SHUTDOWN" );
 
-    int e_trs_c=26;
-    int trs_c  = svr.get_id_count( "top_random_seq" );
+    e_trs_c=26;
+    trs_c  = svr.get_id_count( "top_random_seq" );
 
-    int e_brs_c=56;
-    int brs_c  = svr.get_id_count( "bot_random_seq" );
+    e_brs_c=56;
+    brs_c  = svr.get_id_count( "bot_random_seq" );
 
-    int e_pm_c =0;  // Due to jump to shutdown from main, no post_main messages
-    int pm_c   = svr.get_id_count( "pre_shutdown" );
+    e_pm_c =0;  // Due to jump to shutdown from main, no post_main messages
+    pm_c   = svr.get_id_count( "pre_shutdown" );
 
-    int e_prs_c=0; // Due to jump to shutdown from main, no post_main messages
-    int prs_c  = svr.get_id_count( "pre_shutdown" );
+    e_prs_c=0; // Due to jump to shutdown from main, no post_main messages
+    prs_c  = svr.get_id_count( "pre_shutdown" );
 
     if( jr_c != e_jr_c ) begin
       `uvm_error( "ID_COUNT", $sformatf( "Expected %1d %s message(s).  Got %1d",

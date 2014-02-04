@@ -74,7 +74,8 @@ class blk2 extends uvm_reg_block;
 endclass
 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    my_catcher c;
    c = new;

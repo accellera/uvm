@@ -90,10 +90,14 @@ module top;
        phase.drop_objection(this);
      endtask
 
-     virtual function void report(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+     virtual function void report();
+      uvm_coreservice_t cs_;
+      uvm_root top;
+      uvm_report_server svr;
+      cs_ = uvm_coreservice_t::get();
+      top = cs_.get_root();
+      svr = uvm_report_server::get_server();
 
-       uvm_root top = cs_.get_root();
-       uvm_report_server svr = uvm_report_server::get_server();
        if (svr.get_id_count("SEQ_START") != 10) begin
          `uvm_error("SEQ_COUNT_NOT_10",$sformatf("Expected 10 sequences. Got %0d",svr.get_id_count("SEQ_START")))
        end

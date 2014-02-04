@@ -311,7 +311,7 @@ module top;
     //---------------------------------
 
     begin
-       uvm_root top = uvm_root::get();
+       static uvm_root top = uvm_root::get();
        
        man1.enable_recording(top.get_tr_stream("man1"));
        mac1.enable_recording(top.get_tr_stream("mac1"));

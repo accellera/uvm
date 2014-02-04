@@ -143,7 +143,8 @@ function void check_name(string act, string exp);
 endfunction
 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    blk2 blk;
   

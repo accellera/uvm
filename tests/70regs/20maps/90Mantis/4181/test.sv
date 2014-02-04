@@ -86,7 +86,7 @@ program top;
         endfunction
         virtual function void bus2reg(uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
             // TODO Auto-generated function stub
-            super.bus2reg(bus_item, rw);        
+            // super.bus2reg(bus_item, rw);        
         endfunction
     endclass
 

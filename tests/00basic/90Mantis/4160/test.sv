@@ -42,7 +42,8 @@ endclass // b
   endclass
 
 		   
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    ac mya,myb;
    b policy;

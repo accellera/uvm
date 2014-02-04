@@ -141,9 +141,12 @@ class test extends uvm_test;
       phase.drop_objection(this);
    endtask
 
-   virtual function void report(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+   virtual function void report();
+      uvm_coreservice_t cs_;
+      uvm_report_server svr;
+      cs_ = uvm_coreservice_t::get();
+      svr =  cs_.get_report_server();
 
-      uvm_report_server svr =  cs_.get_report_server();
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) +
           svr.get_severity_count(UVM_WARNING) == 0)

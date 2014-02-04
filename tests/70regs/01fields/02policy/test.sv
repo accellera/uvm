@@ -215,7 +215,8 @@ class dut extends uvm_reg_frontdoor;
 endclass
 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    uvm_reg_data_t data;
    a_blk blk; 

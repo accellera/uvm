@@ -36,7 +36,9 @@ class my_catcher extends uvm_report_catcher;
    int sev[uvm_severity];
    uvm_severity s;
 
-   virtual function action_e catch(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+   virtual function action_e catch();
+      uvm_coreservice_t cs_;
+      cs_ = uvm_coreservice_t::get();
  
       s = uvm_severity'(get_severity());
 

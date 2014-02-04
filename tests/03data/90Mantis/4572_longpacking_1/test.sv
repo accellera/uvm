@@ -41,9 +41,10 @@ class my_packet_class extends uvm_object;
 	endfunction
 endclass
 
-   function void report(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-
+   function void report();
+      uvm_coreservice_t cs_;
       uvm_report_server svr;
+      cs_ = uvm_coreservice_t::get();
       svr = cs_.get_report_server();
 
       if (svr.get_severity_count(UVM_FATAL) +
