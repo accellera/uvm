@@ -5,7 +5,7 @@ Format: Development Release 01-12-2008 (1.35 base)
 # Title: [project name]
 # SubTitle: [subtitle]
 
-Footer: Copyright 2008-2013 Mentor Graphics Corp., Copyright 2008-2013 Cadence Design Systems, Inc., Copyright 2011-2013 Synopsys, Inc.
+Footer: Copyright 2008-2013 Mentor Graphics Corp., Copyright 2008-2013 Cadence Design Systems, Inc., Copyright 2011-2013 Synopsys, Inc., Copyright 2013-2014 NVIDIA Corporation
 Timestamp: Updated month day, year
 #   m     - One or two digit month.  January is "1"
 #   mm    - Always two digit month.  January is "01"
