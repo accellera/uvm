@@ -399,7 +399,7 @@ endfunction
 
 task uvm_root::run_test(string test_name="");
 
-  uvm_report_server l_rs = uvm_report_server::get_server();
+  uvm_report_server l_rs;
   uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
   uvm_factory factory=cs.get_factory();
   bit testname_plusarg;
@@ -510,6 +510,7 @@ task uvm_root::run_test(string test_name="");
   // clean up after ourselves
   phase_runner_proc.kill();
 
+  l_rs = uvm_report_server::get_server();
   l_rs.report_summarize();
 
   if (finish_on_completion)
