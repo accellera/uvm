@@ -25,7 +25,7 @@ cp -fr ovm_sources  some_ve
 chmod -R +rw some_ve
 
 
-$UVM_HOME/bin/ovm2uvm.pl --top_dir ./some_ve --marker "XX-REVIEW-XX" --write --backup --all_text_files
+$UVM_HOME/bin/ovm-to-uvm10.pl --top_dir ./some_ve --marker "XX-REVIEW-XX" --write --backup --all_text_files
 
 diff some_ve uvm_sources.golden > /dev/null
 
