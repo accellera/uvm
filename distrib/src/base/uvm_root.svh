@@ -109,7 +109,7 @@ class uvm_root extends uvm_component;
   //
   // Calls the <uvm_component::pre_abort()> method
   // on the entire <uvm_component> hierarchy in a bottom-up fashion.
-  // It then call calls <report_summarize> and terminates the simulation
+  // It then calls <uvm_report_server::report_summarize> and terminates the simulation
   // with ~$finish~.
 
   virtual function void die();

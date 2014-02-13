@@ -624,16 +624,16 @@ function automatic bit uvm_has_wildcard (string arg);
 endfunction
 
 
+typedef class uvm_component;
+typedef class uvm_root;
+typedef class uvm_report_object;
+
 //------------------------------------------------------------------------------
-// CLASS: uvm_utils
+// CLASS: uvm_utils #(TYPE,FIELD)
 //
 // This class contains useful template functions.
 //
 //------------------------------------------------------------------------------
-
-typedef class uvm_component;
-typedef class uvm_root;
-typedef class uvm_report_object;
         
 class uvm_utils #(type TYPE=int, string FIELD="config");
 
@@ -740,7 +740,7 @@ endclass
 `endif
 
 
-// NOTE: this is an internal function and provides a string join independent of a streaming pack
+// this is an internal function and provides a string join independent of a streaming pack
 function automatic string m_uvm_string_queue_join(ref string i[$]);
 `ifndef QUESTA
    m_uvm_string_queue_join = {>>{i}};

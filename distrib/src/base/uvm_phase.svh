@@ -763,7 +763,7 @@ endclass
 //
 //------------------------------------------------------------------------------
 //
-// Convenience type for the uvm_callbacks#(uvm_phase, uvm_callback) class.
+// Convenience type for the uvm_callbacks#(uvm_phase, uvm_phase_cb) class.
 //
 typedef uvm_callbacks#(uvm_phase, uvm_phase_cb) uvm_phase_cb_pool;
 

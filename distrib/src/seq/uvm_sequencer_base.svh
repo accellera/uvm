@@ -168,7 +168,7 @@ class uvm_sequencer_base extends uvm_component;
 
   extern virtual function void start_phase_sequence(uvm_phase phase);
 
-  // Function: stop_phase_sequence(uvm_phase phase)
+  // Function: stop_phase_sequence
   //
   // Stop the default sequence for this phase, if any exists, and it
   // is still executing.

@@ -49,7 +49,7 @@ virtual class uvm_report_server extends uvm_object;
         // Function: set_max_quit_count
         // ~count~ is the maximum number of ~UVM_QUIT~ actions the uvm_report_server
         // will tolerate before before invoking client.die().
-        // when ~overridable~=0 is passed the set quit count cannot be changed again
+        // when ~overridable~ = 0 is passed, the set quit count cannot be changed again
         pure virtual  function void set_max_quit_count(int count, bit overridable = 1);
 
         // Function: get_max_quit_count
