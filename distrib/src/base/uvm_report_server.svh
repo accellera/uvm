@@ -201,7 +201,7 @@ virtual class uvm_report_server extends uvm_object;
         // | cs.set_report_server(your_server);
         // |
         // | // Not using the uvm_coreservice_t:
-        // | uvm_report_server::get_server(your_server);
+        // | uvm_report_server::set_server(your_server);
    
         static function void set_server(uvm_report_server server);
 	        uvm_coreservice_t cs = uvm_coreservice_t::get();
