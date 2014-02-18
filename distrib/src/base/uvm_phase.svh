@@ -472,7 +472,7 @@ class uvm_phase extends uvm_object;
   //---------------
   // Group: Jumping
   //---------------
-
+  
   // Force phases to jump forward or backward in a schedule
   //
   // A phasing domain can execute a jump from its current phase to any other.
@@ -517,7 +517,7 @@ class uvm_phase extends uvm_object;
   // it does not set a jump_phase to go to after the phase ends.
   extern function void end_prematurely() ;
 
-  // Function: jump_all
+  // Function- jump_all
   //
   // Make all schedules jump to a specified ~phase~, even if the jump target is local.
   // The jump happens to all phase schedules that contain the jump-to ~phase~,
