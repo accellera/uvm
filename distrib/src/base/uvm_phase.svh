@@ -745,8 +745,6 @@ class uvm_phase_cb extends uvm_callback;
   // An extension may interact with the phase,
   // such as raising the phase objection to prolong the phase,
   // in a manner that is consistent with the current phase state.
-  // Except when in the ~READY_TO_END~ state,
-  // any thread forked in the callback will not be killed when the phase ends.
   //
   // By default, the callback method does nothing.
   // Unless otherwise specified, modifying the  phase transition descriptor has
