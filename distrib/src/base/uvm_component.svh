@@ -774,9 +774,8 @@ virtual class uvm_component extends uvm_report_object;
   extern function string massage_scope(string scope);
 
 
-`ifndef UVM_NO_DEPRECATED
   //----------------------------------------------------------------------------
-  // Group- Configuration Interface
+  // Group: Configuration Interface
   //----------------------------------------------------------------------------
   //
   // Components can be designed to be user-configurable in terms of its
@@ -787,6 +786,8 @@ virtual class uvm_component extends uvm_report_object;
   // every configuration scenario. 
   //
   //----------------------------------------------------------------------------
+
+`ifndef UVM_NO_DEPRECATED
 
   static bit m_config_deprecated_warned;
 
@@ -3162,7 +3163,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   if(verbose)
     uvm_report_info("CFGAPL","applying configuration settings", UVM_NONE);
 
-  // Note: the following is VERY expensive. Needs refactoring. Should
+  // The following is VERY expensive. Needs refactoring. Should
   // get config only for the specific field names in 'field_array'.
   // That's because the resource pool is organized first by field name.
   // Can further optimize by encoding the value for each 'field_array' 

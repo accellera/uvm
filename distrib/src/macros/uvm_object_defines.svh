@@ -3419,7 +3419,7 @@ endfunction \
 //| `uvm_record_real(NAME,VALUE)
 //
 // The ~`uvm_record_real~ macro takes the same arguments as
-// the <uvm_recorder::record_real> method.
+// the <uvm_recorder::record_field_real> method.
 //
 // The default implementation will pass the name/value pair to
 // <`uvm_record_attribute> if enabled, otherwise the information

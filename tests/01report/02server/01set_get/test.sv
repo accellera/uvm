@@ -24,12 +24,33 @@ import uvm_pkg::*;
 `include "uvm_macros.svh"
 
 int cnt = 0;
+bit success = 0 ;
 
 class my_server extends uvm_default_report_server;
   virtual function string compose_report_message(uvm_report_message report_message, string report_object_name = "");
     cnt++;
     compose_report_message = {"MY_SERVER: ", super.compose_report_message(report_message, report_object_name)};
   endfunction
+
+  // to make sure this is being executed, have it display a good result
+  // (despite the dummy error thrown earlier)
+  virtual function void report_summarize(UVM_FILE file=0) ;
+     if (success == 1) begin
+       $display("**** UVM TEST PASSED ****");
+       $display("--- UVM Report Summary ---");
+       $display("");
+       $display("** Report counts by severity");
+       $display("UVM_INFO :    6");
+       $display("UVM_WARNING :    0");
+       $display("UVM_ERROR :    0");
+       $display("UVM_FATAL :    0");
+    end
+    else begin
+       $display("**** UVM TEST FAILED ****");
+       super.report_summarize(file) ;
+    end
+  endfunction
+
 endclass
 
 class test extends uvm_test;
@@ -57,10 +78,10 @@ class test extends uvm_test;
 
    virtual function void report();
      uvm_report_server serv = uvm_report_server::get_server();
-     if(serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2 && cnt == 2)
-       $display("**** UVM TEST PASSED ****");
-     else
-       $display("**** UVM TEST FAILED ****");
+     if(serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2 && cnt == 2) begin
+        success = 1 ;
+     end
+     `uvm_error("EXPECTED","This is an expected error designed to test whether report_server that was set is used at end of sim") 
    endfunction
 endclass
 
