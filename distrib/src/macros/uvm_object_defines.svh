@@ -3756,35 +3756,12 @@ endfunction \
 
 // Macro: `uvm_unpack_string
 //
-// Pack a string variable.
+// Unpack a string variable.
 //
 //| `uvm_unpack_string(VAR)
 //
-`ifndef INCA
 `define uvm_unpack_string(VAR) \
-    begin \
-    bit [7:0] chr__; \
-    VAR = ""; \
-    do begin \
-      chr__ = packer.m_bits[packer.count+:8]; \
-      packer.count += 8; \
-      if (chr__ != 0) \
-        VAR = {VAR, string'(chr__)}; \
-    end while (chr__ != 0); \
-    end
-`else
-`define uvm_unpack_string(VAR) \
-    begin \
-    bit [7:0] chr__; \
-    VAR = ""; \
-    do begin \
-      chr__ = packer.m_bits[packer.count+:8]; \
-      packer.count += 8; \
-      if (chr__ != 0) \
-        VAR=$sformatf("%s%s",VAR,chr__); \
-    end while (chr__ != 0); \
-    end
-`endif
+  VAR = packer.unpack_string();
 
 // Macro: `uvm_unpack_real
 //

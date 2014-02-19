@@ -2592,7 +2592,7 @@ endfunction
 
 function void uvm_component::accept_tr (uvm_transaction tr,
                                         time accept_time=0);
-  uvm_event#() e;
+  uvm_event#(uvm_object) e;
   tr.accept_tr(accept_time);
   do_accept_tr(tr);
   e = event_pool.get("accept_tr");
@@ -2680,7 +2680,7 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
                                             string label="",
                                             string desc="",
                                             time begin_time=0);
-   uvm_event#() e;
+   uvm_event#(uvm_object) e;
    string    name;
    string    kind;
    uvm_tr_database db;
@@ -2775,7 +2775,7 @@ endfunction
 function void uvm_component::end_tr (uvm_transaction tr,
                                      time end_time=0,
                                      bit free_handle=1);
-   uvm_event#() e;
+   uvm_event#(uvm_object) e;
    uvm_recorder recorder;
    uvm_tr_database db = m_get_tr_database();
 
@@ -3200,42 +3200,51 @@ function void uvm_component::apply_config_settings (bit verbose=0);
       uvm_report_info("CFGAPL",$sformatf("applying configuration to field %s", name),UVM_NONE);
 
     begin
-    uvm_resource#(uvm_bitstream_t) rbs;
-    if($cast(rbs, r))
-      set_int_local(name, rbs.read(this));
-    else begin
-      uvm_resource#(int) ri;
-      if($cast(ri, r))
-        set_int_local(name, ri.read(this));
-      else begin
-        uvm_resource#(int unsigned) riu;
-        if($cast(riu, r))
-          set_int_local(name, riu.read(this));
-        else begin
-          uvm_resource#(string) rs;
-          if($cast(rs, r))
-            set_string_local(name, rs.read(this));
+       uvm_resource#(uvm_integral_t) rit;
+       if ($cast(rit, r))
+         set_int_local(name, rit.read(this));
+       else begin
+          uvm_resource#(uvm_bitstream_t) rbs;
+          if($cast(rbs, r))
+            set_int_local(name, rbs.read(this));
           else begin
-             uvm_resource#(uvm_config_object_wrapper) rcow;
-             if ($cast(rcow, r)) begin
-                uvm_config_object_wrapper cow = rcow.read();
-                set_object_local(name, cow.obj, cow.clone);
-             end
+             uvm_resource#(int) ri;
+             if($cast(ri, r))
+               set_int_local(name, ri.read(this));
              else begin
-                uvm_resource#(uvm_object) ro;
-                if($cast(ro, r)) begin
-                  set_object_local(name, ro.read(this), 0);
-                end 
-                else if (verbose) begin
-                  uvm_report_info("CFGAPL", $sformatf("field %s has an unsupported type", name), UVM_NONE);
-                end
-             end
-          end
-        end
-      end
+                uvm_resource#(int unsigned) riu;
+                if($cast(riu, r))
+                  set_int_local(name, riu.read(this));
+                else begin
+                   uvm_resource#(uvm_active_passive_enum) rap;
+                   if ($cast(rap, r))
+                     set_int_local(name, rap.read(this));
+                   else begin
+                      uvm_resource#(string) rs;
+                      if($cast(rs, r))
+                        set_string_local(name, rs.read(this));
+                      else begin
+                         uvm_resource#(uvm_config_object_wrapper) rcow;
+                         if ($cast(rcow, r)) begin
+                         uvm_config_object_wrapper cow = rcow.read();
+                            set_object_local(name, cow.obj, cow.clone);
+                         end
+                         else begin
+                            uvm_resource#(uvm_object) ro;
+                            if($cast(ro, r)) begin
+                               set_object_local(name, ro.read(this), 0);
+                            end 
+                            else if (verbose) begin
+                               uvm_report_info("CFGAPL", $sformatf("field %s has an unsupported type", name), UVM_NONE);
+                            end
+                         end // else: !if($cast(rcow, r))
+                      end // else: !if($cast(rs, r))
+                   end // else: !if($cast(rap, r))
+                end // else: !if($cast(riu, r))
+             end // else: !if($cast(ri, r))
+          end // else: !if($cast(rbs, r))
+       end // else: !if($cast(rit, r))
     end
-    end
-
   end
 
   __m_uvm_status_container.field_array.delete();

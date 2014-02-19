@@ -152,13 +152,13 @@ $display("BYTES: %0d", bytes.size());
     endtask
   endclass
 
-  initial begin
+  initial begin 
     cfg_container.value = 22;
     cfg_container.object.color = BLUE; 
     cfg_container.object.i = 55; 
     cfg_container.object.str = "from cfg"; 
-    set_config_object("*", "cfg_field_set_clone", cfg_container);
-    set_config_object("*", "cfg_field_set_ref", cfg_container, 0);
+    uvm_config_object::set(null, "*", "cfg_field_set_clone", cfg_container.clone()); 
+    uvm_config_object::set(null, "*", "cfg_field_set_ref", cfg_container);
     run_test();
   end
 

@@ -26,7 +26,9 @@ class test extends uvm_component;
       super.new(name, parent);
    endfunction
 
-  function void end_of_elaboration_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+  function void end_of_elaboration_phase(uvm_phase phase);
+     uvm_coreservice_t cs_;
+     cs_ = uvm_coreservice_t::get();
 
      // Set verbosity for  demo
      set_report_verbosity_level(UVM_FULL);

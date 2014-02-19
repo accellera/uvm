@@ -19,7 +19,7 @@
 //----------------------------------------------------------------------
 
 
-module tbtest();
+module tbtest;
 
   import uvm_pkg::*;
   `include "uvm_macros.svh"
@@ -112,7 +112,7 @@ module tbtest();
   `uvm_blocking_put_imp_decl(_reg)
   
   class user_sequencer extends uvm_sequencer#(user_transaction);
-    `uvm_sequencer_utils(user_sequencer)
+    `uvm_component_utils(user_sequencer)
     function new (string name, uvm_component parent);
       super.new(name, parent);
     endfunction : new
@@ -211,9 +211,12 @@ module tbtest();
        super.new(name,parent);
     endfunction
 
-   virtual function void report(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+   virtual function void report();
+   uvm_coreservice_t cs_;
+   uvm_report_server svr;
+   cs_ = uvm_coreservice_t::get();
+   svr =  cs_.get_report_server();
 
-	uvm_report_server svr =  cs_.get_report_server();
    if (svr.get_severity_count(UVM_FATAL) +
        svr.get_severity_count(UVM_ERROR) +
        svr.get_severity_count(UVM_WARNING) == 0)

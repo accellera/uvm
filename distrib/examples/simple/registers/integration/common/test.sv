@@ -33,7 +33,7 @@ import apb_pkg::*;
 `include "regmodel.sv"
 `include "tb_env.sv"
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    static tb_env env = new("env");
 

@@ -192,9 +192,9 @@ module test;
     run_test();
   end
   initial begin
-    uvm_domain _common_domain = uvm_domain::get_common_domain();
-    uvm_phase run_phase = _common_domain.find_by_name("run");
-    uvm_objection run_phase_objection = run_phase.get_objection();
+    static uvm_domain _common_domain = uvm_domain::get_common_domain();
+    static uvm_phase run_phase = _common_domain.find_by_name("run");
+    static uvm_objection run_phase_objection = run_phase.get_objection();
     #400 $display("______");
     run_phase_objection.display_objections();
     $display("______");

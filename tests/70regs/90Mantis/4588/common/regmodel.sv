@@ -2,6 +2,7 @@
 `define RAL_SLAVE
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 class ral_reg_slave_B1_CHIP_ID extends uvm_reg;
 	uvm_reg_field REVISION_ID;

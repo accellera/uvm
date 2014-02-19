@@ -142,9 +142,8 @@ module top;
        phase.drop_objection(this);
      endtask
 
-     virtual function void report(); uvm_coreservice_t cs_=uvm_coreservice_t::get();
-
-       uvm_report_server svr = cs_.get_report_server();
+     virtual function void report();
+       uvm_report_server svr = uvm_report_server::get_server();
        if (svr.get_severity_count(UVM_FATAL) +
            svr.get_severity_count(UVM_ERROR) == 0)
          $write("** UVM TEST PASSED **\n");

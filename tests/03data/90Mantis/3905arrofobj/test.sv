@@ -109,53 +109,53 @@ class test extends uvm_test;
     super.new(name,parent);
   endfunction
 
-  function void build();
+  function void build();   
     super.build();
     component = my_component::type_id::create("component",this);
     
     // Works
     object_field = 'hbe;
-    set_config_int("component","object.field",object_field);
+    uvm_config_int::set(this, "component","object.field",object_field);
 
     // Works
     object_msg = "goodbye";
-    set_config_string("component","object.msg",object_msg);
+    uvm_config_string::set(this, "component","object.msg",object_msg);
 
     // Works
     array_field = 'h7a;
-    set_config_int("component","array[0].field",array_field);
+    uvm_config_int::set(this, "component","array[0].field",array_field);
 
     // Works
     array_msg = "hello";
-    set_config_string("component","array[1].msg",array_msg);
+    uvm_config_string::set(this, "component","array[1].msg",array_msg);
 
     // do not work
     begin 
       C c =new;
       c.i=123;
-      set_config_object("component","array[2].c",c);
+      uvm_config_object::set(this, "component","array[2].c",c); // -*- semantic changed see mantis3472 (clone bit)
     end
 
     // Works
-    set_config_int("component","array1",4);
+    uvm_config_int::set(this, "component","array1",4);
 
     // Works
-    set_config_int("component","array2",1);
+    uvm_config_int::set(this, "component","array2",1);
     
     begin
     my_object mytmp;
     mytmp = new;
     mytmp.msg = "test ok";
-    set_config_object("component","array[3]",mytmp);
-    set_config_object("component","array[4]",mytmp);
-    set_config_object("component","array3[3]",mytmp);
-    set_config_object("component","array4[5]",mytmp);
-    set_config_object("component","array5[*]",mytmp);
+    uvm_config_object::set(this, "component","array[3]",mytmp); // -*- semantic changed see mantis3472 (clone bit)
+    uvm_config_object::set(this, "component","array[4]",mytmp); // -*- semantic changed see mantis3472 (clone bit)
+    uvm_config_object::set(this, "component","array3[3]",mytmp); // -*- semantic changed see mantis3472 (clone bit)
+    uvm_config_object::set(this, "component","array4[5]",mytmp); // -*- semantic changed see mantis3472 (clone bit)
+    uvm_config_object::set(this, "component","array5[*]",mytmp); // -*- semantic changed see mantis3472 (clone bit)
     end
     
-    set_config_int("component","array5[1]",-1);
-    set_config_string("component","array5[1]","fail");
-    set_config_string("component","array5","fail");
+    uvm_config_int::set(this, "component","array5[1]",-1);
+    uvm_config_string::set(this, "component","array5[1]","fail");
+    uvm_config_string::set(this, "component","array5","fail");
   endfunction
 
   function void end_of_elaboration();

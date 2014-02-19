@@ -110,19 +110,19 @@ cfg_field_set_clone.print();
     endtask
   endclass
 
-  initial begin
+  initial begin  
     cfg_container.value = 22;
     cfg_container.object.push_back(null);
     cfg_container.object[0] = new;
     cfg_container.object[0].color = BLUE; 
     cfg_container.object[0].i = 55; 
     cfg_container.object[0].str = "from cfg"; 
-    set_config_int("*", "cfg_field_set_clone.object", 1);
-    set_config_object("*", "cfg_field_set_clone.object[0]", cfg_container.object[0]);
-    set_config_int("*", "cfg_field_set_ref.object", 1);
-    set_config_object("*", "cfg_field_set_ref.object[0]", cfg_container.object[0], 0);
-    set_config_int("*", "cfg_field_set_sub.object", 1);
-    set_config_object("*", "cfg_field_set_sub.object[0]", cfg_container.object[0]);
+    uvm_config_int::set(null, "*", "cfg_field_set_clone.object", 1);
+    uvm_config_object::set(null, "*", "cfg_field_set_clone.object[0]", cfg_container.object[0].clone()); 
+    uvm_config_int::set(null, "*", "cfg_field_set_ref.object", 1);
+    uvm_config_object::set(null, "*", "cfg_field_set_ref.object[0]", cfg_container.object[0]);
+    uvm_config_int::set(null, "*", "cfg_field_set_sub.object", 1);
+    uvm_config_object::set(null, "*", "cfg_field_set_sub.object[0]", cfg_container.object[0].clone());
     run_test();
   end
 

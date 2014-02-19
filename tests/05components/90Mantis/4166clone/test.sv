@@ -88,20 +88,23 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
          
-   function void build_phase(uvm_phase phase);
+   function void build_phase(uvm_phase phase); 
       co0 = new("co0");
       c0 = new("c0", this);
       c1 = new("c1", this);
       oc0 = new("oc0", this);
       $cast(oc1, oc0.clone());
       co0.config_comp = c1;
-      set_config_object("*", "co", co0, 1);
+      uvm_config_object::set(this, "*", "co", co0.clone()); 
    endfunction
 
-   function void report_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-
-      uvm_root top = cs_.get_root();
-      uvm_report_server svr = top.get_report_server();
+   function void report_phase(uvm_phase phase);
+      uvm_coreservice_t cs_;
+      uvm_root top;
+      uvm_report_server svr;
+      cs_ = uvm_coreservice_t::get();
+      top = cs_.get_root();
+      svr = top.get_report_server();
       if ((svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0) &&
          (cb_illcln_demote::seen == 2) &&

@@ -5,7 +5,7 @@ Format: Development Release 01-12-2008 (1.35 base)
 # Title: [project name]
 # SubTitle: [subtitle]
 
-Footer: Copyright 2008-2013 Mentor Graphics Corp., Copyright 2008-2013 Cadence Design Systems, Inc., Copyright 2011-2013 Synopsys, Inc.
+Footer: Copyright 2008-2013 Mentor Graphics Corp., Copyright 2008-2013 Cadence Design Systems, Inc., Copyright 2011-2013 Synopsys, Inc., Copyright 2013-2014 NVIDIA Corporation
 Timestamp: Updated month day, year
 #   m     - One or two digit month.  January is "1"
 #   mm    - Always two digit month.  January is "01"
@@ -214,6 +214,7 @@ Group: Macros  {
    File: Callbacks                    (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_callback_defines.svh)
    File: TLM                          (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_tlm_defines.svh)
    File: Registers                    (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_reg_defines.svh)
+   File: Version Macros               (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_version_defines.svh)
    }  # Group: Macros
 
 Group: Policies  {
@@ -290,7 +291,8 @@ Group: Globals  {
 
    File: Types, Enums, Policies       (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_object_globals.svh)
    File: Globals                      (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_globals.svh)
-   File: UVM Core Service             (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_coreservice_t::get().svh)
+   File: UVM Core Service             (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_coreservice.svh)
+   File: UVM Traversal 				  (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_traversal.svh)
    }  # Group: Globals
 
 Group: Index  {

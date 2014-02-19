@@ -80,10 +80,11 @@ class test extends uvm_test;
 
 endclass
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+     static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
-     uvm_factory fact = cs_.get_factory();
-     my_server server = new();
+     static uvm_factory fact = cs_.get_factory();
+     static my_server server = new();
      static my_catcher catcher = new();
      uvm_report_cb::add(null, catcher);
      uvm_report_server::set_server(server);

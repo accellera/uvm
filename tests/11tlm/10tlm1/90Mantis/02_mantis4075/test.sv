@@ -88,10 +88,13 @@ class req extends uvm_sequence_item ;
       phase.drop_objection(this);
     endtask
 
-   function void report_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-
-      uvm_root top = cs_.get_root();
-      uvm_report_server svr = top.get_report_server();
+   function void report_phase(uvm_phase phase);
+      uvm_coreservice_t cs_;
+      uvm_root top;
+      uvm_report_server svr;
+      cs_ = uvm_coreservice_t::get();
+      top = cs_.get_root();
+      svr = top.get_report_server();
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0)
          $write("** UVM TEST PASSED **\n");

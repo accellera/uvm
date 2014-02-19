@@ -63,7 +63,7 @@ class xbus_env extends uvm_env;
   endfunction : new
 
   // build_phase
-  function void build_phase(uvm_phase phase);
+  function void build_phase(uvm_phase phase); 
     string inst_name;
     super.build_phase(phase);
     if(has_bus_monitor == 1) begin
@@ -73,7 +73,7 @@ class xbus_env extends uvm_env;
     for(int i = 0; i < num_masters; i++) begin
       $sformat(inst_name, "masters[%0d]", i);
       masters[i] = xbus_master_agent::type_id::create(inst_name, this);
-      set_config_int({inst_name, "*"}, "master_id", i);
+      uvm_config_int::set(this, {inst_name, "*"}, "master_id", i);
     end
     slaves = new[num_slaves];
     for(int i = 0; i < num_slaves; i++) begin

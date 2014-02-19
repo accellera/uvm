@@ -29,13 +29,13 @@ module test;
     `uvm_new_func
     `uvm_component_utils(myleaf)
 
-    function void build();
+    function void build(); 
       super.build();
-      void'(get_config_int("value", build_val));
+      void'(uvm_config_int::get(this, "","value", build_val));
     endfunction
-    task run_phase(uvm_phase phase);
+    task run_phase(uvm_phase phase); 
       phase.raise_objection(this);
-      #5 void'(get_config_int("value", run_val));
+      #5 void'(uvm_config_int::get(this, "","value", run_val));
       phase.drop_objection(this);
     endtask
   endclass
@@ -47,14 +47,14 @@ module test;
     endfunction
     `uvm_component_utils(mycomp)
 
-    function void build();
+    function void build(); 
       super.build();
-      set_config_int("mc", "value", 33);
+      uvm_config_int::set(this, "mc", "value", 33);
       leaf = new("leaf", this);
     endfunction
-    task run_phase(uvm_phase phase);
+    task run_phase(uvm_phase phase); 
       phase.raise_objection(this);
-      #2 set_config_int("leaf", "value", 55);
+      #2 uvm_config_int::set(this, "leaf", "value", 55);
       phase.drop_objection(this);
     endtask
   endclass
@@ -66,17 +66,17 @@ module test;
     endfunction
     `uvm_component_utils(test)
 
-    function void build();
+    function void build(); 
       super.build();
-      set_config_int("mc.leaf", "value", 22);
+      uvm_config_int::set(this, "mc.leaf", "value", 22);
       mc = new("mc", this);
     endfunction
 
-    task run_phase(uvm_phase phase);
+    task run_phase(uvm_phase phase); 
       bit failed = 0;
 
       phase.raise_objection(this);
-      set_config_int("mc.leaf", "value", 44); //takes precedence because of hierarhcy
+      uvm_config_int::set(this, "mc.leaf", "value", 44); //takes precedence because of hierarhcy
       #10;
       if(mc.leaf.build_val != 22) begin 
         $display("*** UVM TEST FAILED, expected mc.leaf.build_val=22 but got %0d ***", mc.leaf.build_val);

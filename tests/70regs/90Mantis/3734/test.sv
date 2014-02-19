@@ -90,7 +90,8 @@ class blk2 extends uvm_reg_block;
    endfunction
 endclass
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    blk2 blk;
    blk = blk2::type_id::create("blk");

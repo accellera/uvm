@@ -111,7 +111,7 @@ class env extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build();
+  function void build();   
     obj o;
 
     // calling super.build here invokes the auto-config feature where
@@ -124,9 +124,9 @@ class env extends uvm_component;
     o = new();
     o.t = 19;
     o.xt = "yo!";
-    set_config_object("*", "o", o, 0); // no clone
-    set_config_int("*", "i", 7);
-    set_config_string("*", "s", "fortitude");
+    uvm_config_object::set(this, "*", "o", o); // no clone
+    uvm_config_int::set(this, "*", "i", 7);
+    uvm_config_string::set(this, "*", "s", "fortitude");
   endfunction
 
 endclass

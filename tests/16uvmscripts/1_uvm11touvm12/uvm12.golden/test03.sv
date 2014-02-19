@@ -57,13 +57,12 @@ module top;
         endfunction
     endclass
 
-    initial begin uvm_coreservice_t cs_=uvm_coreservice_t::get();
-
+    initial begin
         my_catcher ctchr1;
 
         uvm_factory f;
         ctchr1 =  new("Catcher1");
-        f = cs_.get_factory();
+        f = uvm_factory::get();
         f.set_type_override_by_name("test","test2"); 
         f.print();
         f.debug_create_by_name("test", "", "uvm_test_top");

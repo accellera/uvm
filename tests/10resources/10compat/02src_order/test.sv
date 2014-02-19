@@ -28,9 +28,9 @@ module test;
     `uvm_new_func
     `uvm_component_utils(mycomp)
 
-    function void build();
+    function void build(); 
       super.build();
-      void'(get_config_int("value", build_val));
+      void'(uvm_config_int::get(this, "","value", build_val));
     endfunction
   endclass
  
@@ -40,9 +40,9 @@ module test;
     `uvm_new_func
     `uvm_component_utils(mycomp)
 
-    function void build();
+    function void build(); 
       super.build();
-      set_config_int("*", "value", 1);
+      uvm_config_int::set(this, "*", "value", 1);
       mc1 = new("mc1", this);
       mc2 = new("mc2", this);
     endfunction
@@ -55,10 +55,10 @@ module test;
     endfunction
     `uvm_component_utils(test)
 
-    function void build();
+    function void build(); 
       super.build();
-      set_config_int("*", "value", 22);
-      set_config_int("*.mc2", "value", 33);
+      uvm_config_int::set(this, "*", "value", 22);
+      uvm_config_int::set(this, "*.mc2", "value", 33);
       m1 = new("m1", this);
     endfunction
 

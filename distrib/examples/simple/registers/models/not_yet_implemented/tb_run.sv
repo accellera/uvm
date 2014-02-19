@@ -63,7 +63,7 @@ class tb_test extends uvm_test;
 endclass
 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    static tb_env env = new("env");
    static tb_test test = new("test");

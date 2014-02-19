@@ -218,7 +218,8 @@ endclass
 //----------------------------------------------------------------------
 module top;
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    uvm_root top;
    

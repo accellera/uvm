@@ -1,1 +1,1 @@
-../../../../admin/bin/post_test.pl
+../20begin_end/post_test.pl

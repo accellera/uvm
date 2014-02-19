@@ -78,7 +78,8 @@ endclass
 
 
 
-initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+initial begin
+   static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    int n_warns, p_warns;
    uvm_report_server svr;

@@ -51,10 +51,11 @@ class my_catcher extends uvm_report_catcher;
    int sev[sev_id_pair];
    sev_id_pair p;
 
-   virtual function action_e catch(); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
- 
+   virtual function action_e catch();
       string s_str;
       string exp_sev;
+      uvm_coreservice_t cs_;
+      cs_ = uvm_coreservice_t::get();
 
       // Ignore messages from root
       if(get_client() == cs_.get_root())

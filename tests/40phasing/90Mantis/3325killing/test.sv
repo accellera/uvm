@@ -42,7 +42,17 @@ class test extends test_base;
 
   endtask : main_phase
 
-  function void check_phase(uvm_phase phase); uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+  function void check_phase(uvm_phase phase);
+    uvm_coreservice_t cs_;
+    uvm_report_server svr;
+    int e_km_c;
+    int km_c;
+    int e_trs_c;
+    int trs_c;
+    int e_brs_c;
+    int brs_c;
+    cs_ = uvm_coreservice_t::get();
+    svr = cs_.get_report_server();
 
     //normal test
     //  [top_random_seq]    10
@@ -51,15 +61,14 @@ class test extends test_base;
     //  [top_random_seq]     6
     //  [bot_random_seq]    12
 
-    uvm_report_server svr = cs_.get_report_server();
-    int e_km_c =1;
-    int km_c   = svr.get_id_count( "KILLING_MAIN" );
+    e_km_c =1;
+    km_c   = svr.get_id_count( "KILLING_MAIN" );
 
-    int e_trs_c=6;
-    int trs_c  = svr.get_id_count( "top_random_seq" );
+    e_trs_c=6;
+    trs_c  = svr.get_id_count( "top_random_seq" );
 
-    int e_brs_c=12;
-    int brs_c  = svr.get_id_count( "bot_random_seq" );
+    e_brs_c=12;
+    brs_c  = svr.get_id_count( "bot_random_seq" );
 
     if( km_c != e_km_c ) begin
       `uvm_error( "ID_COUNT", $sformatf( "Expected %1d %s message(s).  Got %1d",

@@ -62,7 +62,7 @@ module test;
 			if(is_locked)
 				`uvm_error("FACTORY","uvm factory is locked")
 			else    
-				delegate.set_type_override_by_name(original_type_name,override_type_name,full_inst_path);
+				delegate.set_inst_override_by_name(original_type_name,override_type_name,full_inst_path);
 		endfunction
 
 		virtual function void set_type_override_by_type (uvm_object_wrapper original_type,
@@ -85,11 +85,14 @@ module test;
 		endfunction 
 	endclass    
 
-	initial begin uvm_coreservice_t cs_ = uvm_coreservice_t::get();
+	initial begin
+		static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
 		uvm_locking_factory f;
-  		uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
-  		uvm_factory factory=cs.get_factory();
+		uvm_coreservice_t cs;
+		uvm_factory factory;
+		cs = uvm_coreservice_t::get();                                                     
+		factory = cs.get_factory();
   
 		// create new factory
 		f = new();

@@ -98,6 +98,7 @@ sub run_the_test($$$) {
         my $found_toplevels = 0;
         if (open(COMPILE_LOG,"<$testdir/".&comptime_log_fname())) {
             while(my $line=<COMPILE_LOG>) {
+                $found_toplevels=0 if ($line =~ /^End time:/);
                 if ($found_toplevels) {
                     $toplevels .= " $line ";
                 }
