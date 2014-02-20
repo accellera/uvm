@@ -190,7 +190,7 @@ class uvm_default_coreservice_t extends uvm_coreservice_t;
 
 	// Function: set_report_server
 	// sets the central report server to ~server~
-   virtual function void set_report_server(uvm_report_server server);
+	virtual function void set_report_server(uvm_report_server server);
 		report_server=server;
 	endfunction 
 
