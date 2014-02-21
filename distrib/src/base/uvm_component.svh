@@ -1697,6 +1697,16 @@ virtual class uvm_component extends uvm_report_object;
   // does the pre abort callback hierarchically
   extern /*local*/ function void m_do_pre_abort;
 
+
+typedef struct  {
+	string arg;
+	string args[$];
+	int unsigned used;
+} uvm_cmdline_parsed_arg_t;
+
+static uvm_cmdline_parsed_arg_t m_uvm_applied_cl_action[$];
+static uvm_cmdline_parsed_arg_t m_uvm_applied_cl_sev[$];
+
 endclass : uvm_component
 
 `include "base/uvm_root.svh"
@@ -3446,7 +3456,6 @@ function void uvm_component::m_set_cl_verb;
   first = 0;
 endfunction
 
-
 // m_set_cl_action
 // ---------------
 
@@ -3454,40 +3463,47 @@ function void uvm_component::m_set_cl_action;
   // _ALL_ can be used for ids or severities
   // +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>
   // +uvm_set_action=uvm_test_top.env0.*,_ALL_,UVM_ERROR,UVM_NO_ACTION
-
-  static string values[$];
-  static bit bad_args[int];
-  static int applied_cmdline[int];
 	
-  string args[$];
+  static bit initialized = 0;
   uvm_severity sev;
   uvm_action action;
 
-  if(!values.size())
+  if(!initialized) begin
+	string values[$];
     void'(uvm_cmdline_proc.get_arg_values("+uvm_set_action=",values));
+	foreach(values[idx]) begin
+		uvm_cmdline_parsed_arg_t t;
+		string args[$];
+	 	uvm_split_string(values[idx], ",", args);	
 
-  foreach(values[i]) begin
-	if(bad_args.exists(i)) continue;
-	
-    uvm_split_string(values[i], ",", args);
+		if(args.size() != 4) begin
+	   		`uvm_warning("INVLCMDARGS", $sformatf("+uvm_set_action requires 4 arguments, but %0d given for command +uvm_set_action=%s, Usage: +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>", args.size(), values[idx]))
+	   		continue;
+   		end
+   		if((args[2] != "_ALL_") && !uvm_string_to_severity(args[2], sev)) begin
+	   		`uvm_warning("INVLCMDARGS", $sformatf("Bad severity argument \"%s\" given to command +uvm_set_action=%s, Usage: +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>", args[2], values[idx]))
+	   		continue;
+   		end
+   		if(!uvm_string_to_action(args[3], action)) begin
+	   		`uvm_warning("INVLCMDARGS", $sformatf("Bad action argument \"%s\" given to command +uvm_set_action=%s, Usage: +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>", args[3], values[idx]))
+	   		continue;
+   		end
+   		t.args=args;   
+   		t.arg=values[idx];
+   		m_uvm_applied_cl_action.push_back(t);
+	end 
+	initialized=1;
+  end
+  
+  foreach(m_uvm_applied_cl_action[i]) begin
+	string args[$] = m_uvm_applied_cl_action[i].args;
+
 	if (!uvm_is_match(args[0], get_full_name()) ) continue; 
 	
-    if(args.size() != 4) begin
-      `uvm_warning("INVLCMDARGS", $sformatf("+uvm_set_action requires 4 arguments, but %0d given for command +uvm_set_action=%s, Usage: +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>", args.size(), values[i]))
-       bad_args[i]=1;
-	   continue;
-    end
-    if((args[2] != "_ALL_") && !uvm_string_to_severity(args[2], sev)) begin
-      `uvm_warning("INVLCMDARGS", $sformatf("Bad severity argument \"%s\" given to command +uvm_set_action=%s, Usage: +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>", args[2], values[i]))
-       bad_args[i]=1;
-	   continue;
-    end
-    if(!uvm_string_to_action(args[3], action)) begin
-      `uvm_warning("INVLCMDARGS", $sformatf("Bad action argument \"%s\" given to command +uvm_set_action=%s, Usage: +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>", args[3], values[i]))
-      bad_args[i]=1;
-      continue;
-    end
-    applied_cmdline[i]++;
+	void'(uvm_string_to_severity(args[2], sev));
+	void'(uvm_string_to_action(args[3], action));
+	
+    m_uvm_applied_cl_action[i].used++;
     if(args[1] == "_ALL_") begin
       if(args[2] == "_ALL_") begin
         set_report_severity_action(UVM_INFO, action);
@@ -3520,37 +3536,44 @@ function void uvm_component::m_set_cl_sev;
   //  +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>
   //  +uvm_set_severity=uvm_test_top.env0.*,BAD_CRC,UVM_ERROR,UVM_WARNING
 
-  static string values[$];
-  static bit bad_args[int];
-  static int applied_cmdline[int];
-
-  string args[$];
+  static bit initialized;
   uvm_severity orig_sev, sev;
 
-  if(!values.size())
+  if(!initialized) begin
+	string values[$];
     void'(uvm_cmdline_proc.get_arg_values("+uvm_set_severity=",values));
+	foreach(values[idx]) begin
+		uvm_cmdline_parsed_arg_t t;
+		string args[$];
+	 	uvm_split_string(values[idx], ",", args);	
+	 	if(args.size() != 4) begin
+      		`uvm_warning("INVLCMDARGS", $sformatf("+uvm_set_severity requires 4 arguments, but %0d given for command +uvm_set_severity=%s, Usage: +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>", args.size(), values[idx]))
+      		continue;
+    	end
+    	if(args[2] != "_ALL_" && !uvm_string_to_severity(args[2], orig_sev)) begin
+      		`uvm_warning("INVLCMDARGS", $sformatf("Bad severity argument \"%s\" given to command +uvm_set_severity=%s, Usage: +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>", args[2], values[idx]))
+      		continue;
+    	end
+    	if(!uvm_string_to_severity(args[3], sev)) begin
+      		`uvm_warning("INVLCMDARGS", $sformatf("Bad severity argument \"%s\" given to command +uvm_set_severity=%s, Usage: +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>", args[3], values[idx]))
+      		continue;
+    	end
+	 	
+	 	t.args=args;
+    	t.arg=values[idx];
+	 	m_uvm_applied_cl_sev.push_back(t);
+	end	
+	initialized=1;
+  end
 
-  foreach(values[i]) begin
-	if(bad_args.exists(i)) continue;
-	  	
-    uvm_split_string(values[i], ",", args);
-    if(args.size() != 4) begin
-      `uvm_warning("INVLCMDARGS", $sformatf("+uvm_set_severity requires 4 arguments, but %0d given for command +uvm_set_severity=%s, Usage: +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>", args.size(), values[i]))
-       bad_args[i]=1;
-      continue;
-    end
+  foreach(m_uvm_applied_cl_sev[i]) begin
+  	string args[$]=m_uvm_applied_cl_sev[i].args;
+
     if (!uvm_is_match(args[0], get_full_name()) ) continue; 
-    if(args[2] != "_ALL_" && !uvm_string_to_severity(args[2], orig_sev)) begin
-      `uvm_warning("INVLCMDARGS", $sformatf("Bad severity argument \"%s\" given to command +uvm_set_severity=%s, Usage: +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>", args[2], values[i]))
-       bad_args[i]=1;
-      continue;
-    end
-    if(!uvm_string_to_severity(args[3], sev)) begin
-      `uvm_warning("INVLCMDARGS", $sformatf("Bad severity argument \"%s\" given to command +uvm_set_severity=%s, Usage: +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>", args[3], values[i]))
-       bad_args[i]=1;
-      continue;
-    end
-    applied_cmdline[i]++;
+	    
+	void'(uvm_string_to_severity(args[2], orig_sev));
+	void'(uvm_string_to_severity(args[3], sev));   	
+    m_uvm_applied_cl_sev[i].used++;
     if(args[1] == "_ALL_" && args[2] == "_ALL_") begin
       set_report_severity_override(UVM_INFO,sev);
       set_report_severity_override(UVM_WARNING,sev);
