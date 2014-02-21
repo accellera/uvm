@@ -1,0 +1,11 @@
++UVM_VERBOSITY=UVM_MEDIUM
++uvm_set_action=foo,A,UVM_ERROR,UVM_NO_ACTION,ADDON
++uvm_set_action=foo,A,UVM_NOTHING,UVM_EXIT
++uvm_set_action=foo,A,UVM_NOTHING,NOTHING+MAYBE=EVENTUALLY
++uvm_set_action=foo,A,UVM_ERROR,UVM_NO_ACTION
++uvm_set_action=uvm_test_top,A,UVM_ERROR,UVM_NO_ACTION
++uvm_set_severity=foo,B,UVM_ERROR,UVM_INFO
++uvm_set_severity=foo,B,UVM_ERROR,UVM_EXIT,ADDON
++uvm_set_severity=foo,B,UVM_NOTHING,UVM_FATAL
++uvm_set_severity=foo,B,UVM_ERROR,UVM_NOTHING
++uvm_set_severity=uvm_test_top,B,UVM_ERROR,UVM_INFO
