@@ -78,17 +78,15 @@ module test;
   endclass // test
    
 class my_simple_item extends simple_item;
-   int unsigned x = 'hdeadbeef;
+  static int unsigned x = 'hdeadbeef;
  function new (string name = "simple_item");
     super.new(name);
  endfunction : new
-   function void post_generate();
+   function void post_randomize();
       addr=x;
-      data=x;
+      data=x+1;
 
       x = x ^ (x << 2);
-      $display("foo");
-      
    endfunction // post_generate
    `uvm_object_utils(my_simple_item)
 endclass // my_simple_item
