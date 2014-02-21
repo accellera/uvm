@@ -50,14 +50,11 @@ Don't Index: Typedefs
 
 File: Introduction                    (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/intro.txt)
 
-Group: Release Notes  {
-
-   File: Mandatory uvm_object Constructors  (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/relnotes/Mantis_3770.txt)
-   }  # Group: Release Notes
+File: Release Notes                   (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/relnotes.txt)
 
 Group: Base  {
 
-   File: Overview                     (no auto-title, UVM_ROOT/uvm_ref/base.txt)
+   File: Overview                     (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/base.txt)
    File: uvm_void                     (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_misc.svh)
    File: uvm_object                   (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_object.svh)
    File: uvm_transaction              (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_transaction.svh)

@@ -2,7 +2,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
-//   Copyright 2013      NVIDIA Corporation
+//   Copyright 2013-2014 NVIDIA Corporation
 //   Copyright 2013      Cisco Systems, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -2551,7 +2551,7 @@ endfunction \
 // Implements the data operations for an associative array of integral
 // types indexed by any integral key data type. 
 //
-//|  `uvm_field_aa_int_key(long unsigned,ARG,FLAG)
+//|  `uvm_field_aa_int_key(KEY,ARG,FLAG)
 //
 // ~KEY~ is the data type of the integral key, ~ARG~ is the name of a property 
 // that is an associative array of integrals, and ~FLAG~ is a bitwise OR of one 
@@ -2570,11 +2570,11 @@ endfunction \
 // Implements the data operations for an associative array of integral
 // types indexed by any enumeration key data type. 
 //
-//|  `uvm_field_aa_int_longint_unsigned(ARG,FLAG)
+//|  `uvm_field_aa_int_enumkey(KEY, ARG,FLAG)
 //
-// ~ARG~ is the name of a property that is an associative array of integrals
-// with ~longint unsigned~ key, and ~FLAG~ is a bitwise OR of one or more
-// flag settings as described in <Field Macros> above.
+// ~KEY~ is the enumeration type of the key, ~ARG~ is the name of a property 
+// that is an associative array of integrals, and ~FLAG~ is a bitwise OR of one 
+// or more flag settings as described in <Field Macros> above.
 
 `define uvm_field_aa_int_enumkey(KEY, ARG, FLAG) \
   begin \
