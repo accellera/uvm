@@ -21,10 +21,11 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
+// File: Miscellaneous Structures
 
 //------------------------------------------------------------------------------
 //
-// Topic: uvm_void
+// Class: uvm_void
 //
 // The ~uvm_void~ class is the base class for all UVM classes. It is an abstract
 // class with no data members or functions. It allows for generic containers of

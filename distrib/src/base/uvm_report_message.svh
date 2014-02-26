@@ -311,7 +311,7 @@ class uvm_report_message_element_container extends uvm_object;
 
   // Function: delete
   //
-  // Delete the <index>-th element in the container
+  // Delete the ~index~-th element in the container
   //
 
   virtual function void delete(int index);
@@ -754,7 +754,7 @@ class uvm_report_message extends uvm_object;
 
   // Function: set_line
   //
-  // Get or set the line in the <file> from which the message originates.
+  // Get or set the line in the ~file~ from which the message originates.
   // This value is automatically populate by the messaging macros.
 
   virtual function void set_line(int ln);

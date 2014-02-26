@@ -5,7 +5,7 @@ Format: Development Release 01-12-2008 (1.35 base)
 # Title: [project name]
 # SubTitle: [subtitle]
 
-Footer: Copyright 2008-2013 Mentor Graphics Corp., Copyright 2008-2013 Cadence Design Systems, Inc., Copyright 2011-2013 Synopsys, Inc., Copyright 2013-2014 NVIDIA Corporation
+Footer: Copyright 2008-2014 Mentor Graphics Corp., Copyright 2008-2014 Cadence Design Systems, Inc., Copyright 2011-2014 Synopsys, Inc., Copyright 2013-2014 NVIDIA Corporation
 Timestamp: Updated month day, year
 #   m     - One or two digit month.  January is "1"
 #   mm    - Always two digit month.  January is "01"
@@ -145,10 +145,10 @@ Group: TLM  {
 
    Group: TLM2  {
 
-      File: Interface Masks           (no auto-title, UVM_ROOT/distrib/docs/html/src/tlm2/uvm_tlm2_defines.svh)
       File: Overview                  (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/tlm2.txt)
+      File: Interface Masks           (no auto-title, UVM_ROOT/distrib/docs/html/src/tlm2/uvm_tlm2_defines.svh)
+      File: TLM2 Types                (no auto-title, UVM_ROOT/distrib/docs/html/src/tlm2/uvm_tlm2_ifs.svh)
       File: TLM Generic Payload &amp; Extensions (no auto-title, UVM_ROOT/distrib/docs/html/src/tlm2/uvm_tlm2_generic_payload.svh)
-      File: tlm interfaces            (no auto-title, UVM_ROOT/distrib/docs/html/src/tlm2/uvm_tlm2_ifs.svh)
       File: TLM Socket Base Classes   (no auto-title, UVM_ROOT/distrib/docs/html/src/tlm2/uvm_tlm2_sockets_base.svh)
       File: TLM Sockets               (no auto-title, UVM_ROOT/distrib/docs/html/src/tlm2/uvm_tlm2_sockets.svh)
       File: TLM2 Export Classes       (no auto-title, UVM_ROOT/distrib/docs/html/src/tlm2/uvm_tlm2_exports.svh)

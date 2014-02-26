@@ -192,7 +192,7 @@ virtual class uvm_component extends uvm_report_object;
   // <build_phase>.
   //
   // All processes associated with a task-based phase are killed when the phase
-  // ends. See <uvm_phase::execute> for more details.
+  // ends. See <uvm_task_phase> for more details.
   //----------------------------------------------------------------------------
 
 
@@ -623,7 +623,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // Custom component base classes requiring a custom phasing schedule can
   // augment or replace the domain definition they inherit by overriding
-  // <defined_domain>. To augment, overrides would call super.define_domain().
+  // their ~defined_domain~. To augment, overrides would call super.define_domain().
   // To replace, overrides would not call super.define_domain().
   // 
   // The default implementation adds a copy of the ~uvm~ phasing schedule to
@@ -631,14 +631,14 @@ virtual class uvm_component extends uvm_report_object;
   // is currently empty.
   //
   // Calling <set_domain>
-  // with the default ~uvm~ domain (see <uvm_domain::get_uvm_domain>) on
+  // with the default ~uvm~ domain (ie. <uvm_domain::get_uvm_domain> ) on
   // a component with no ~define_domain~ override effectively reverts the
   // that component to using the default ~uvm~ domain. This may be useful
   // if a branch of the testbench hierarchy defines a custom domain, but
   // some child sub-branch should remain in the default ~uvm~ domain,
   // call <set_domain> with a new domain instance handle with ~hier~ set.
   // Then, in the sub-branch, call <set_domain> with the default ~uvm~ domain handle,
-  // obtained via <uvm_domain::get_uvm_domain()>.
+  // obtained via <uvm_domain::get_uvm_domain>.
   //
   // Alternatively, the integrator may define the graph in a new domain externally,
   // then call <set_domain> to apply it to a component.
