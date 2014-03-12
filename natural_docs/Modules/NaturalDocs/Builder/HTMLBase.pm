@@ -1517,8 +1517,10 @@ sub BuildPrototype #(type, prototype, file, in_summary)
         if ($in_summary) {
           $limit = 55;
         }
-        my $useCondensed = (length($beforeParams) + $maxParamLength + length($afterParams) > $limit ? 1 : 0);
-        
+#JUSTINR- Force Condensed format to allow easier PDF conversion
+#        my $useCondensed = (length($beforeParams) + $maxParamLength + length($afterParams) > $limit ? 1 : 0);
+        my $useCondensed = 1;       
+       
         my $parameterColumns = 1 + $hasType + $hasTypePrefix + $hasNamePrefix +
                                                $hasDefaultValue + $hasDefaultValuePrefix + $useCondensed;
 
