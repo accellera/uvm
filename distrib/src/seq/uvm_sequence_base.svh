@@ -289,13 +289,10 @@ class uvm_sequence_base extends uvm_sequence_item;
 
     if (m_sequencer != null) begin
        integer handle;
-       uvm_tr_stream stream;
        if (m_parent_sequence == null) begin
-          stream = m_sequencer.get_tr_stream(get_name(), "Transactions");
           handle = m_sequencer.begin_tr(this, get_name());
           m_tr_recorder = uvm_recorder::get_recorder_from_handle(handle);
        end else begin
-          stream = m_sequencer.get_tr_stream(get_root_sequence_name(), "Transactions");
           handle = m_sequencer.begin_child_tr(this, 
                                               (m_parent_sequence.m_tr_recorder == null) ? 0 : m_parent_sequence.m_tr_recorder.get_handle(), 
                                               get_root_sequence_name());

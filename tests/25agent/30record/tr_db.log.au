@@ -1,4 +1,3 @@
-  CREATE_STREAM @X{NAME:simple_triple_do T:Transactions SCOPE:uvm_test_top.agent[0].sequencer STREAM:@H}
   CREATE_STREAM @X{NAME:simple_triple_do T: SCOPE:uvm_test_top.agent[0].sequencer STREAM:@H}
     OPEN_RECORDER @X{TXH:@H STREAM:@H NAME:simple_triple_do TIME:0 TYPE="Begin_No_Parent, Link"}
     OPEN_RECORDER @X{TXH:@H STREAM:@H NAME:req TIME:0 TYPE="Begin_End, Link"}
@@ -24,7 +23,6 @@
     FREE_RECORDER @X{TXH:@H}
     CLOSE_RECORDER @X{TXH:@H TIME=30}
     FREE_RECORDER @X{TXH:@H}
-  CREATE_STREAM @X{NAME:simple_triple_do T:Transactions SCOPE:uvm_test_top.agent[1].sequencer STREAM:@H}
   CREATE_STREAM @X{NAME:simple_triple_do T: SCOPE:uvm_test_top.agent[1].sequencer STREAM:@H}
     OPEN_RECORDER @X{TXH:@H STREAM:@H NAME:simple_triple_do TIME:30 TYPE="Begin_No_Parent, Link"}
   CREATE_STREAM @X{NAME:simple_triple_do T: SCOPE:uvm_test_top.agent[1].driver STREAM:@H}

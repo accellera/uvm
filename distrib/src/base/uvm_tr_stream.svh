@@ -409,16 +409,6 @@ virtual class uvm_tr_stream extends uvm_object;
       end
    endfunction : get_handle
    
-   // Function- m_get_handle
-   // Provided to allow implementation-specific handles which are not
-   // identical to the built-in handles.
-   //
-   // This is an implementation detail of the UVM library, which allows
-   // for vendors to (optionally) put vendor-specific methods into the library.
-   virtual function integer m_get_handle();
-      return get_handle();
-   endfunction : m_get_handle
-   
    // Function: get_stream_from_handle
    // Static accessor, returns a stream reference for a given unique id.
    //
