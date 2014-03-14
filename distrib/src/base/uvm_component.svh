@@ -1653,7 +1653,6 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual function uvm_object create (string name=""); 
   extern virtual function uvm_object clone  ();
 
-  local uvm_tr_stream m_main_stream;
   local uvm_tr_stream m_streams[string][string];
   local uvm_recorder m_tr_h[uvm_transaction];
   extern protected function integer m_begin_tr (uvm_transaction tr,
@@ -2723,13 +2722,10 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
      name = tr.get_type_name();
    
    if (uvm_verbosity'(recording_detail) != UVM_NONE) begin
-      if ((stream_name == "") || (stream_name == "main")) begin
-        if (m_main_stream == null)
-           m_main_stream = db.open_stream("main", this.get_full_name(), "TVM");
-         stream = m_main_stream;
-      end
-      else
-        stream = get_tr_stream(stream_name);
+      if (stream_name == "")
+        stream_name = "main";
+
+      stream = get_tr_stream(stream_name, "TVM");
 
       if (stream != null ) begin
          kind = (parent_recorder == null) ? "Begin_No_Parent, Link" : "Begin_End, Link";
@@ -2835,14 +2831,11 @@ function integer uvm_component::record_error_tr (string stream_name="main",
    
    if(error_time == 0) error_time = $realtime;
 
-   if ((stream_name=="") || (stream_name=="main")) begin
-      if (m_main_stream == null)
-        m_main_stream = tr_database.open_stream("main", this.get_full_name(), "TVM");
-      stream = m_main_stream;
-   end
-   else
-     stream = get_tr_stream(stream_name);
+   if (stream_name == "")
+     stream_name = "main";
 
+   stream = get_tr_stream(stream_name, "TVM");
+   
    handle = 0;
    if (stream != null) begin
 
@@ -2893,13 +2886,10 @@ function integer uvm_component::record_event_tr (string stream_name="main",
    
    if(event_time == 0) event_time = $realtime;
    
-   if ((stream_name=="") || (stream_name=="main")) begin
-      if (m_main_stream == null)
-        m_main_stream = tr_database.open_stream("main", this.get_full_name(), "TVM");
-      stream = m_main_stream;
-   end
-   else
-     stream = get_tr_stream(stream_name);
+   if (stream_name == "")
+     stream_name = "main";
+   
+   stream = get_tr_stream(stream_name, "TVM");
 
    handle = 0;
    if (stream != null) begin
