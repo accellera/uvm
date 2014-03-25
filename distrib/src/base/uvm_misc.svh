@@ -460,7 +460,7 @@ function string uvm_leaf_scope (string full_name, byte scope_separator = ".");
   if(bracket_match != "" && bracket_match != full_name[full_name.len()-1])
     bracket_match = "";
 
-  for(pos=full_name.len()-1; pos!=0; --pos) begin
+  for(pos=full_name.len()-1; pos>0; --pos) begin
     if(full_name[pos] == bracket_match) bmatches++;
     else if(full_name[pos] == scope_separator) begin
       bmatches--;
