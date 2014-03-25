@@ -65,7 +65,7 @@ class uvm_spell_chkr #(type T=int);
   // If, on average, that proves to be an invalid assumption then we'll
   // have to find ways to optimize this algorithm.
   //--------------------------------------------------------------------
-  static function bit check (tab_t strtab, string s);
+  static function bit check (ref tab_t strtab, input string s);
 
     string key;
     int distance;
