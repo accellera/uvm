@@ -880,9 +880,10 @@ class uvm_resource_pool;
 
     // Does an entry in the name map exist with the specified name?
     // If not, then we're done
-    if((rpterr && !spell_check(name)) || (!rpterr && !rtab.exists(name))) begin
-      return q;
-    end
+    if(!rtab.exists(name)) begin
+	    if(rpterr) spell_check(name);	
+		return q;
+    end	
 
     rsrc = null;
     rq = rtab[name];
