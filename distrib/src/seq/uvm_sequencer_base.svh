@@ -980,8 +980,19 @@ endfunction
 // --------------------------------
 
 task uvm_sequencer_base::m_wait_for_arbitration_completed(int request_id);
-      wait(arb_completed.exists(request_id));
-      arb_completed.delete(request_id);
+  int lock_arb_size;
+  
+  // Search the list of arb_wait_q, see if this item is done
+  forever 
+    begin
+      lock_arb_size  = m_lock_arb_size;
+      
+      if (arb_completed.exists(request_id)) begin
+        arb_completed.delete(request_id);
+        return;
+      end
+      wait (lock_arb_size != m_lock_arb_size);
+    end
 endtask
 
 
