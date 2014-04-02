@@ -1020,7 +1020,7 @@ function void uvm_reg_map::add_submap (uvm_reg_map child_map,
         `uvm_error("RegModel",
           {"Submap '",child_map.get_full_name(),"' may not be added to this ",
           "address map, '", get_full_name(),"', as the submap's parent block, '",
-          child_blk.get_full_name(),"', is neither this map's parent block nor a child of this map's parent block, '",
+          child_blk.get_full_name(),"', is neither this map's parent block nor a descendent of this map's parent block, '",
           m_parent.get_full_name(),"'"})
       return;
      end
