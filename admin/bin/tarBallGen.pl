@@ -78,7 +78,7 @@ $cmd .= "git push  --tags --force origin;";
 system ("echo \"$cmd\""); system ("$cmd") unless $debug;
 
 # Generate the tarball
-$cmd = "git archive --format tar.gz --prefix=$prefix/  $tag > ../../$tar";
+$cmd = "git archive --format tar.gz --prefix=$prefix/  refs/tags/$rbranch > ../../$tar";
 system ("echo $cmd"); system ("$cmd");
 
 print "Tarball ready: $tar\n";
