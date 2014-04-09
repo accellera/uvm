@@ -33,42 +33,44 @@ module top();
     endfunction
   endclass
 
+  class my_sequencer extends uvm_sequencer #(my_item);
+    `uvm_sequencer_utils(my_sequencer)
+
+    function new(string name, uvm_component parent);
+      super.new(name, parent);
+      `uvm_update_sequence_lib_and_item(my_item)
+    endfunction
+  endclass
+
   class my_sub_sequence extends uvm_sequence #(my_item);
-    `uvm_object_utils(my_sub_sequence)
+    `uvm_sequence_utils(my_sub_sequence,my_sequencer)
     function new(string name = "my_sub_sequence");
       super.new(name);
     endfunction
     task body();
 	my_item m;
+        uvm_test_done.raise_objection(this);     
 	`uvm_do(m)
+        uvm_test_done.drop_objection(this);     
     endtask
   endclass  
 
   class my_sequence extends uvm_sequence #(my_item);
-    `uvm_object_utils(my_sequence)
+    `uvm_sequence_utils(my_sequence,my_sequencer)
     function new(string name = "my_sequence");
       super.new(name);
-    endfunction // new
+    endfunction
     task body();
-       $display("FOO");
-begin
-       
-       my_sequence s;
-       
-        uvm_phase phase=get_starting_phase();       
-       $display("BLA");
-        phase.raise_objection(this); 
-       
-        begin    
- 	uvm_sequence#(my_item) s = my_sub_sequence::type_id::create("seq");
+	int i = get_seq_kind("my_sub_sequence");
+        uvm_test_done.raise_objection(this);     
 	`uvm_info("MANTIS","now doing do_sequence_kind",UVM_NONE)
-	`uvm_do(s)
-	end
-        phase.drop_objection(this);
-   end
+	do_sequence_kind(i);
+        uvm_test_done.drop_objection(this);     
     endtask
   endclass
 
+
+  
   class my_driver extends uvm_driver #(my_item);
     `uvm_component_utils(my_driver)
 
@@ -76,7 +78,7 @@ begin
       super.new(name, parent);
     endfunction
 
-    task run_phase(uvm_phase phase);
+    task run();
       forever begin
         seq_item_port.get_next_item(req);
         #100;
@@ -88,24 +90,24 @@ begin
   class my_agent extends uvm_agent;
     `uvm_component_utils(my_agent)
 
-    uvm_sequencer #(my_item) ms;
+    my_sequencer ms;
     my_driver md;
 
     function new(string name, uvm_component parent);
       super.new(name, parent);
     endfunction
 
-    function void build_phase(uvm_phase phase);
-      super.build_phase(phase);
-      ms = uvm_sequencer #(my_item)::type_id::create("ms", this);
+    function void build();
+      super.build();
+      ms = my_sequencer::type_id::create("ms", this);
       md = my_driver::type_id::create("md", this);
     endfunction
 
-    function void connect_phase(uvm_phase phase);
-       super.connect_phase(phase);
+    function void connect();
       md.seq_item_port.connect(ms.seq_item_export);
     endfunction
   endclass
+
   
   class test extends uvm_test;
     `uvm_component_utils(test)
@@ -116,13 +118,13 @@ begin
       super.new(name, parent);
     endfunction
 
-    function void build_phase(uvm_phase phase); 
+    function void build();
       super.build();
       ma0 = my_agent::type_id::create("ma0", this);
-      uvm_config_string::set(this, "ma0.ms","default_sequence","my_sequence");
+      set_config_string("ma0.ms","default_sequence","my_sequence");
     endfunction
 
-    function void report_phase(uvm_phase phase);
+    function void report();
       `uvm_info("MANTIS","UVM TEST PASSED",UVM_NONE)
       `uvm_info(get_type_name(), $sformatf("The topology:\n%s", this.sprint()), UVM_HIGH)
     endfunction
