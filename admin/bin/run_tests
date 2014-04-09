@@ -462,6 +462,10 @@ sub check_test {
      return 1;
    }
 
+   # FIXME the script has a serious flaw because the decision pass/fail is taken
+   # without considering all input (here we consider it pass BUT it could fail 
+   # with simulator failures
+
    # FATAL may be the expected outcome
    if ($pass > 0 && $n_fatals > 0) {
      print "pass (UVM_FATALs)\n";
@@ -474,22 +478,8 @@ sub check_test {
      return 1;
    }
 
-   if ($pass) {
-     if ($n_errs > 0) {
-       print "pass (with UVM_ERRORs)\n";
-     } else {
-       print "pass.\n";
-     }
-     return 0;
-   }
-
    # Maybe the run-time errors were expected...   
    @errs = &get_runtime_errors($testdir);
-   if ($#errs == -1) {
-     print "**FAIL** (Did not pass)\n";
-     return 1;
-   }
- 
    foreach $err (@errs) {
      local(@s)=split('#',$err);
      if (&check_runtime_error($testdir, $s[0], $s[1])) {
@@ -498,8 +488,17 @@ sub check_test {
      }
    }
 
-   print "pass (with runtime error(s))\n";
-   return 0;
+     if ($n_errs > 0) {
+       print "pass (with UVM_ERRORs)\n";
+     } elsif(scalar(@errs)) {
+        print "pass (with runtime error(s))\n";
+     } else {    
+       print "pass.\n";
+     }
+     return 0;
+
+#   print "**FAIL** !pass&&!error\n";
+#   return 1;
 }
 
 

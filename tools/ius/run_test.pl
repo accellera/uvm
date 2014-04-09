@@ -165,10 +165,12 @@ sub get_runtime_errors {
 
   local(@errs)=();
 
-  while ($_ = <LOG>) {
+  while (<LOG>) {
    if (/^(ncsim): \*[FE],\w+ \(([^,]+),(\d+)\|(\d+)\):/) {
 	  push(@errs, "$2#$3");
-    }
+   } elsif (/^(ncsim): \*[FE],\w+:/) {
+	  push(@errs, "$2#0");
+   }
 
     if (/^ERROR:/) {
 	  push(@errs, "fname#2");
@@ -176,7 +178,7 @@ sub get_runtime_errors {
   }
 
   close(LOG);
-  
+
   return @errs;
 }
 
