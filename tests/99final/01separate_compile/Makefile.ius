@@ -24,5 +24,5 @@
 # well this cannot be checked but for instance `UVM_REG_DATA_WIDTH was missing before
 #
 all: 
-	irun -uvmhome $(UVM_HOME) -access -rw +UVM_TESTNAME=test +UVM_VERBOSITY=HIGH +define+NUM_REGS=10 -clean test1.sv
+	irun -uvmhome $(UVM_HOME) -access rw +UVM_TESTNAME=test +UVM_VERBOSITY=HIGH +define+NUM_REGS=10 -clean test1.sv
 	$(CHECK)
