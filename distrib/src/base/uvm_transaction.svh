@@ -156,7 +156,7 @@ virtual class uvm_transaction extends uvm_object;
   // - The <do_accept_tr> method is called to allow for any post-accept
   //   action in derived classes.
 
-  extern function void accept_tr (time accept_time=0);
+  extern function void accept_tr (time accept_time = 0);
 
   
   // Function: do_accept_tr
@@ -201,7 +201,7 @@ virtual class uvm_transaction extends uvm_object;
   // recording is enabled. The meaning of the handle is implementation specific.
 
 
-  extern function integer begin_tr (time begin_time=0);
+  extern function integer begin_tr (time begin_time = 0);
 
   
   // Function: begin_child_tr
@@ -236,8 +236,8 @@ virtual class uvm_transaction extends uvm_object;
   // The return value is a transaction handle, which is valid (non-zero) only if
   // recording is enabled. The meaning of the handle is implementation specific.
 
-  extern function integer begin_child_tr (time begin_time=0, 
-                                               integer parent_handle=0);
+  extern function integer begin_child_tr (time begin_time = 0, 
+                                               integer parent_handle = 0);
 
 
   // Function: do_begin_tr
