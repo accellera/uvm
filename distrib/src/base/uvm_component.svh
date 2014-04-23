@@ -963,7 +963,7 @@ virtual class uvm_component extends uvm_report_object;
   // applied. If the component's <print_config_matches> property is set, then
   // apply_config_settings is automatically called with ~verbose~ = 1.
 
-  extern virtual function void apply_config_settings (bit verbose=0);
+  extern virtual function void apply_config_settings (bit verbose = 0);
 
 
   // Function: print_config_settings
@@ -1410,7 +1410,7 @@ virtual class uvm_component extends uvm_report_object;
   // - Triggers the component's internal accept_tr event. Any processes waiting
   //   on this event will resume in the next delta cycle. 
 
-  extern function void accept_tr (uvm_transaction tr, time accept_time=0);
+  extern function void accept_tr (uvm_transaction tr, time accept_time = 0);
 
 
   // Function: do_accept_tr

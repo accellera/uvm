@@ -268,7 +268,7 @@ virtual class uvm_printer;
   // print. Generally, there is no output associated with the array footer, but
   // this method let's the printer know that the array printing is complete.
 
-  extern virtual  function void print_array_footer (int size=0);
+  extern virtual  function void print_array_footer (int size = 0);
 
 
 

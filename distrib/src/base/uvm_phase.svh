@@ -283,14 +283,14 @@ class uvm_phase extends uvm_object;
   //
   // Returns the topmost parent schedule node, if any, for hierarchical graph traversal
   //
-  extern function uvm_phase get_schedule(bit hier=0);
+  extern function uvm_phase get_schedule(bit hier = 0);
 
 
   // Function: get_schedule_name
   //
   // Returns the schedule name associated with this phase node
   //
-  extern function string get_schedule_name(bit hier=0);
+  extern function string get_schedule_name(bit hier = 0);
 
 
   // Function: get_domain
