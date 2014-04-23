@@ -169,7 +169,7 @@ virtual class uvm_report_server extends uvm_object;
         //
         // The run_test method in uvm_top calls this method.
 
-        pure virtual function void report_summarize(UVM_FILE file=0);
+        pure virtual function void report_summarize(UVM_FILE file = 0);
 
 
 `ifndef UVM_NO_DEPRECATED 
@@ -818,7 +818,7 @@ class uvm_default_report_server extends uvm_report_server;
   //
   // The run_test method in uvm_top calls this method.
 
-  virtual function void report_summarize(UVM_FILE file=0);
+  virtual function void report_summarize(UVM_FILE file = 0);
     string id;
     string name;
     string output_str;
