@@ -301,7 +301,7 @@ class uvm_report_message_element_container extends uvm_object;
 
   // Function: size
   //
-  // Returns the size of the container, ie. the number of elements
+  // Returns the size of the container, i.e. the number of elements
   //
 
   virtual function int size();
@@ -721,7 +721,7 @@ class uvm_report_message extends uvm_object;
 
   // Function: set_verbosity
   //
-  // Get or set the message threshhold value.  This value is compared
+  // Get or set the message threshold value.  This value is compared
   // against settings in the <uvm_report_handler> to determine whether this
   // message should be executed.
 

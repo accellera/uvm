@@ -1283,8 +1283,8 @@ virtual class uvm_component extends uvm_report_object;
   //
   // These methods recursively associate the specified verbosity with reports of
   // the given ~severity~, ~id~, or ~severity-id~ pair. An verbosity associated
-  // with a particular severity-id pair takes precedence over an verbosity
-  // associated with id, which takes precedence over an an verbosity associated
+  // with a particular severity-id pair takes precedence over a verbosity
+  // associated with id, which takes precedence over a verbosity associated
   // with a severity.
   //
   // For a list of severities and their default verbosities, refer to
@@ -1311,7 +1311,7 @@ virtual class uvm_component extends uvm_report_object;
   // These methods recursively associate the specified action with reports of
   // the given ~severity~, ~id~, or ~severity-id~ pair. An action associated
   // with a particular severity-id pair takes precedence over an action
-  // associated with id, which takes precedence over an an action associated
+  // associated with id, which takes precedence over an action associated
   // with a severity.
   //
   // For a list of severities and their default actions, refer to

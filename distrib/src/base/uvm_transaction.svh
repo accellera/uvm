@@ -53,12 +53,12 @@ typedef class uvm_parent_child_link;
 // While convenient, it is generally the responsibility of drivers to mark a
 // transaction's progress during execution.  To allow the driver or layering sequence
 // to control sequence item timestamps, events, and recording, you must call
-// <uvm_sqr_if_base#(REQ,RSP)::disable_auto_item_recording> at the begining
+// <uvm_sqr_if_base#(REQ,RSP)::disable_auto_item_recording> at the beginning
 // of the run_phase() method.
 //
 // Users may also use the transaction's event pool, <events>,
 // to define custom events for the driver to trigger and the sequences to wait on. Any
-// in-between events such as marking the begining of the address and data
+// in-between events such as marking the beginning of the address and data
 // phases of transaction execution could be implemented via the
 // <events> pool.
 // 
@@ -141,7 +141,7 @@ virtual class uvm_transaction extends uvm_object;
   // With some
   // protocols, the received item may not be started immediately after it is
   // accepted. For example, a bus driver, having accepted a request transaction,
-  // may still have to wait for a bus grant before begining to execute
+  // may still have to wait for a bus grant before beginning to execute
   // the request.
   //
   // This function performs the following actions:

@@ -304,7 +304,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
 
   // Function: min_size
   //
-  // Returns the mininum number of implementation ports that must
+  // Returns the minimum number of implementation ports that must
   // be connected to this port by the end_of_elaboration phase.
 
   function int max_size ();
@@ -718,8 +718,8 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   // Function: resolve_bindings
   //
   // This callback is called just before entering the end_of_elaboration phase.
-  // It recurses through each port's fanout to determine all the imp destina-
-  // tions. It then checks against the required min and max connections.
+  // It recurses through each port's fanout to determine all the imp 
+  // destinations. It then checks against the required min and max connections.
   // After resolution, <size> returns a valid value and <get_if>
   // can be used to access a particular imp.
   //

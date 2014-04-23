@@ -461,7 +461,7 @@ virtual class uvm_object extends uvm_void;
   // Function: compare
   //
   // Deep compares members of this data object with those of the object provided
-  // in the ~rhs~ (right-hand side) argument, returning 1 on a match, 0 othewise.
+  // in the ~rhs~ (right-hand side) argument, returning 1 on a match, 0 otherwise.
   //
   // The compare method is not virtual and should not be overloaded in derived
   // classes. To compare the fields of a derived class, that class should

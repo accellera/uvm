@@ -68,7 +68,7 @@ typedef class uvm_root;
 //
 // File descriptors - These can be set by (in increasing priority) default,
 // severity level, an id, or (severity,id) pair.  File descriptors are
-// standard verilog file descriptors; they may refer to more than one file.
+// standard SystemVerilog file descriptors; they may refer to more than one file.
 // It is the user's responsibility to open and close them.
 //
 // Default file handle - The default file handle is 0, which means that reports
@@ -302,10 +302,10 @@ class uvm_report_object extends uvm_object;
   // given ~severity~, ~id~, or ~severity-id~ pair. This threshold is compared with
   // the verbosity originally assigned to the report to decide whether it gets
   // processed.  A verbosity threshold associated with a particular ~severity-id~ 
-  // pair takes precedence over an verbosity threshold associated with ~id~, which 
-  // takes precedence over an an verbosity threshold associated with a ~severity~.
+  // pair takes precedence over a verbosity threshold associated with ~id~, which 
+  // takes precedence over a verbosity threshold associated with a ~severity~.
   //
-  // The ~verbosity~ argument can be any integer, but is most commonaly a
+  // The ~verbosity~ argument can be any integer, but is most commonly a
   // predefined <uvm_verbosity> value, <UVM_NONE>, <UVM_LOW>, <UVM_MEDIUM>,
   // <UVM_HIGH>, <UVM_FULL>.
 
@@ -348,7 +348,7 @@ class uvm_report_object extends uvm_object;
   // These methods associate the specified action or actions with reports of the
   // given ~severity~, ~id~, or ~severity-id~ pair. An action associated with a
   // particular ~severity-id~ pair takes precedence over an action associated with
-  // ~id~, which takes precedence over an an action associated with a ~severity~.
+  // ~id~, which takes precedence over an action associated with a ~severity~.
   //
   // The ~action~ argument can take the value <UVM_NO_ACTION>, or it can be a
   // bitwise OR of any combination of <UVM_DISPLAY>, <UVM_LOG>, <UVM_COUNT>,
@@ -399,7 +399,7 @@ class uvm_report_object extends uvm_object;
   // output to the given file descriptor. The ~file~ argument must be a
   // multi-channel descriptor (mcd) or file id compatible with $fdisplay.
   //
-  // A FILE descriptor can be associated with with reports of
+  // A FILE descriptor can be associated with reports of
   // the given ~severity~, ~id~, or ~severity-id~ pair.  A FILE associated with
   // a particular ~severity-id~ pair takes precedence over a FILE associated
   // with ~id~, which take precedence over an a FILE associated with a 
