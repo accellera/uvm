@@ -543,7 +543,7 @@ class uvm_report_object extends uvm_object;
   // The <uvm_root::run_test> task calls this method just before it component
   // phasing begins.
   //
-  // Use uvm_root::report_header()
+  // Use <uvm_root::report_header()>
 
   virtual function void report_header(UVM_FILE file = 0);    
      uvm_root l_root;
@@ -618,7 +618,7 @@ class uvm_report_object extends uvm_object;
   //
   // Returns the <uvm_report_server> instance associated with this report object.
   //
-  // Use uvm_report_server::get_server()
+  // Use <uvm_report_server::get_server()>
 
   function uvm_report_server get_report_server();
     uvm_report_server l_rs = uvm_report_server::get_server();

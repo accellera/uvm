@@ -92,7 +92,7 @@ endclass
 //|  // Catchers are callbacks on report objects (components are report 
 //|  // objects, so catchers can be attached to components).
 //|
-//|  // To affect all reporters, use null for the object
+//|  // To affect all reporters, use ~null~ for the object
 //|  uvm_report_cb::add(null, demoter); 
 //|
 //|  // To affect some specific object use the specific reporter

@@ -36,7 +36,7 @@
 // The ~uvm_top~ instance of ~uvm_root~ plays several key roles in the UVM.
 // 
 // Implicit top-level - The ~uvm_top~ serves as an implicit top-level component.
-// Any component whose parent is specified as NULL becomes a child of ~uvm_top~. 
+// Any component whose parent is specified as ~null~ becomes a child of ~uvm_top~. 
 // Thus, all UVM components in simulation are descendants of ~uvm_top~.
 //
 // Phase control - ~uvm_top~ manages the phasing for all components.

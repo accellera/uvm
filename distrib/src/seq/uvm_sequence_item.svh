@@ -189,7 +189,7 @@ class uvm_sequence_item extends uvm_transaction;
   // Function: get_parent_sequence
   //
   // Returns a reference to the parent sequence of any sequence on which this
-  // method was called. If this is a parent sequence, the method returns null.
+  // method was called. If this is a parent sequence, the method returns ~null~.
 
   function uvm_sequence_base get_parent_sequence();
     return (m_parent_sequence);

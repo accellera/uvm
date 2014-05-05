@@ -568,7 +568,7 @@ class uvm_mem extends uvm_object;
    //
    // Returns the user-defined frontdoor for this memory
    //
-   // If null, no user-defined frontdoor has been defined.
+   // If ~null~, no user-defined frontdoor has been defined.
    // A user-defined frontdoor is defined
    // by using the <uvm_mem::set_frontdoor()> method. 
    //
@@ -604,7 +604,7 @@ class uvm_mem extends uvm_object;
    //
    // Returns the user-defined backdoor for this memory
    //
-   // If null, no user-defined backdoor has been defined.
+   // If ~null~, no user-defined backdoor has been defined.
    // A user-defined backdoor is defined
    // by using the <uvm_reg::set_backdoor()> method. 
    //

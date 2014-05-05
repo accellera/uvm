@@ -94,7 +94,7 @@ class uvm_report_handler extends uvm_object;
   // Function: print
   //
   // The uvm_report_handler implements the uvm_object::do_print() such that
-  // uvm_report_handler::print() method provides UVM printer formatted output
+  // <uvm_report_handler::print()> method provides UVM printer formatted output
   // of the current configuration.  A snippet of example output is shown here:
   //
   // |uvm_test_top                uvm_report_handler  -     @555                    

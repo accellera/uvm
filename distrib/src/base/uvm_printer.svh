@@ -418,7 +418,7 @@ class uvm_printer_knobs;
 
   // Variable: header
   //
-  // Indicates whether the ~uvm_printer::print_header~ function should be called when
+  // Indicates whether the <uvm_printer::print_header> function should be called when
   // printing an object.
 
   bit header = 1;
@@ -426,7 +426,7 @@ class uvm_printer_knobs;
 
   // Variable: footer
   //
-  // Indicates whether the ~uvm_printer::print_footer~ function should be called when
+  // Indicates whether the <uvm_printer::print_footer> function should be called when
   // printing an object. 
 
   bit footer = 1;

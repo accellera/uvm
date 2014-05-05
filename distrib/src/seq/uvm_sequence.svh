@@ -82,7 +82,7 @@ virtual class uvm_sequence #(type REQ = uvm_sequence_item,
   // Function: get_current_item
   //
   // Returns the request item currently being executed by the sequencer. If the
-  // sequencer is not currently executing an item, this method will return null.
+  // sequencer is not currently executing an item, this method will return ~null~.
   //
   // The sequencer is executing an item from the time that get_next_item or peek
   // is called until the time that get or item_done is called.

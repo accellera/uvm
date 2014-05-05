@@ -861,7 +861,7 @@ class uvm_resource_pool;
   // match the ~name~, ~scope~, and ~type_handle~.  If no resources
   // match the queue is returned empty. If ~rpterr~ is set then a
   // warning is issued if no matches are found, and the spell checker is
-  // invoked on ~name~.  If ~type_handle~ is null then a type check is
+  // invoked on ~name~.  If ~type_handle~ is ~null~ then a type check is
   // not made and resources are returned that match only ~name~ and
   // ~scope~.
 
@@ -1529,7 +1529,7 @@ end
   //
   // looks up a resource by ~type_handle~ in the type map. The first resource
   // with the specified ~type_handle~ that is visible in the specified ~scope~ is
-  // returned, if one exists. Null is returned if there is no resource matching
+  // returned, if one exists. ~null~ is returned if there is no resource matching
   // the specifications.
 
   static function this_type get_by_type(string scope = "",

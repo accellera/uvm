@@ -312,7 +312,7 @@ class uvm_objection extends uvm_report_object;
   //
   // Raises the number of objections for the source ~object~ by ~count~, which
   // defaults to 1.  The ~object~ is usually the ~this~ handle of the caller.
-  // If ~object~ is not specified or null, the implicit top-level component,
+  // If ~object~ is not specified or ~null~, the implicit top-level component,
   // <uvm_root>, is chosen.
   //
   // Rasing an objection causes the following.
@@ -466,7 +466,7 @@ class uvm_objection extends uvm_report_object;
   //
   // Drops the number of objections for the source ~object~ by ~count~, which
   // defaults to 1.  The ~object~ is usually the ~this~ handle of the caller.
-  // If ~object~ is not specified or null, the implicit top-level component,
+  // If ~object~ is not specified or ~null~, the implicit top-level component,
   // <uvm_root>, is chosen.
   //
   // Dropping an objection causes the following.
