@@ -64,12 +64,12 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // Task: try_next_item
   //
   // Retrieves the next available item from a sequence if one is available.
-  // Otherwise, the function returns immediately with request set to null. 
+  // Otherwise, the function returns immediately with request set to ~null~. 
   // The following steps occur on this call:
   //
   // 1 - Arbitrate among requesting, unlocked, relevant sequences - choose the
   //     highest priority sequence based on the current sequencer arbitration
-  //     mode. If no sequence is available, return null.
+  //     mode. If no sequence is available, return ~null~.
   // 2 - The chosen sequence will return from wait_for_grant
   // 3 - The chosen sequence <uvm_sequence_base::pre_do> is called
   // 4 - The chosen sequence item is randomized
@@ -228,10 +228,10 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // However, this works only for simple, in-order, blocking transaction
   // execution. For pipelined and out-of-order transaction execution, the
   // driver must turn off this automatic recording and call
-  // uvm_transaction::accept_tr, uvm_transaction::begin_tr
-  // and uvm_transaction::end_tr explicitly at appropriate points in time.
+  // <uvm_transaction::accept_tr>, <uvm_transaction::begin_tr>
+  // and <uvm_transaction::end_tr> explicitly at appropriate points in time.
   //
-  // This methods be called at the beginning of the driver's run_phase() method.
+  // This methods be called at the beginning of the driver's <run_phase()> method.
   // Once disabled, automatic recording cannot be re-enabled.
   //
   // For backward-compatibility, automatic item recording can be globally

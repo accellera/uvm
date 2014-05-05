@@ -123,7 +123,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   // Create a new or update an existing configuration setting for
   // ~field_name~ in ~inst_name~ from ~cntxt~.
   // The setting is made at ~cntxt~, with the full scope of the set 
-  // being {~cntxt~,".",~inst_name~}. If ~cntxt~ is null then ~inst_name~
+  // being {~cntxt~,".",~inst_name~}. If ~cntxt~ is ~null~ then ~inst_name~
   // provides the complete scope information of the setting.
   // ~field_name~ is the target field. Both ~inst_name~ and ~field_name~
   // may be glob style or regular expression style expressions.

@@ -125,7 +125,7 @@ class uvm_sequencer_base extends uvm_component;
   // take effect.
   //
   // When setting the resource using ~set~, the 1st argument specifies the
-  // context pointer, usually "this" for components or "null" when executed from
+  // context pointer, usually "this" for components or ~null~ when executed from
   // outside the component hierarchy (i.e. in module).  
   // The 2nd argument is the instance string, which is a path name to the
   // target sequencer, relative to the context pointer.  The path must include

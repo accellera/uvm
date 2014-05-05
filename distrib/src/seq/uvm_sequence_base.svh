@@ -240,7 +240,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // The ~sequencer~ argument specifies the sequencer on which to run this
   // sequence. The sequencer must be compatible with the sequence.
   //
-  // If ~parent_sequence~ is null, then this sequence is a root parent,
+  // If ~parent_sequence~ is ~null~, then this sequence is a root parent,
   // otherwise it is a child of ~parent_sequence~. The ~parent_sequence~'s
   // pre_do, mid_do, and post_do methods will be called during the execution
   // of this sequence.
@@ -710,7 +710,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Task: lock
   //
-  // Requests a lock on the specified sequencer. If sequencer is null, the lock
+  // Requests a lock on the specified sequencer. If sequencer is ~null~, the lock
   // will be requested on the current default sequencer.
   //
   // A lock request will be arbitrated the same as any other request.  A lock is
@@ -757,7 +757,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Function: unlock
   //
   // Removes any locks or grabs obtained by this sequence on the specified
-  // sequencer. If sequencer is null, then the unlock will be done on the
+  // sequencer. If sequencer is ~null~, then the unlock will be done on the
   // current default sequencer.
 
   function void  unlock(uvm_sequencer_base sequencer = null);
@@ -775,7 +775,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Function: ungrab
   //
   // Removes any locks or grabs obtained by this sequence on the specified
-  // sequencer. If sequencer is null, then the unlock will be done on the
+  // sequencer. If sequencer is ~null~, then the unlock will be done on the
   // current default sequencer.
 
   function void  ungrab(uvm_sequencer_base sequencer = null);

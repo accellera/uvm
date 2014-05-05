@@ -253,7 +253,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // Finds a field with the specified name in this register
    // and returns its abstraction class.
-   // If no fields are found, returns null. 
+   // If no fields are found, returns ~null~. 
    //
    extern virtual function uvm_reg_field get_field_by_name(string name);
 
@@ -708,7 +708,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // Returns the user-defined frontdoor for this register
    //
-   // If null, no user-defined frontdoor has been defined.
+   // If ~null~, no user-defined frontdoor has been defined.
    // A user-defined frontdoor is defined
    // by using the <uvm_reg::set_frontdoor()> method. 
    //
@@ -750,7 +750,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // Returns the user-defined backdoor for this register
    //
-   // If null, no user-defined backdoor has been defined.
+   // If ~null~, no user-defined backdoor has been defined.
    // A user-defined backdoor is defined
    // by using the <uvm_reg::set_backdoor()> method. 
    //

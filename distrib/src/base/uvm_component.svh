@@ -63,12 +63,12 @@ virtual class uvm_component extends uvm_report_object;
   //
   // Creates a new component with the given leaf instance ~name~ and handle
   // to its ~parent~.  If the component is a top-level component (i.e. it is
-  // created in a static module or interface), ~parent~ should be null.
+  // created in a static module or interface), ~parent~ should be ~null~.
   //
   // The component will be inserted as a child of the ~parent~ object, if any.
   // If ~parent~ already has a child by the given ~name~, an error is produced.
   //
-  // If ~parent~ is null, then the component will become a child of the
+  // If ~parent~ is ~null~, then the component will become a child of the
   // implicit top-level component, ~uvm_top~.
   //
   // All classes derived from uvm_component must call super.new(name,parent).
@@ -87,7 +87,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: get_parent
   //
-  // Returns a handle to this component's parent, or null if it has no parent.
+  // Returns a handle to this component's parent, or ~null~ if it has no parent.
 
   extern virtual function uvm_component get_parent ();
 
@@ -164,7 +164,7 @@ virtual class uvm_component extends uvm_report_object;
   // Looks for a component with the given hierarchical ~name~ relative to this
   // component. If the given ~name~ is preceded with a '.' (dot), then the search
   // begins relative to the top level (absolute lookup). The handle of the
-  // matching component is returned, else null. The name must not contain
+  // matching component is returned, else ~null~. The name must not contain
   // wildcards.
 
   extern function uvm_component lookup (string name);
@@ -837,7 +837,7 @@ virtual class uvm_component extends uvm_report_object;
   // - For set_config_string, ~value~ is a string.
   //
   // - For set_config_object, ~value~ must be an <uvm_object>-based object or
-  //   null.  Its clone argument specifies whether the object should be cloned.
+  //   ~null~.  Its clone argument specifies whether the object should be cloned.
   //   If set, the object is cloned both going into the table (during the set)
   //   and coming out of the table (during the get), so that multiple components
   //   matched to the same setting (by way of wildcards) do not end up sharing
@@ -969,7 +969,7 @@ virtual class uvm_component extends uvm_report_object;
   // Function: print_config_settings
   //
   // Called without arguments, print_config_settings prints all configuration
-  // information for this component, as set by previous calls to uvm_config_db#(T)::set().
+  // information for this component, as set by previous calls to <uvm_config_db#(T)::set()>.
   // The settings are printing in the order of their precedence.
   // 
   // If ~field~ is specified and non-empty, then only configuration settings
@@ -991,7 +991,7 @@ virtual class uvm_component extends uvm_report_object;
   // Function: print_config
   //
   // Print_config_settings prints all configuration information for this
-  // component, as set by previous calls to uvm_config_db#(T)::set() and exports to
+  // component, as set by previous calls to <uvm_config_db#(T)::set()> and exports to
   // the resources pool.  The settings are printing in the order of
   // their precedence.
   //

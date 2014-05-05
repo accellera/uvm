@@ -357,7 +357,7 @@ class uvm_vreg extends uvm_object;
    //
    // Finds a virtual field with the specified name in this virtual register
    // and returns its abstraction class.
-   // If no fields are found, returns null.
+   // If no fields are found, returns ~null~.
    //
    extern virtual function uvm_vreg_field get_field_by_name(string name);
 

@@ -848,7 +848,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
   // Add an instance-specific extension. Only one instance of any given
   // extension type is allowed. If there is an existing extension
   // instance of the type of ~ext~, ~ext~ replaces it and its handle
-  // is returned. Otherwise, null is returned.
+  // is returned. Otherwise, ~null~ is returned.
    
   function uvm_tlm_extension_base set_extension(uvm_tlm_extension_base ext);
     uvm_tlm_extension_base ext_handle = ext.get_type_handle();

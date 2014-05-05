@@ -304,8 +304,8 @@ class uvm_default_report_server extends uvm_report_server;
 
   // Function: print
   //
-  // The uvm_report_server implements the uvm_object::do_print() such that
-  // uvm_server_handler::print() method provides UVM printer formatted output
+  // The uvm_report_server implements the <uvm_object::do_print()> such that
+  // <uvm_server_handler::print()> method provides UVM printer formatted output
   // of the current configuration.  A snippet of example output is shown here:
   //
   // |uvm_report_server                 uvm_report_server  -     @13  

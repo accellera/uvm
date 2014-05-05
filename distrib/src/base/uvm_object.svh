@@ -142,7 +142,7 @@ virtual class uvm_object extends uvm_void;
   // means of supplying those arguments.
   //
   // The default implementation of this method produces an error and returns
-  // null. To enable use of this method, a user's subtype must implement a
+  // ~null~. To enable use of this method, a user's subtype must implement a
   // version that returns the subtype's wrapper.
   //
   // For example:
@@ -174,7 +174,7 @@ virtual class uvm_object extends uvm_void;
   //
   // The default implementation of this method does a factory lookup of the
   // proxy using the return value from <get_type_name>. If the type returned
-  // by <get_type_name> is not registered with the factory, then a null 
+  // by <get_type_name> is not registered with the factory, then a ~null~ 
   // handle is returned.
   //
   // For example:
@@ -581,7 +581,7 @@ virtual class uvm_object extends uvm_void;
   //  - For string data types, append a zero byte after packing the string
   //    contents.
   //
-  //  - For objects, pack 4 bits immediately before packing the object. For null
+  //  - For objects, pack 4 bits immediately before packing the object. For ~null~
   //    objects, pack 4'b0000. For non-null objects, pack 4'b0001.
   //
   // When the `uvm_field_* macros are used, 
@@ -663,11 +663,11 @@ virtual class uvm_object extends uvm_void;
   //   elements in the array from the 32 bits immediately before unpacking
   //   individual elements, as shown above.
   //
-  // - For string data types, unpack into the new string until a null byte is
+  // - For string data types, unpack into the new string until a ~null~ byte is
   //   encountered.
   //
   // - For objects, unpack 4 bits into a byte or int variable. If the value
-  //   is 0, the target object should be set to null and unpacking continues to
+  //   is 0, the target object should be set to ~null~ and unpacking continues to
   //   the next property, if any. If the least significant bit is 1, then the
   //   target object should be allocated and its properties unpacked.
 
