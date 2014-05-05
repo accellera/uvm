@@ -884,7 +884,7 @@ virtual class uvm_component extends uvm_report_object;
   // is found, then ~value~ is unchanged and the 0 returned.
   //
   // Calling the get_config_object method requires special handling. Because
-  // ~value~ is an output of type <uvm_object>, you must provide an uvm_object
+  // ~value~ is an output of type <uvm_object>, you must provide a uvm_object
   // handle to assign to (_not_ a derived class handle). After the call, you can
   // then $cast to the actual type.
   //
@@ -3058,7 +3058,7 @@ function void uvm_component::set_config_object(string inst_name,
       uvm_component comp;
       if ($cast(comp,value)) begin
         `uvm_error("INVCLNC", {"Clone failed during set_config_object ",
-          "with an object that is an uvm_component. Components cannot be cloned."})
+          "with an object that is a uvm_component. Components cannot be cloned."})
         return;
       end
       else begin

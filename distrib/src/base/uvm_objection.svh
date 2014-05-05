@@ -1089,7 +1089,7 @@ class uvm_objection extends uvm_report_object;
   endfunction
 
 
-  // Below is all of the basic data stuff that is needed for an uvm_object
+  // Below is all of the basic data stuff that is needed for a uvm_object
   // for factory registration, printing, comparing, etc.
 
   typedef uvm_object_registry#(uvm_objection,"uvm_objection") type_id;
