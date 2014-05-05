@@ -250,7 +250,8 @@ class test extends uvm_component;
 
    virtual function void report_phase(uvm_phase phase);
       super.report_phase(phase);
-
+      
+`ifdef UVM_DEPRECATED_STARTING_PHASE
       if (ctchr.warn_seen != 4)
         `uvm_error("ERR_W",
                    "Didn't see the warnings we expected!")
@@ -259,6 +260,16 @@ class test extends uvm_component;
                    "Didn't see the errors we expected!")
       else
         $display("*** UVM TEST PASSED ***");
+`else
+      if (ctchr.warn_seen != 0)
+        `uvm_error("ERR_W",
+                   "Saw unexpected warnings")
+      else if (ctchr.err_seen != 0)
+        `uvm_error("ERR_E",
+                   "Saw unexpected errors")
+      else
+        $display("*** UVM TEST PASSED ***");
+`endif
       
    endfunction : report_phase
 
