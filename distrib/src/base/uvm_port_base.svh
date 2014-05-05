@@ -400,8 +400,8 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   //   must be compatible. Each port has an interface mask that encodes the
   //   interface(s) it supports. If the bitwise AND of these masks is equal to
   //   the this port's mask, the requirement is met and the ports are
-  //   compatible. For example, an uvm_blocking_put_port #(T) is compatible with
-  //   an uvm_put_export #(T) and uvm_blocking_put_imp #(T) because the export
+  //   compatible. For example, a uvm_blocking_put_port #(T) is compatible with
+  //   a uvm_put_export #(T) and uvm_blocking_put_imp #(T) because the export
   //   and imp provide the interface required by the uvm_blocking_put_port.
   // 
   // - Ports of type <UVM_EXPORT> can only connect to other exports or imps.
@@ -417,10 +417,10 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   //
   // Relationships, when enabled, are checked are as follows:
   //
-  // - If this port is an UVM_PORT type, the ~provider~ can be a parent port,
+  // - If this port is a UVM_PORT type, the ~provider~ can be a parent port,
   //   or a sibling export or implementation port.
   //
-  // - If this port is an <UVM_EXPORT> type, the provider can be a child
+  // - If this port is a <UVM_EXPORT> type, the provider can be a child
   //   export or implementation port.
   //
   // If any relationship check is violated, a warning is issued.

@@ -76,7 +76,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   // is called until the time that get or item_done is called.
   //
   // Note that a driver that only calls get() will never show a current item,
-  // since the item is completed at the same time as it is requsted.
+  // since the item is completed at the same time as it is requested.
   //
   function REQ get_current_item();
     REQ t;

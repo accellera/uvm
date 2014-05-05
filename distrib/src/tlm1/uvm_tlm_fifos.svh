@@ -192,7 +192,7 @@ endclass
 //
 // An analysis_fifo is a <uvm_tlm_fifo#(T)> with an unbounded size and a write interface.
 // It can be used any place a <uvm_analysis_imp> is used. Typical usage is
-// as a buffer between an <uvm_analysis_port> in an initiator component
+// as a buffer between a <uvm_analysis_port> in an initiator component
 // and TLM1 target component.
 //
 //------------------------------------------------------------------------------
