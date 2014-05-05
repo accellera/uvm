@@ -165,7 +165,7 @@ class uvm_tlm_time;
 
    // Function: get_abstime
    // Return the current canonical time value,
-   // in the number of specified time unit, reguardless of the
+   // in the number of specified time unit, regardless of the
    // current timescale of the caller.
    //
    // ~secs~ is the number of seconds in the desired time unit
@@ -180,7 +180,7 @@ class uvm_tlm_time;
 
    // Function: set_abstime
    // Set the current canonical time value,
-   // to the number of specified time unit, reguardless of the
+   // to the number of specified time unit, regardless of the
    // current timescale of the caller.
    //
    // ~secs~ is the number of seconds in the time unit in the value ~t~

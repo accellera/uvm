@@ -105,7 +105,7 @@ virtual class uvm_report_server extends uvm_object;
 
         // Function: do_copy
         // copies all message statistic severity,id counts to the dest uvm_report_server
-        // the copy is cummulative (only items from the source are transfered, already existing entries are not deleted,
+        // the copy is cummulative (only items from the source are transferred, already existing entries are not deleted,
         // existing entries/counts are overridden when they exist in the source set)
         function void do_copy (uvm_object rhs);
                 uvm_report_server rhs_;

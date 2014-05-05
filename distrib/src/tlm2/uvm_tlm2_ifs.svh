@@ -155,7 +155,7 @@ class uvm_tlm_if #(type T=uvm_tlm_generic_payload,
    //
    // Execute a blocking transaction. Once this method returns,
    // the transaction is assumed to have been executed. Whether
-   // that execution is succesful or not must be indicated by the
+   // that execution is successful or not must be indicated by the
    // transaction itself.
    //
    // The callee may modify or update the transaction object, subject

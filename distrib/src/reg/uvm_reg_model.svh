@@ -335,7 +335,7 @@ typedef enum bit [63:0] {
 //|       +-+---+-------------+---+-------+
 //|
 //
-// If the register is implementd using a single HDL variable,
+// If the register is implemented using a single HDL variable,
 // The array should specify a single slice with its ~offset~ and ~size~
 // specified as -1. For example:
 //

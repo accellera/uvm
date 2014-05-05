@@ -74,7 +74,7 @@ typedef class uvm_phase_cb;
 // Singleton instances of those extensions are provided as package variables.
 // These instances define the attributes of the phase (not what state it is in)
 // They are then cloned into schedule nodes which point back to one of these
-// implementations, and calls it's virtual task or function methods on each
+// implementations, and calls its virtual task or function methods on each
 // participating component.
 // It is the base class for phase functors, for both predefined and
 // user-defined phases. Per-component overrides can use a customized imp.

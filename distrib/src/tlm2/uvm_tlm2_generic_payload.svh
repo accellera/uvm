@@ -56,7 +56,7 @@ typedef enum
 //
 // Respone status attribute type definition
 //
-// UVM_TLM_OK_RESPONSE                - Bus operation completed succesfully
+// UVM_TLM_OK_RESPONSE                - Bus operation completed successfully
 //
 // UVM_TLM_INCOMPLETE_RESPONSE        - Transaction was not delivered to target
 //
@@ -175,7 +175,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // All that is required is that a consistent mechanism is used to
    // fill the payload data array and later extract data from it.
    //
-   // Should a generic payload be transfered to/from a systemC model,
+   // Should a generic payload be transferred to/from a systemC model,
    // it will be necessary for any multi-byte data in that generic payload
    // to use/be interpreted using the host endianness.
    // However, this process is currently outside the scope of this standard.

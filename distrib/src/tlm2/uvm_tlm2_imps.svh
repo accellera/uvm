@@ -123,7 +123,7 @@
 // The macro wraps the function b_transport()
 // Execute a blocking transaction. Once this method returns,
 // the transaction is assumed to have been executed. Whether
-// that execution is succesful or not must be indicated by the
+// that execution is successful or not must be indicated by the
 // transaction itself.
 //
 // The callee may modify or update the transaction object, subject
