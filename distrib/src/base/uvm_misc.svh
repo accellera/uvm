@@ -397,7 +397,7 @@ endfunction
 // Creates a random seed and updates the seed map so that if the same string
 // is used again, a new value will be generated. The inst_id is used to hash
 // by instance name and get a map of type name hashes which the type_id uses
-// for it's lookup.
+// for its lookup.
 
 function int unsigned uvm_create_random_seed ( string type_id, string inst_id="" );
   uvm_seed_map seed_map;

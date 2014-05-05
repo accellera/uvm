@@ -521,7 +521,7 @@ typedef enum { UVM_PHASE_IMP,
 //   UVM_PHASE_STARTED - phase ready to execute, running phase_started() callback
 //
 //   UVM_PHASE_EXECUTING - An executing phase is one where the phase callbacks are
-//              being executed. It's process is tracked by the phaser.
+//              being executed. Its process is tracked by the phaser.
 //
 //   UVM_PHASE_READY_TO_END - no objections remain in this phase or in any
 //              predecessors of its successors or in any sync'd phases. This 

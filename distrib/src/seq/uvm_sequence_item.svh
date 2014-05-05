@@ -211,7 +211,7 @@ class uvm_sequence_item extends uvm_transaction;
   // Function: get_depth
   //
   // Returns the depth of a sequence from its parent.  A  parent sequence will
-  // have a depth of 1, it's child will have a depth  of 2, and it's grandchild
+  // have a depth of 1, its child will have a depth  of 2, and its grandchild
   // will have a depth of 3.
 
   function int get_depth();
