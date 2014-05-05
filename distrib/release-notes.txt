@@ -250,3 +250,15 @@ member methods of uvm_recorder.
 (+) Mantis 4786: Corrected the documentation of print_real
 
 (+) Mantis 4784: documenting the `uvm_record_(int,string,real,time) macros
+
+Mantis 4861: adding a uvm_reg_map to an existing regmap instance did require 
+both maps to have the same parent. bad error message and behaviour fixed.
+
+Mantis 4871: Fixed problem that multiple +uvm_set_* commands were ignored after a 
+format error
+
+Mantis 4882: changed name of phase objection to reflect phase name
+
+Mantis 4884: Performance fix avoiding the copy of large QDA into uvm_spell_chkr::check
+
+Mantis 4893: Fixed bug in uvm_leaf_scope which could lead to stall of simulation
