@@ -102,6 +102,9 @@ while($csv =~ /(^\d+\,.*)/mgx) {
   if($cols[$cols{"Status"}] =~ /completed/) {
     $score{$id}++;
   }
+  if($cols[$cols{"Status"}] =~ /closed/) {
+    $score{$id}++;
+  }
   push @{$reason{$id}},$cols[$cols{"Status"}];
   push @{$reason{$id}},$cols[$cols{"Assigned To"}];  
 }
