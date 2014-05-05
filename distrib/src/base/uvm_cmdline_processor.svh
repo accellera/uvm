@@ -97,7 +97,7 @@ class uvm_cmdline_processor extends uvm_report_object;
   // Function: get_uvmargs
   //
   // This function returns a queue with all of the uvm arguments
-  // that were used to start the simulation. An UVM argument is
+  // that were used to start the simulation. A UVM argument is
   // taken to be any argument that starts with a - or + and uses
   // the keyword UVM (case insensitive) as the first three
   // letters of the argument.
@@ -406,7 +406,7 @@ class uvm_cmdline_processor extends uvm_report_object;
     //
     //| <sim command> +uvm_set_config_int=uvm_test_top.soc_env,mode,5
     //
-    // No equivalent of set_config_object() exists since no way exists to pass an
+    // No equivalent of set_config_object() exists since no way exists to pass a
     // uvm_object into the simulation via the command line.
     //
 

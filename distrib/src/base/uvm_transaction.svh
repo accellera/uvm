@@ -336,7 +336,7 @@ virtual class uvm_transaction extends uvm_object;
   //
   // By default, the event pool contains the events: begin, accept, and end.
   // Events can also be added by derivative objects. An event pool is a
-  // specialization of an <uvm_pool#(KEY,T)>, e.g. a ~uvm_pool#(uvm_event)~.
+  // specialization of <uvm_pool#(KEY,T)>, e.g. a ~uvm_pool#(uvm_event)~.
 
   extern function uvm_event_pool get_event_pool ();
 

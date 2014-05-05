@@ -188,7 +188,7 @@ endclass
 //----------------------------------------------------------------------
 // Class: uvm_tlm_nb_transport_bw_imp
 //
-// Used like exports, except an addtional class parameter specifices 
+// Used like exports, except an addtional class parameter specifies 
 // the type of the implementation object.  When the
 // imp is instantiated the implementation object is bound.
 //----------------------------------------------------------------------

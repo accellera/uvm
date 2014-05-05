@@ -121,7 +121,7 @@ class uvm_sequencer_base extends uvm_component;
   // If both are used,
   // the sequence instance takes precedence. When attempting to override
   // a previous default sequence setting, you must override both
-  // the instance and type (wrapper) reources, else your override may not
+  // the instance and type (wrapper) resources, else your override may not
   // take effect.
   //
   // When setting the resource using ~set~, the 1st argument specifies the
@@ -143,7 +143,7 @@ class uvm_sequencer_base extends uvm_component;
   //|                                         "default_sequence",
   //|                                         myseq);
   //
-  // Configuration by type is shorter and can be substituted via the
+  // Configuration by type is shorter and can be substituted via
   // the factory.
   //
   //| uvm_config_db #(uvm_object_wrapper)::set(null, "top.agent.myseqr.main_phase",
@@ -228,11 +228,11 @@ class uvm_sequencer_base extends uvm_component;
 
   // Function: has_lock
   //
-  // Returns 1 if the sequence refered to in the parameter currently has a lock
+  // Returns 1 if the sequence referred to in the parameter currently has a lock
   // on this sequencer, 0 otherwise.
   //
   // Note that even if this sequence has a lock, a child sequence may also have
-  // a lock, in which case the sequence is still blocked from issueing
+  // a lock, in which case the sequence is still blocked from issuing
   // operations on the sequencer
   //
   extern function bit has_lock(uvm_sequence_base sequence_ptr);

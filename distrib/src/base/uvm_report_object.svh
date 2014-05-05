@@ -40,7 +40,7 @@ typedef class uvm_root;
 // or for all messages from all components in the environment. Defaults are
 // applied where there is no explicit configuration.
 //
-// Most methods in uvm_report_object are delegated to an internal instance of an
+// Most methods in uvm_report_object are delegated to an internal instance of a
 // <uvm_report_handler>, which stores the reporting configuration and determines
 // whether an issued message should be displayed based on that configuration.
 // Then, to display a message, the report handler delegates the actual
@@ -72,7 +72,7 @@ typedef class uvm_root;
 // It is the user's responsibility to open and close them.
 //
 // Default file handle - The default file handle is 0, which means that reports
-// are not sent to a file even if an UVM_LOG attribute is set in the action
+// are not sent to a file even if a UVM_LOG attribute is set in the action
 // associated with the report. This can be overridden by any of the set_*_file
 // methods.
 //
@@ -100,7 +100,7 @@ class uvm_report_object extends uvm_object;
 
   // Function: uvm_get_report_object
   //
-  // Returns the nearest uvm_report_object when called.  From inside an 
+  // Returns the nearest uvm_report_object when called.  From inside a
   // uvm_component, the method simply returns 'this'.  
   // 
   // See also the global version of <uvm_get_report_object>.
@@ -575,7 +575,7 @@ class uvm_report_object extends uvm_object;
   // Function- die
   //
   // This method is called by the report server if a report reaches the maximum
-  // quit count or has an UVM_EXIT action associated with it, e.g., as with
+  // quit count or has a UVM_EXIT action associated with it, e.g., as with
   // fatal errors.
   //
   // Calls the <uvm_component::pre_abort()> method
