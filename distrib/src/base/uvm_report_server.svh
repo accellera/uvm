@@ -105,7 +105,7 @@ virtual class uvm_report_server extends uvm_object;
 
         // Function: do_copy
         // copies all message statistic severity,id counts to the dest uvm_report_server
-        // the copy is cummulative (only items from the source are transfered, already existing entries are not deleted,
+        // the copy is cummulative (only items from the source are transferred, already existing entries are not deleted,
         // existing entries/counts are overridden when they exist in the source set)
         function void do_copy (uvm_object rhs);
                 uvm_report_server rhs_;
@@ -304,8 +304,8 @@ class uvm_default_report_server extends uvm_report_server;
 
   // Function: print
   //
-  // The uvm_report_server implements the uvm_object::do_print() such that
-  // uvm_server_handler::print() method provides UVM printer formatted output
+  // The uvm_report_server implements the <uvm_object::do_print()> such that
+  // <uvm_server_handler::print()> method provides UVM printer formatted output
   // of the current configuration.  A snippet of example output is shown here:
   //
   // |uvm_report_server                 uvm_report_server  -     @13  

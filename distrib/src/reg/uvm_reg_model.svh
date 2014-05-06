@@ -323,7 +323,7 @@ typedef enum bit [63:0] {
 // of HDL variables that implement a register in the HDL.
 //
 // Slices must be specified in most-to-least significant order.
-// Slices must not overlap. Gaps may exists in the concatentation
+// Slices must not overlap. Gaps may exists in the concatenation
 // if portions of the registers are not implemented.
 //
 // For example, the following register
@@ -335,7 +335,7 @@ typedef enum bit [63:0] {
 //|       +-+---+-------------+---+-------+
 //|
 //
-// If the register is implementd using a single HDL variable,
+// If the register is implemented using a single HDL variable,
 // The array should specify a single slice with its ~offset~ and ~size~
 // specified as -1. For example:
 //

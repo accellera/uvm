@@ -229,7 +229,7 @@ virtual class uvm_factory;
   // When requesting by name, the ~request_type_name~ is a string representing
   // the requested type, which must have been registered with the factory with
   // that name prior to the request. If the factory does not recognize the
-  // ~requested_type_name~, an error is produced and a null handle returned.
+  // ~requested_type_name~, an error is produced and a ~null~ handle returned.
   //
   // If the optional ~parent_inst_path~ is provided, then the concatenation,
   // {~parent_inst_path~, ".",~name~}, forms an instance path (context) that

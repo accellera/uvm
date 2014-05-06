@@ -55,7 +55,7 @@ class uvm_tlm_fifo #(type T=int) extends uvm_tlm_fifo_base #(T);
   // Function: new
   //
   // The ~name~ and ~parent~ are the normal uvm_component constructor arguments. 
-  // The ~parent~ should be null if the <uvm_tlm_fifo#(T)> is going to be used in a
+  // The ~parent~ should be ~null~ if the <uvm_tlm_fifo#(T)> is going to be used in a
   // statically elaborated construct (e.g., a module). The ~size~ indicates the
   // maximum size of the FIFO; a value of zero indicates no upper bound.
 

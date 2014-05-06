@@ -189,7 +189,7 @@ class uvm_sequence_item extends uvm_transaction;
   // Function: get_parent_sequence
   //
   // Returns a reference to the parent sequence of any sequence on which this
-  // method was called. If this is a parent sequence, the method returns null.
+  // method was called. If this is a parent sequence, the method returns ~null~.
 
   function uvm_sequence_base get_parent_sequence();
     return (m_parent_sequence);
@@ -210,8 +210,8 @@ class uvm_sequence_item extends uvm_transaction;
 
   // Function: get_depth
   //
-  // Returns the depth of a sequence from it's parent.  A  parent sequence will
-  // have a depth of 1, it's child will have a depth  of 2, and it's grandchild
+  // Returns the depth of a sequence from its parent.  A  parent sequence will
+  // have a depth of 1, its child will have a depth  of 2, and its grandchild
   // will have a depth of 3.
 
   function int get_depth();
