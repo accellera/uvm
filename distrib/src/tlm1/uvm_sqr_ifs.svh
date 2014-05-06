@@ -210,7 +210,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // Function: put_response
   //
   // Sends a response back to the sequence that issued the request. Before the
-  // response is put, it must have it's sequence ID and transaction ID set to
+  // response is put, it must have its sequence ID and transaction ID set to
   // match the request.  This can be done using the
   // <uvm_sequence_item::set_id_info> call:
   //
