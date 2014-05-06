@@ -205,6 +205,7 @@ Group: Sequences  {
 
 Group: Macros  {
 
+   File: Overview                     (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/macros.txt)
    File: Report Macros                (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_message_defines.svh)
    File: Component and Object         (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_object_defines.svh)
    File: Sequence and Do Action       (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_sequence_defines.svh)
@@ -286,6 +287,7 @@ Group: Command Line Processor  {
 
 Group: Globals  {
 
+   File: Overview                     (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/globals.txt)
    File: Types, Enums, Policies       (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_object_globals.svh)
    File: Globals                      (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_globals.svh)
    File: UVM Core Service             (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_coreservice.svh)
