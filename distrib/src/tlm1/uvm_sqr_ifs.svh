@@ -94,7 +94,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // The current item is removed from the sequencer fifo.
   //
   // If a response item is provided, then it will be sent back to the requesting
-  // sequence. The response item must have it's sequence ID and transaction ID
+  // sequence. The response item must have its sequence ID and transaction ID
   // set correctly, using the <uvm_sequence_item::set_id_info> method:
   //
   //|  rsp.set_id_info(req);
@@ -189,7 +189,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // Task: put
   //
   // Sends a response back to the sequence that issued the request. Before the
-  // response is put, it must have it's sequence ID and transaction ID set to
+  // response is put, it must have its sequence ID and transaction ID set to
   // match the request.  This can be done using the
   // <uvm_sequence_item::set_id_info> call:
   //
