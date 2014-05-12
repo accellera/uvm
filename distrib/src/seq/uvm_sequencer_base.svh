@@ -479,6 +479,7 @@ class uvm_sequencer_base extends uvm_component;
   extern virtual task               run_phase(uvm_phase phase);
 `endif
 
+  static uvm_sequencer_base all_sequencer_insts[int unsigned];
 endclass
 
 
@@ -496,6 +497,8 @@ function uvm_sequencer_base::new (string name, uvm_component parent);
   super.new(name, parent);
   m_sequencer_id = g_sequencer_id++;
   m_lock_arb_size = -1;
+	
+  all_sequencer_insts[m_sequencer_id]=this;
 endfunction
 
 

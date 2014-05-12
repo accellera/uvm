@@ -303,10 +303,8 @@ class uvm_sequence_base extends uvm_sequence_item;
        end
     end
 
-    // Ensure that the sequence_id is intialized in case this sequence has been stopped previously
+     // Ensure that the sequence_id is intialized in case this sequence has been stopped previously
     set_sequence_id(-1);
-    // Remove all sqr_seq_ids
-    m_sqr_seq_ids.delete();
 
     // Register the sequence with the sequencer if defined.
     if (m_sequencer != null) begin
@@ -382,7 +380,14 @@ class uvm_sequence_base extends uvm_sequence_item;
     // were forcibly stoped, this step has already taken place
     if (m_sequence_state != UVM_STOPPED) begin
       if (m_sequencer != null)
-        m_sequencer.m_sequence_exiting(this);
+        m_sequencer.m_sequence_exiting(this);	 
+      else	
+	      // remove any routing for this sequence even when virtual sequencers (or a null sequencer is involved)
+	      // once we pass this point nothing can be routed to this sequence(id)
+	      foreach(m_sqr_seq_ids[seqrID]) begin
+		      uvm_sequencer_base s = uvm_sequencer_base::all_sequencer_insts[seqrID];
+		      s.m_sequence_exiting(this);
+	      end	    
     end
 
     #0; // allow stopped and finish waiters to resume
