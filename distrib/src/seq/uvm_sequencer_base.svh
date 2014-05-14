@@ -92,7 +92,7 @@ class uvm_sequencer_base extends uvm_component;
   // Derived sequencers may override this method to perform a custom arbitration
   // policy. The override must return one of the entries from the
   // avail_sequences queue, which are indexes into an internal queue,
-  // arb_sequence_q. The 
+  // arb_sequence_q.  
   //
   // The default implementation behaves like UVM_SEQ_ARB_FIFO, which returns the
   // entry at avail_sequences[0]. 
@@ -321,7 +321,7 @@ class uvm_sequencer_base extends uvm_component;
   // UVM_SEQ_ARB_FIFO          - Requests are granted in FIFO order (default)
   // UVM_SEQ_ARB_WEIGHTED      - Requests are granted randomly by weight
   // UVM_SEQ_ARB_RANDOM        - Requests are granted randomly
-  // UVM_SEQ_ARB_STRICT_FIFO   - Requests at highest priority granted in fifo order
+  // UVM_SEQ_ARB_STRICT_FIFO   - Requests at highest priority granted in FIFO order
   // UVM_SEQ_ARB_STRICT_RANDOM - Requests at highest priority granted in randomly
   // UVM_SEQ_ARB_USER          - Arbitration is delegated to the user-defined 
   //                             function, user_priority_arbitration. That function

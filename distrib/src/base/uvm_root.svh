@@ -183,8 +183,8 @@ class uvm_root extends uvm_component;
   //
   // Returns the component handle (find) or list of components handles
   // (find_all) matching a given string. The string may contain the wildcards,
-  // * and ?. Strings beginning with '.' are absolute path names. If optional
-  // comp arg is provided, then search begins from that component down
+  // * and ?. Strings beginning with '.' are absolute path names. If the optional
+  // argument comp is provided, then search begins from that component down
   // (default=all components).
 
   extern function void find_all (string comp_match,
