@@ -59,7 +59,7 @@ typedef class uvm_config_db_options;
 // The parameter value "int" identifies the configuration type as
 // an int property.  
 //
-// The <set> and <get> methods provide the same api and
+// The <set> and <get> methods provide the same API and
 // semantics as the set/get_config_* functions in <uvm_component>.
 //----------------------------------------------------------------------
 class uvm_config_db#(type T=int) extends uvm_resource_db#(T);

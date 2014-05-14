@@ -54,7 +54,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   //
   // Once <get_next_item> is called, <item_done> must be called to indicate the
   // completion of the request to the sequencer.  This will remove the request
-  // item from the sequencer fifo.
+  // item from the sequencer FIFO.
 
   virtual task get_next_item(output T1 t);
     uvm_report_error("get_next_item", `UVM_SEQ_ITEM_TASK_ERROR, UVM_NONE);
@@ -78,7 +78,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   //
   // Once <try_next_item> is called, <item_done> must be called to indicate the
   // completion of the request to the sequencer.  This will remove the request
-  // item from the sequencer fifo.
+  // item from the sequencer FIFO.
 
   virtual task try_next_item(output T1 t);
     uvm_report_error("try_next_item", `UVM_SEQ_ITEM_TASK_ERROR, UVM_NONE);
@@ -91,7 +91,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // <uvm_sequence_base::wait_for_item_done>
   // calls made by a sequence for this item will return.
   //
-  // The current item is removed from the sequencer fifo.
+  // The current item is removed from the sequencer FIFO.
   //
   // If a response item is provided, then it will be sent back to the requesting
   // sequence. The response item must have its sequence ID and transaction ID
@@ -163,9 +163,9 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
 
   // Task: peek
   //
-  // Returns the current request item if one is in the sequencer fifo.  If no
-  // item is in the fifo, then the call will block until the sequencer has a new
-  // request. The following steps will occur if the sequencer fifo is empty:
+  // Returns the current request item if one is in the sequencer FIFO.  If no
+  // item is in the FIFO, then the call will block until the sequencer has a new
+  // request. The following steps will occur if the sequencer FIFO is empty:
   //
   // 1 - Arbitrate among requesting, unlocked, relevant sequences - choose the
   // highest priority sequence based on the current sequencer arbitration mode.
@@ -177,9 +177,9 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // 4 - The chosen sequence item is randomized
   // 5 - The chosen sequence <uvm_sequence_base::post_do> is called
   //
-  // Once a request item has been retrieved and is in the sequencer fifo,
+  // Once a request item has been retrieved and is in the sequencer FIFO,
   // subsequent calls to peek will return the same item.  The item will stay in
-  // the fifo until either get or <item_done> is called.
+  // the FIFO until either get or <item_done> is called.
 
   virtual task peek(output T1 t);
     uvm_report_error("peek", `UVM_SEQ_ITEM_TASK_ERROR, UVM_NONE);

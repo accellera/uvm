@@ -278,7 +278,7 @@ endclass
 //
 // Convenience callback type declaration for registers
 //
-// Use this declaration to register register callbacks rather than
+// Use this declaration to register the register callbacks rather than
 // the more verbose parameterized class
 //
 typedef uvm_callbacks#(uvm_reg, uvm_reg_cbs) uvm_reg_cb;

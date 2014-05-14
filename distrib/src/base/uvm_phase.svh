@@ -146,7 +146,7 @@ class uvm_phase extends uvm_object;
   //
   // Create a new phase node, with a name and a note of its type
   //   name   - name of this phase
-  //   type   - task, topdown func or bottomup func
+  //   type   - a value in <uvm_phase_type>
   //
   extern function new(string name="uvm_phase",
                       uvm_phase_type phase_type=UVM_PHASE_SCHEDULE,
@@ -302,7 +302,7 @@ class uvm_phase extends uvm_object;
 
   // Function: get_imp
   //
-  // Returns the phase implementation for this this node.
+  // Returns the phase implementation for this node.
   // Returns ~null~ if this phase type is not a UVM_PHASE_LEAF_NODE. 
   //
   extern function uvm_phase get_imp();

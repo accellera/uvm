@@ -83,7 +83,7 @@ class uvm_sequence_item extends uvm_transaction;
   // request, and to uniquely identify transactions.
   //
   // The sequence_id is assigned automatically by a sequencer when a sequence
-  // initiates communication through any sequencer calls (i.e. `uvm_do_xxx,
+  // initiates communication through any sequencer calls (i.e. `uvm_do_*,
   // wait_for_grant).  A sequence_id will remain unique for this sequence
   // until it ends or it is killed.  However, a single sequence may have
   // multiple valid sequence ids at any point in time.  Should a sequence 
