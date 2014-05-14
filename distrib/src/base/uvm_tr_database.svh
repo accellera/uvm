@@ -199,7 +199,7 @@ virtual class uvm_tr_database extends uvm_object;
    // Establishes a ~link~ between two elements in the database
    //
    // Links are only supported between ~streams~ and ~records~
-   // wihin a single database.
+   // within a single database.
    //
    // This method will trigger a <do_establish_link> call.
    function void establish_link(uvm_link_base link);
@@ -327,7 +327,7 @@ class uvm_text_tr_database extends uvm_tr_database;
    // The text-backend will open a text file to dump all records in to.  The name
    // of this text file is controlled via <set_file_name>.
    //
-   // This will also lock the ~file_name~, so that it can not be
+   // This will also lock the ~file_name~, so that it cannot be
    // modified while the connection is open.
    protected virtual function bit do_open_db();
       if (m_file == 0) begin

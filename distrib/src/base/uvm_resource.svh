@@ -50,7 +50,7 @@
 // each resource has a static type handle that uniquely identifies the
 // type of each specialized resource container.
 //
-// Mutliple resources that have the same name are stored in a queue.
+// Multiple resources that have the same name are stored in a queue.
 // Each resource is pushed into a queue with the first one at the front
 // of the queue and each subsequent one behind it.  The same happens for
 // multiple resources that have the same type.  The resource queues are

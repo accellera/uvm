@@ -81,7 +81,7 @@ class uvm_tlm_time;
    
 
    // Scale a timescaled value to 'm_res' units,
-   // the the specified scale
+   // the specified scale
    local function real to_m_res(real t, time scaled, real secs);
       // ToDo: Check resolution
       return t/real'(scaled) * (secs/m_res);

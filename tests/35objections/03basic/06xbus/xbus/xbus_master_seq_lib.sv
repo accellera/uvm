@@ -42,7 +42,7 @@ virtual class xbus_base_sequence extends uvm_sequence #(xbus_transfer);
   // will encapsulate the sub-sequence. 
   virtual task pre_body();
     m_sequencer.uvm_report_info(get_type_name(),
-      $sformatf("%s pre_body() raising an uvm_test_done objection", 
+      $sformatf("%s pre_body() raising a uvm_test_done objection", 
       get_sequence_path()), UVM_MEDIUM);
     uvm_test_done.raise_objection(this);
   endtask
@@ -51,7 +51,7 @@ virtual class xbus_base_sequence extends uvm_sequence #(xbus_transfer);
   // the root sequence is complete. 
   virtual task post_body();
     m_sequencer.uvm_report_info(get_type_name(),
-      $sformatf("%s post_body() dropping an uvm_test_done objection", 
+      $sformatf("%s post_body() dropping a uvm_test_done objection", 
       get_sequence_path()), UVM_MEDIUM);
     uvm_test_done.drop_objection(this);
   endtask

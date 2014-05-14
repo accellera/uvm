@@ -859,7 +859,7 @@ function void uvm_packer::unpack_object(uvm_object value);
     end
   end
   else if ((is_non_null != 0) && (value == null)) begin
-     uvm_report_error("UNPOBJ","can not unpack into null object", UVM_NONE);
+     uvm_report_error("UNPOBJ","cannot unpack into null object", UVM_NONE);
   end
   value.__m_uvm_status_container.cycle_check.delete(value);
 
@@ -1018,7 +1018,7 @@ function string uvm_packer::unpack_string(int num_chars=-1);
         ((m_bits[count+:8] != 0) || (is_null_term == 0)) &&
         ((i<num_chars)||(is_null_term==1)) )
   begin
-    // silly, because can not append byte/char to string
+    // silly, because cannot append byte/char to string
     unpack_string = {unpack_string," "};
     if(big_endian == 0)
       unpack_string[i] = m_bits[count +: 8];

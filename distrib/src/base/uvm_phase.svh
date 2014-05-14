@@ -327,8 +327,8 @@ class uvm_phase extends uvm_object;
   // Function: get_adjacent_successor_nodes
   //
   // Provides an array of nodes which are successors to
-  // ~this~ phase node.  A 'successors node' is defined
-  // as any phase node which liest after ~this~ node in
+  // ~this~ phase node.  A 'successor's node' is defined
+  // as any phase node which comes after ~this~ node in
   // the phase graph, with no nodes between ~this~ node
   // and the successor node.
   //

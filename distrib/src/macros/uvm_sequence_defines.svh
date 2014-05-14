@@ -428,7 +428,7 @@
 //
 //| `uvm_declare_p_sequencer(SEQUENCER)
 //
-// The example below shows using the the `uvm_declare_p_sequencer macro
+// The example below shows using the `uvm_declare_p_sequencer macro
 // along with the uvm_object_utils macros to set up the sequence but
 // not register the sequence in the sequencer's library.
 //

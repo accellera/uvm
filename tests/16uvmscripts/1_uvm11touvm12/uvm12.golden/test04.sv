@@ -182,7 +182,7 @@ module top;
                                           UVM_SEQ_LIB_ITEM);
 
     // then override the mode for three of the four phases.
-    // this tests the the config overrides work  
+    // this tests that the config overrides work  
     uvm_config_db #(uvm_sequence_lib_mode)::set(null,
                                           "uvm_test_top.sequencer.reset_phase",
                                           "default_sequence.selection_mode",

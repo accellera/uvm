@@ -126,9 +126,9 @@ endfunction
 // See also <uvm_report_object::uvm_report_enabled>.
 //
 // Static methods of an extension of uvm_report_object, e.g. uvm_compoent-based
-// objects, can not call ~uvm_report_enabled~ because the call will resolve to
+// objects, cannot call ~uvm_report_enabled~ because the call will resolve to
 // the <uvm_report_object::uvm_report_enabled>, which is non-static.
-// Static methods can not call non-static methods of the same class. 
+// Static methods cannot call non-static methods of the same class. 
 
 function int uvm_report_enabled (int verbosity,
                                  uvm_severity severity=UVM_INFO, string id="");

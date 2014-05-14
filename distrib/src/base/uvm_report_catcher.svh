@@ -46,7 +46,7 @@ endclass
 // The uvm_report_catcher is used to catch messages issued by the uvm report
 // server. Catchers are
 // uvm_callbacks#(<uvm_report_object>,uvm_report_catcher) objects,
-// so all factilities in the <uvm_callback> and <uvm_callbacks#(T,CB)>
+// so all facilities in the <uvm_callback> and <uvm_callbacks#(T,CB)>
 // classes are available for registering catchers and controlling catcher
 // state.
 // The uvm_callbacks#(<uvm_report_object>,uvm_report_catcher) class is
@@ -449,7 +449,7 @@ virtual class uvm_report_catcher extends uvm_callback;
 
    // Function: uvm_report_error
    //
-   // Issues a error message using the current message's report object.
+   // Issues an error message using the current message's report object.
    // This message will bypass any message catching callbacks.
    
    protected function void uvm_report_error(string id,

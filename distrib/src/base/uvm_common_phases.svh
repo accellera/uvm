@@ -212,7 +212,7 @@ endclass
 // <uvm_component::run_phase> virtual method. This phase runs in
 // parallel to the runtime phases, <uvm_pre_reset_phase> through
 // <uvm_post_shutdown_phase>. All components in the testbench
-// are synchronized with respect to the run phase regardles of
+// are synchronized with respect to the run phase regardless of
 // the phase domain they belong to.
 //
 // Upon Entry:
@@ -273,7 +273,7 @@ endclass
 
 // Class: uvm_extract_phase
 //
-// Extract data from different points of the verficiation environment.
+// Extract data from different points of the verification environment.
 //
 // <uvm_bottomup_phase> that calls the
 // <uvm_component::extract_phase> method.

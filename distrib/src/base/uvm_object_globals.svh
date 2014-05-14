@@ -258,7 +258,7 @@ string uvm_aa_string_key;
 //   UVM_WARNING - Indicates a potential problem.
 //   UVM_ERROR   - Indicates a real problem. Simulation continues subject
 //                 to the configured message action.
-//   UVM_FATAL   - Indicates a problem from which simulation can not
+//   UVM_FATAL   - Indicates a problem from which simulation cannot
 //                 recover. Simulation exits via $finish after a #0 delay.
 
 typedef enum bit [1:0]
@@ -310,7 +310,7 @@ typedef enum
 //
 // Defines standard verbosity levels for reports.
 //
-//  UVM_NONE   - Report is always printed. Verbosity level setting can not
+//  UVM_NONE   - Report is always printed. Verbosity level setting cannot
 //               disable it.
 //  UVM_LOW    - Report is issued if configured verbosity is set to UVM_LOW
 //               or above.

@@ -186,7 +186,7 @@ endclass
 //
 // uvm_port_base possesses the properties of components in that they have a
 // hierarchical instance path and parent. Because SystemVerilog does not support
-// multiple inheritance, uvm_port_base can not extend both the interface it
+// multiple inheritance, uvm_port_base cannot extend both the interface it
 // implements and <uvm_component>. Thus, uvm_port_base contains a local instance
 // of uvm_component, to which it delegates such commands as get_name,
 // get_full_name, and get_parent.
@@ -400,13 +400,13 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   //   must be compatible. Each port has an interface mask that encodes the
   //   interface(s) it supports. If the bitwise AND of these masks is equal to
   //   the this port's mask, the requirement is met and the ports are
-  //   compatible. For example, an uvm_blocking_put_port #(T) is compatible with
-  //   an uvm_put_export #(T) and uvm_blocking_put_imp #(T) because the export
+  //   compatible. For example, a uvm_blocking_put_port #(T) is compatible with
+  //   a uvm_put_export #(T) and uvm_blocking_put_imp #(T) because the export
   //   and imp provide the interface required by the uvm_blocking_put_port.
   // 
   // - Ports of type <UVM_EXPORT> can only connect to other exports or imps.
   //
-  // - Ports of type <UVM_IMPLEMENTATION> can not be connected, as they are
+  // - Ports of type <UVM_IMPLEMENTATION> cannot be connected, as they are
   //   bound to the component that implements the interface at time of
   //   construction.
   //
@@ -417,7 +417,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   //
   // Relationships, when enabled, are checked are as follows:
   //
-  // - If this port is an UVM_PORT type, the ~provider~ can be a parent port,
+  // - If this port is a uvm_PORT type, the ~provider~ can be a parent port,
   //   or a sibling export or implementation port.
   //
   // - If this port is an <UVM_EXPORT> type, the provider can be a child

@@ -26,7 +26,7 @@
 // The uvm_comparer class provides a policy object for doing comparisons. The
 // policies determine how miscompares are treated and counted. Results of a
 // comparison are stored in the comparer object. The <uvm_object::compare>
-// and <uvm_object::do_compare> methods are passed an uvm_comparer policy
+// and <uvm_object::do_compare> methods are passed a uvm_comparer policy
 // object.
 //
 //------------------------------------------------------------------------------
