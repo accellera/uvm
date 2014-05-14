@@ -951,31 +951,15 @@ class uvm_objection extends uvm_report_object;
   // and all descendants.
 
   function int get_objection_total (uvm_object obj=null);
-    uvm_component c;
-    string ch;
  
     if (obj==null)
       obj = m_top;
 
     if (!m_total_count.exists(obj))
       return 0;
-    if (m_prop_mode) 
+    else
       return m_total_count[obj];
-    else begin
-      if ($cast(c,obj)) begin
-        if (!m_source_count.exists(obj))
-          get_objection_total = 0;
-        else
-          get_objection_total = m_source_count[obj];
-        if (c.get_first_child(ch))
-        do
-          get_objection_total += get_objection_total(c.get_child(ch));
-        while (c.get_next_child(ch));
-      end
-      else begin
-        return m_total_count[obj];
-      end
-    end
+     
   endfunction
   
 
