@@ -127,8 +127,8 @@ typedef class uvm_phase_cb;
 //
 // Handles of this type uvm_phase are used frequently in the API, both by
 // the user, to access phasing-specific API, and also as a parameter to some
-// APIs. In many cases, the singleton package-global phase handles can be
-// used (eg. connect_ph, run_ph) in APIs. For those APIs that need to look
+// APIs. In many cases, the singleton phase handles can be
+// used (eg. <uvm_run_phase::get()>) in APIs. For those APIs that need to look
 // up that phase in the graph, this is done automatically.
 
 class uvm_phase extends uvm_object;
