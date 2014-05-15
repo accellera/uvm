@@ -262,3 +262,6 @@ Mantis 4882: changed name of phase objection to reflect phase name
 Mantis 4884: Performance fix avoiding the copy of large QDA into uvm_spell_chkr::check
 
 Mantis 4893: Fixed bug in uvm_leaf_scope which could lead to stall of simulation
+
+Mantis 4920: Fixed random stability bug in lookup_name which would cause instability 
+when the config database is queried.
