@@ -317,7 +317,7 @@ class uvm_packer;
   //   remaining 3 bits are reserved).
   //
   // - For queues, dynamic arrays, and associative arrays, pack 32 bits
-  //   indicating the size of the array prior to to packing individual elements.
+  //   indicating the size of the array prior to packing individual elements.
 
   bit use_metadata;
 

@@ -178,7 +178,7 @@ where the asterisk can be any of
 Group: Usage
 
 This example illustrates basic TLM connectivity using
-the blocking put inteface.
+the blocking put interface.
 
 (see uvm_ref_tlm_hierarchy.gif)
 

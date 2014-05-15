@@ -43,7 +43,7 @@ endclass
 //
 // The uvm_cmdline_processor class also provides support for setting various UVM
 // variables from the command line such as components' verbosities and configuration
-// settings for integral types and strings.  Each of these capablities is described 
+// settings for integral types and strings.  Each of these capabilities is described 
 // in the Built-in UVM Aware Command Line Arguments section.
 //
 
@@ -85,7 +85,7 @@ class uvm_cmdline_processor extends uvm_report_object;
   // This function returns a queue with all of the plus arguments
   // that were used to start the simulation. Plusarguments may be
   // used by the simulator vendor, or may be specific to a company
-  // or individiual user. Plusargs never have extra arguments
+  // or individual user. Plusargs never have extra arguments
   // (i.e. if there is a plusarg as the second argument on the
   // command line, the third argument is unrelated); this is not
   // necessarily the case with vendor specific dash arguments.
@@ -162,7 +162,7 @@ class uvm_cmdline_processor extends uvm_report_object;
   //
   // This function finds the first argument which matches the ~match~ arg and
   // returns the suffix of the argument. This is similar to the $value$plusargs
-  // system task, but does not take a formating string. The return value is
+  // system task, but does not take a formatting string. The return value is
   // the number of command line arguments that match the ~match~ string, and
   // ~value~ is the value of the first match.
   
@@ -220,7 +220,7 @@ class uvm_cmdline_processor extends uvm_report_object;
 
   // Function: get_tool_name
   //
-  // Returns the simulation tool that is executing the simlation.
+  // Returns the simulation tool that is executing the simulation.
   // This is a vendor specific string.
 
   function string get_tool_name ();
@@ -229,7 +229,7 @@ class uvm_cmdline_processor extends uvm_report_object;
 
   // Function: get_tool_version
   //
-  // Returns the version of the simulation tool that is executing the simlation.
+  // Returns the version of the simulation tool that is executing the simulation.
   // This is a vendor specific string.
 
   function string  get_tool_version ();
@@ -420,7 +420,7 @@ class uvm_cmdline_processor extends uvm_report_object;
     //
     //| <sim command> +uvm_set_default_sequence=path.to.sequencer,main_phase,seq_type
     //  
-    // This is functionally equivilent to calling the following in your 
+    // This is functionally equivalent to calling the following in your 
     // test:
     //
     //| uvm_coreservice_t cs = uvm_coreservice_t::get();
