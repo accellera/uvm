@@ -870,10 +870,20 @@ class uvm_resource_pool;
                                                     uvm_resource_base type_handle = null,
                                                     bit rpterr = 1);
     uvm_resource_types::rsrc_q_t rq;
-    uvm_resource_types::rsrc_q_t q = new();
+    uvm_resource_types::rsrc_q_t q;
     uvm_resource_base rsrc;
     uvm_resource_base r;
 
+     // ensure rand stability during lookup
+     begin
+	process p = process::self();
+	string s;
+	if(p!=null) s=p.get_randstate();
+	q=new();
+	if(p!=null) p.set_randstate(s);
+     end
+
+     
     // resources with empty names are anonymous and do not exist in the name map
     if(name == "")
       return q;
