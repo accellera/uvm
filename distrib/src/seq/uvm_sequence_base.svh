@@ -1069,7 +1069,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Function: response_handler
   //
-  // When the use_reponse_handler bit is set to 1, this virtual task is called
+  // When the use_response_handler bit is set to 1, this virtual task is called
   // by the sequencer for each response that arrives for this sequence.
 
   virtual function void response_handler(uvm_sequence_item response);

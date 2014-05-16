@@ -134,7 +134,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   // precedence. Settings from the same level of hierarchy have
   // a last setting wins semantic. A precedence setting of 
   // <uvm_resource_base::default_precedence>  is used for uvm_top, and 
-  // each hierarcical level below the top is decremented by 1.
+  // each hierarchical level below the top is decremented by 1.
   //
   // After build time, all settings use the default precedence and thus
   // have a last wins semantic. So, if at run time, a low level 

@@ -200,7 +200,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
 
 
 
-  // Internal methods and variables; do not use directly; not part of standard
+  // Internal methods and variables; do not use directly, not part of standard
 
   /* local */ extern function void m_last_rsp_push_front(RSP item);
   /* local */ extern function void put_response (RSP t);

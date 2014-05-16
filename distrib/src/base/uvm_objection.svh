@@ -315,7 +315,7 @@ class uvm_objection extends uvm_report_object;
   // If ~object~ is not specified or ~null~, the implicit top-level component,
   // <uvm_root>, is chosen.
   //
-  // Rasing an objection causes the following.
+  // Raising an objection causes the following.
   //
   // - The source and total objection counts for ~object~ are increased by
   //   ~count~. ~description~ is a string that marks a specific objection
@@ -507,7 +507,7 @@ class uvm_objection extends uvm_report_object;
   //   completed, propagation of the dropped objection to the parent proceeds
   //   as described in <raise_objection>, except as described below.
   //
-  // If a new objection for this ~object~ or any of its descendents is raised
+  // If a new objection for this ~object~ or any of its decendants is raised
   // during the drain time or during execution of the all_dropped callback at
   // any point, the hierarchical chain described above is terminated and the
   // dropped callback does not go up the hierarchy. The raised objection will
@@ -515,7 +515,7 @@ class uvm_objection extends uvm_report_object;
   // reduced by the number of drops that were pending waiting for the 
   // all_dropped/drain time completion. Thus, if exactly one objection
   // caused the count to go to zero, and during the drain exactly one new
-  // objection comes in, no raises or drops are propagted up the hierarchy,
+  // objection comes in, no raises or drops are propagated up the hierarchy,
   //
   // As an optimization, if the ~object~ has no set drain-time and no
   // registered callbacks, the forked process can be skipped and propagation
@@ -615,7 +615,7 @@ class uvm_objection extends uvm_report_object;
   //
   // The caller, if a uvm_object-based object, should pass its 'this' handle
   // to the ~obj~ argument to document who cleared the objection.
-  // Any drain_times set by the user are not effected. 
+  // Any drain_times set by the user are not affected. 
   //
   virtual function void clear(uvm_object obj=null);
     string name;
@@ -799,7 +799,7 @@ class uvm_objection extends uvm_report_object;
   // been dropped before calling the all_dropped callback and propagating
   // the objection to the parent. 
   //
-  // If a new objection for this ~object~ or any of its descendents is raised
+  // If a new objection for this ~object~ or any of its decendants is raised
   // during the drain time or during execution of the all_dropped callbacks,
   // the drain_time/all_dropped execution is terminated. 
 

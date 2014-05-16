@@ -39,7 +39,7 @@
 // Type parameters:
 //
 // REQ - Type of the request transactions conveyed by this channel.
-// RSP - Type of the reponse transactions conveyed by this channel.
+// RSP - Type of the response transactions conveyed by this channel.
 //
 //------------------------------------------------------------------------------
 
