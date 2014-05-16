@@ -1470,7 +1470,7 @@ end
   // uvm_resource#(T) provides an interface for setting and getting a
   // resources.  Specifically, a resource can insert itself into the
   // resource pool.  It doesn't make sense for a resource to get itself,
-  // since you can't call a functino on a handle you don't have.
+  // since you can't call a function on a handle you don't have.
   // However, a static get interface is provided as a convenience.  This
   // obviates the need for the user to get a handle to the global
   // resource pool as this is done for him here.
