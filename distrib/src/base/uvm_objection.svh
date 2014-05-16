@@ -507,7 +507,7 @@ class uvm_objection extends uvm_report_object;
   //   completed, propagation of the dropped objection to the parent proceeds
   //   as described in <raise_objection>, except as described below.
   //
-  // If a new objection for this ~object~ or any of its decendants is raised
+  // If a new objection for this ~object~ or any of its descendants is raised
   // during the drain time or during execution of the all_dropped callback at
   // any point, the hierarchical chain described above is terminated and the
   // dropped callback does not go up the hierarchy. The raised objection will
@@ -799,7 +799,7 @@ class uvm_objection extends uvm_report_object;
   // been dropped before calling the all_dropped callback and propagating
   // the objection to the parent. 
   //
-  // If a new objection for this ~object~ or any of its decendants is raised
+  // If a new objection for this ~object~ or any of its descendants is raised
   // during the drain time or during execution of the all_dropped callbacks,
   // the drain_time/all_dropped execution is terminated. 
 
