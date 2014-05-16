@@ -462,7 +462,7 @@ endclass
 // virtual, users can define subtypes that override the default algorithm,
 // perform tasks before and/or after calling super.<method> to execute any
 // registered callbacks, or to not call the base implementation, effectively
-// disabling that particalar hook. A demonstration of this methodology is
+// disabling that particular hook. A demonstration of this methodology is
 // provided in an example included in the kit.
 //------------------------------------------------------------------------------
 
@@ -569,14 +569,14 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
     return($cast(this_cb,cb));
   endfunction
 
-  // Group: Add/delete inteface
+  // Group: Add/delete interface
 
   // Function: add
   //
   // Registers the given callback object, ~cb~, with the given
   // ~obj~ handle. The ~obj~ handle can be ~null~, which allows 
   // registration of callbacks without an object context. If
-  // ~ordreing~ is UVM_APPEND (default), the callback will be executed
+  // ~ordering~ is UVM_APPEND (default), the callback will be executed
   // after previously added callbacks, else  the callback
   // will be executed ahead of previously added callbacks. The ~cb~
   // is the callback handle; it must be non-null, and if the callback

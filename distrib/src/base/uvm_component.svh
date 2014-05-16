@@ -1053,7 +1053,7 @@ virtual class uvm_component extends uvm_report_object;
   // that originally dropped the objection. 
   // The ~description~ is optionally provided by the ~source_obj~ to give a
   // reason for dropping the objection. The ~count~ indicates the number of
-  // objections dropped by the the ~source_obj~.
+  // objections dropped by the ~source_obj~.
 
   virtual function void dropped (uvm_objection objection, uvm_object source_obj, 
       string description, int count);
@@ -1067,7 +1067,7 @@ virtual class uvm_component extends uvm_report_object;
   // object that dropped the last objection.
   // The ~description~ is optionally provided by the ~source_obj~ to give a
   // reason for raising the objection. The ~count~ indicates the number of
-  // objections dropped by the the ~source_obj~.
+  // objections dropped by the ~source_obj~.
 
   virtual task all_dropped (uvm_objection objection, uvm_object source_obj, 
       string description, int count);

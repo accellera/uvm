@@ -365,7 +365,7 @@ endclass
 //|  endclass
 //
 // The <`uvm_component_param_utils> and <`uvm_object_param_utils> macros are used
-// to register parameterized classes with the factory. Unlike the the non-param
+// to register parameterized classes with the factory. Unlike the non-param
 // versions, these macros do not specify the ~Tname~ parameter in the underlying
 // uvm_component_registry typedef, and they do not define the get_type_name
 // method for the user class. Consequently, you will not be able to use the

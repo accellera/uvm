@@ -39,7 +39,7 @@ A *producer* component will use uvm_blocking_put_port and uvm_analysis_port and 
 
 A *consumer* component will use uvm_blocking_put export and connect it directly to a fifo export, also will connect the *bfm*  get port to the fifo export
 
-At *top* env, the *producer*, *consumer*, and the the *listener* will be connected
+At *top* env, the *producer*, *consumer*, and the *listener* will be connected
 
 */
 

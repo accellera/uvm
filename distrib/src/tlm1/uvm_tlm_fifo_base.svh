@@ -33,7 +33,7 @@ endclass
 //
 // This class is the base for <uvm_tlm_fifo#(T)>. It defines the TLM exports 
 // through which all transaction-based FIFO operations occur. It also defines
-// default implementations for each inteface method provided by these exports.
+// default implementations for each interface method provided by these exports.
 //
 // The interface methods provided by the <put_export> and the <get_peek_export>
 // are defined and described by <uvm_tlm_if_base #(T1,T2)>.  See the TLM Overview
