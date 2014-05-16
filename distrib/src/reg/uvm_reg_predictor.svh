@@ -243,7 +243,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
   
   // Function: check_phase
   //
-  // Checks that no pending register transactions are still enqueued.
+  // Checks that no pending register transactions are still queued.
 
   virtual function void check_phase(uvm_phase phase);
 	 string q[$];

@@ -67,7 +67,7 @@
 // A sequence can also be indirectly started as a child in the <body> of a
 // parent sequence. The child sequence's <start> method is called indirectly
 // by invoking any of the `uvm_do macros.
-// In thise cases, <start> is called with
+// In these cases, <start> is called with
 // ~call_pre_post~ set to 0, preventing the started sequence's <pre_body> and
 // <post_body> methods from being called. During execution of the
 // child sequence, the parent's <pre_do>, <mid_do>, and <post_do> methods
@@ -424,7 +424,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Task: pre_do
   //
   // This task is a user-definable callback task that is called ~on the
-  // parent sequence~, if any.the
+  // parent sequence~, if any
   // sequence has issued a wait_for_grant() call and after the sequencer has
   // selected this sequence, and before the item is randomized.
   //
@@ -530,7 +530,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // this sequence is started as the default sequence on a sequencer.
   // See <uvm_sequencer_base::start_phase_sequence> for more information.
   //
-  // Internally, the <uvm_sequence_base> uses a <uvm_get_to_lock_dap> to 
+  // Internally, the <uvm_sequence_base> uses an <uvm_get_to_lock_dap> to 
   // protect the starting phase value from being modified 
   // after the reference has been read.  Once the sequence has ended 
   // its execution (either via natural termination, or being killed),
@@ -590,7 +590,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   //| seq.start(my_sequencer);
   //
   // Internally, the <uvm_sequence_base> uses a <uvm_get_to_lock_dap> to 
-  // protect the ~automatic_phase_objection~ value from being modified after
+  // protect the ~automatic_phase_objection~ value from being modified 
   // after the reference has been read.  Once the sequence has ended 
   // its execution (either via natural termination, or being killed),
   // then the ~automatic_phase_objection~ value can be modified again.
@@ -735,7 +735,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Requests a lock on the specified sequencer.  If no argument is supplied,
   // the lock will be requested on the current default sequencer.
   //
-  // A grab equest is put in front of the arbitration queue. It will be
+  // A grab request is put in front of the arbitration queue. It will be
   // arbitrated before any other requests. A grab is granted when no other grabs
   // or locks are blocking this sequence.
   //

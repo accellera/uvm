@@ -58,7 +58,7 @@
 //
 //|    function AFTER transform (BEFORE b);
 //
-// Matches and mistmatches are reported in terms of the ~AFTER~ transactions.
+// Matches and mismatches are reported in terms of the ~AFTER~ transactions.
 // For more information, see the 
 // <uvm_in_order_comparator #(T,comp_type,convert,pair_type)> class.
 //

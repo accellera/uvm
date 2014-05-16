@@ -569,7 +569,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
     return($cast(this_cb,cb));
   endfunction
 
-  // Group: Add/delete inteface
+  // Group: Add/delete interface
 
   // Function: add
   //

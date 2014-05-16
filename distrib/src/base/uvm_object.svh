@@ -323,7 +323,7 @@ virtual class uvm_object extends uvm_void;
   //
   // This virtual function is a user-definable hook, called directly by the
   // user, that allows users to provide object information in the form of
-  // a string. Unlike <sprint>, there is no requirement to use an <uvm_printer>
+  // a string. Unlike <sprint>, there is no requirement to use a <uvm_printer>
   // policy object. As such, the format and content of the output is fully
   // customizable, which may be suitable for applications not requiring the
   // consistent formatting offered by the <print>/<sprint>/<do_print>

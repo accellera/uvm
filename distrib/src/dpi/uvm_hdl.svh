@@ -97,7 +97,7 @@ typedef logic [UVM_HDL_MAX_WIDTH-1:0] uvm_hdl_data_t;
   // Releases a value previously set with <uvm_hdl_force>.
   // Returns 1 if the call succeeded, 0 otherwise. ~value~ is set to
   // the HDL value after the release. For 'reg', the value will still be
-  // the forced value until it has bee procedurally reassigned. For 'wire',
+  // the forced value until it has been procedurally reassigned. For 'wire',
   // the value will change immediately to the resolved value of its
   // continuous drivers, if any. If none, its value remains as forced until
   // the next direct assignment.

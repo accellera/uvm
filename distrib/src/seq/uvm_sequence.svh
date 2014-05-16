@@ -102,7 +102,7 @@ virtual class uvm_sequence #(type REQ = uvm_sequence_item,
   // By default, sequences must retrieve responses by calling get_response.
   // If no transaction_id is specified, this task will return the next response
   // sent to this sequence.  If no response is available in the response queue,
-  // the method will block until a response is recieved.
+  // the method will block until a response is received.
   //
   // If a transaction_id is parameter is specified, the task will block until
   // a response with that transaction_id is received in the response queue.

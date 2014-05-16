@@ -139,7 +139,7 @@ class uvm_default_coreservice_t extends uvm_coreservice_t;
 	// Function: set_factory
 	//
 	// Sets the current uvm factory.
-	// Please note: it is up to the user to preserve the contents of the original factory or delegate calls to to the original factory 
+	// Please note: it is up to the user to preserve the contents of the original factory or delegate calls to the original factory 
 	virtual function void set_factory(uvm_factory f);
 		factory = f;
 	endfunction 

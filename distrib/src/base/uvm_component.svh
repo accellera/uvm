@@ -61,7 +61,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: new
   //
-  // Creates a new component with the given leaf instance ~name~ and handle to
+  // Creates a new component with the given leaf instance ~name~ and handle
   // to its ~parent~.  If the component is a top-level component (i.e. it is
   // created in a static module or interface), ~parent~ should be null.
   //
@@ -201,7 +201,7 @@ virtual class uvm_component extends uvm_report_object;
   // The <uvm_build_phase> phase implementation method.
   //
   // Any override should call super.build_phase(phase) to execute the automatic
-  // configuration of fields registed in the component by calling 
+  // configuration of fields registered in the component by calling 
   // <apply_config_settings>.
   // To turn off automatic configuration for a component, 
   // do not call super.build_phase(phase).
@@ -253,8 +253,8 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
-  // Thn the phase will automatically
-  // ends once all objections are dropped using ~phase.drop_objection()~.
+  // Thus the phase will automatically
+  // end once all objections are dropped using ~phase.drop_objection()~.
   // 
   // Any processes forked by this task continue to run
   // after the task returns,
@@ -601,7 +601,7 @@ virtual class uvm_component extends uvm_report_object;
   // recursively to all its children. 
   //
   // Calls the virtual <define_domain> method, which derived components can
-  // override to augment or replace the domain definition of ita base class.
+  // override to augment or replace the domain definition of its base class.
   //
 
   extern function void set_domain(uvm_domain domain, int hier=1);
@@ -631,7 +631,7 @@ virtual class uvm_component extends uvm_report_object;
   // is currently empty.
   //
   // Calling <set_domain>
-  // with the default ~uvm~ domain (ie. <uvm_domain::get_uvm_domain> ) on
+  // with the default ~uvm~ domain (i.e. <uvm_domain::get_uvm_domain> ) on
   // a component with no ~define_domain~ override effectively reverts the
   // that component to using the default ~uvm~ domain. This may be useful
   // if a branch of the testbench hierarchy defines a custom domain, but
@@ -884,7 +884,7 @@ virtual class uvm_component extends uvm_report_object;
   // is found, then ~value~ is unchanged and the 0 returned.
   //
   // Calling the get_config_object method requires special handling. Because
-  // ~value~ is an output of type <uvm_object>, you must provide an uvm_object
+  // ~value~ is an output of type <uvm_object>, you must provide a uvm_object
   // handle to assign to (_not_ a derived class handle). After the call, you can
   // then $cast to the actual type.
   //
@@ -1035,7 +1035,7 @@ virtual class uvm_component extends uvm_report_object;
   // Function: raised
   //
   // The ~raised~ callback is called when this or a descendant of this component
-  // instance raises the specfied ~objection~. The ~source_obj~ is the object
+  // instance raises the specified ~objection~. The ~source_obj~ is the object
   // that originally raised the objection. 
   // The ~description~ is optionally provided by the ~source_obj~ to give a
   // reason for raising the objection. The ~count~ indicates the number of
@@ -1049,11 +1049,11 @@ virtual class uvm_component extends uvm_report_object;
   // Function: dropped
   //
   // The ~dropped~ callback is called when this or a descendant of this component
-  // instance drops the specfied ~objection~. The ~source_obj~ is the object
+  // instance drops the specified ~objection~. The ~source_obj~ is the object
   // that originally dropped the objection. 
   // The ~description~ is optionally provided by the ~source_obj~ to give a
   // reason for dropping the objection. The ~count~ indicates the number of
-  // objections dropped by the the ~source_obj~.
+  // objections dropped by the ~source_obj~.
 
   virtual function void dropped (uvm_objection objection, uvm_object source_obj, 
       string description, int count);
@@ -1067,7 +1067,7 @@ virtual class uvm_component extends uvm_report_object;
   // object that dropped the last objection.
   // The ~description~ is optionally provided by the ~source_obj~ to give a
   // reason for raising the objection. The ~count~ indicates the number of
-  // objections dropped by the the ~source_obj~.
+  // objections dropped by the ~source_obj~.
 
   virtual task all_dropped (uvm_objection objection, uvm_object source_obj, 
       string description, int count);
@@ -1282,7 +1282,7 @@ virtual class uvm_component extends uvm_report_object;
   // Function: set_report_severity_id_verbosity_hier
   //
   // These methods recursively associate the specified verbosity with reports of
-  // the given ~severity~, ~id~, or ~severity-id~ pair. An verbosity associated
+  // the given ~severity~, ~id~, or ~severity-id~ pair. A verbosity associated
   // with a particular severity-id pair takes precedence over a verbosity
   // associated with id, which takes precedence over a verbosity associated
   // with a severity.
@@ -3058,7 +3058,7 @@ function void uvm_component::set_config_object(string inst_name,
       uvm_component comp;
       if ($cast(comp,value)) begin
         `uvm_error("INVCLNC", {"Clone failed during set_config_object ",
-          "with an object that is an uvm_component. Components cannot be cloned."})
+          "with an object that is a uvm_component. Components cannot be cloned."})
         return;
       end
       else begin

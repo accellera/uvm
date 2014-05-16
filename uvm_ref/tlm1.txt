@@ -21,7 +21,7 @@ common base class and interface mask.
 
 Like their SystemC counterparts, the UVM's TLM port and export implementations
 allow connections between ports whose interfaces are not an exact match.
-For example, an ~uvm_blocking_get_port~ can be connected to any port,
+For example, a ~uvm_blocking_get_port~ can be connected to any port,
 export or imp port that provides ~at the least~ an implementation
 of the blocking_get interface, which includes the ~uvm_get_*~ ports and
 exports, ~uvm_blocking_get_peek_*~ ports and exports, and
@@ -178,7 +178,7 @@ where the asterisk can be any of
 Group: Usage
 
 This example illustrates basic TLM connectivity using
-the blocking put inteface.
+the blocking put interface.
 
 (see uvm_ref_tlm_hierarchy.gif)
 

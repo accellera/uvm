@@ -686,7 +686,7 @@ endfunction \
 
 // MACRO: `uvm_field_object
 //
-// Implements the data operations for an <uvm_object>-based property.
+// Implements the data operations for a <uvm_object>-based property.
 //
 //|  `uvm_field_object(ARG,FLAG)
 //

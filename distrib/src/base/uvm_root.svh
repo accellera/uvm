@@ -57,7 +57,7 @@
 //
 //
 // The ~uvm_top~ instance checks during the end_of_elaboration phase if any errors have 
-// been generated so far. If errors are found an UVM_FATAL error is being generated as result 
+// been generated so far. If errors are found a UVM_FATAL error is being generated as result 
 // so that the simulation will not continue to the start_of_simulation_phase.
 // 
 
@@ -118,7 +118,7 @@ class uvm_root extends uvm_component;
   // Function: die
   //
   // This method is called by the report server if a report reaches the maximum
-  // quit count or has an UVM_EXIT action associated with it, e.g., as with
+  // quit count or has a UVM_EXIT action associated with it, e.g., as with
   // fatal errors.
   //
   // Calls the <uvm_component::pre_abort()> method

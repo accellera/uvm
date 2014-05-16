@@ -123,7 +123,7 @@ virtual class uvm_reg_cbs extends uvm_callback;
    //
    // - Modifying the ~status~ member modifies the returned status.
    //
-   // - Modiying the ~value~ or ~offset~ members has no effect, as
+   // - Modifying the ~value~ or ~offset~ members has no effect, as
    //   the operation has already completed.
    //
    // See <uvm_reg_item> for details on ~rw~ information.
@@ -205,7 +205,7 @@ virtual class uvm_reg_cbs extends uvm_callback;
    // - Modifying the readback ~value~ or ~status~ modifies the actual
    //   returned value and status.
    //
-   // - Modiying the ~value~ or ~offset~ members has no effect, as
+   // - Modifying the ~value~ or ~offset~ members has no effect, as
    //   the operation has already completed.
    //
    // See <uvm_reg_item> for details on ~rw~ information.
