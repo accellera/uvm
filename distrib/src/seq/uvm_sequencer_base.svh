@@ -1711,7 +1711,7 @@ function uvm_sequence_base uvm_sequencer_base::get_sequence(int req_kind);
                                           m_seq_type))) 
   begin
       uvm_report_fatal("FCTSEQ", 
-        $sformatf("Factory can not produce a sequence of type %0s.",
+        $sformatf("Factory cannot produce a sequence of type %0s.",
         m_seq_type), UVM_NONE);
   end
 

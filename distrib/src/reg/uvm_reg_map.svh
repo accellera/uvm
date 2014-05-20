@@ -995,7 +995,7 @@ function void uvm_reg_map::add_submap (uvm_reg_map child_map,
 
    parent_map = child_map.get_parent_map();
 
-   // Can not have more than one parent (currently)
+   // Cannot have more than one parent (currently)
    if (parent_map != null) begin
       `uvm_error("RegModel", {"Map '", child_map.get_full_name(),
                  "' is already a child of map '",

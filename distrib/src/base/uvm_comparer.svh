@@ -42,7 +42,7 @@ class uvm_comparer;
 
   // Variable: show_max
   //
-  // Sets the maximum number of messages to send to the messager for miscompares
+  // Sets the maximum number of messages to send to the printer for miscompares
   // of an object. 
 
   int unsigned show_max = 1;

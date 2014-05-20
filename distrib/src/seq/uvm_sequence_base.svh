@@ -140,7 +140,7 @@ class uvm_sequence_base extends uvm_sequence_item;
             int                m_wait_for_grant_semaphore;
 
   // Each sequencer will assign a sequence id.  When a sequence is talking to multiple
-  // sequencers, each sequence_id is managed seperately
+  // sequencers, each sequence_id is managed separately
   protected int m_sqr_seq_ids[int];
 
   protected bit children_array[uvm_sequence_base];
@@ -1248,7 +1248,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     m_seq_type = m_sequencer.sequences[req_kind];
     if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
       uvm_report_fatal("FCTSEQ", 
-        $sformatf("Factory can not produce a sequence of type %0s.",
+        $sformatf("Factory cannot produce a sequence of type %0s.",
         m_seq_type), UVM_NONE);
     end
     m_seq.set_use_sequence_info(1);
@@ -1270,7 +1270,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     m_seq_type = m_sequencer.sequences[req_kind];
     if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
       uvm_report_fatal("FCTSEQ", 
-        $sformatf("Factory can not produce a sequence of type %0s.", m_seq_type), UVM_NONE);
+        $sformatf("Factory cannot produce a sequence of type %0s.", m_seq_type), UVM_NONE);
     end
 
     m_seq.set_item_context(this, m_sequencer);
@@ -1293,7 +1293,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     if (!$cast(m_seq, factory.create_object_by_name(seq_name, get_full_name(), seq_name))) begin
       uvm_report_fatal("FCTSEQ", 
-        $sformatf("Factory can not produce a sequence of type %0s.", seq_name), UVM_NONE);
+        $sformatf("Factory cannot produce a sequence of type %0s.", seq_name), UVM_NONE);
     end
     m_seq.set_use_sequence_info(1);
     return m_seq;

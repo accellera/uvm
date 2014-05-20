@@ -501,7 +501,7 @@ endfunction \
 // By using the macros, you do not have to implement any of the do_* methods 
 // inherited from <uvm_object>. However, be aware that the field macros expand
 // into general inline code that is not as run-time efficient nor as flexible
-// as direct implementions of the do_* methods. 
+// as direct implementations of the do_* methods. 
 //
 // Below is an example usage of the field macros for a sequence item. 
 //
@@ -593,7 +593,7 @@ endfunction \
 //   UVM_DEC      - Print / record the field in decimal (base-10).
 //   UVM_UNSIGNED - Print / record the field in unsigned decimal (base-10).
 //   UVM_OCT      - Print / record the field in octal (base-8).
-//   UVM_HEX      - Print / record the field in hexidecimal (base-16).
+//   UVM_HEX      - Print / record the field in hexadecimal (base-16).
 //   UVM_STRING   - Print / record the field in string format.
 //   UVM_TIME     - Print / record the field in time format.
 //
@@ -1552,7 +1552,7 @@ endfunction \
 //
 // Implementation note:
 // lines flagged with empty multi-line comments, /**/, are not needed or need
-// to be different for fixed arrays, which can not be resized. Fixed arrays 
+// to be different for fixed arrays, which cannot be resized. Fixed arrays 
 // do not need to pack/unpack their size either, because their size is known;
 // wouldn't hurt though if it allowed code consolidation. Unpacking would
 // necessarily be different. */
@@ -1578,7 +1578,7 @@ endfunction \
 // -------------------
 
 `define M_UVM_SARRAY_RESIZE(ARG,VAL) \
-  /* fixed arrays can not be resized; do nothing */
+  /* fixed arrays cannot be resized; do nothing */
 
 
 // M_UVM_FIELD_QDA_INT
@@ -3471,7 +3471,7 @@ endfunction \
 //|   `uvm_pack_array(data)
 //| endfunction
 //
-// The 'N' versions of these macros take a explicit size argument, which must
+// The 'N' versions of these macros take an explicit size argument, which must
 // be compile-time constant value greater than '0'.
 //------------------------------------------------------------------------------
 
@@ -3638,7 +3638,7 @@ endfunction \
 //|   `uvm_unpack_array(data)
 //| endfunction
 //
-// The 'N' versions of these macros take a explicit size argument, which must
+// The 'N' versions of these macros take an explicit size argument, which must
 // be a compile-time constant value greater than '0'.
 //------------------------------------------------------------------------------
 

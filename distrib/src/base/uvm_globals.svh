@@ -128,7 +128,7 @@ endfunction
 // Static methods of an extension of uvm_report_object, e.g. uvm_component-based
 // objects, cannot call ~uvm_report_enabled~ because the call will resolve to
 // the <uvm_report_object::uvm_report_enabled>, which is non-static.
-// Static methods can not call non-static methods of the same class. 
+// Static methods cannot call non-static methods of the same class. 
 
 function int uvm_report_enabled (int verbosity,
                                  uvm_severity severity=UVM_INFO, string id="");
@@ -461,7 +461,7 @@ task uvm_wait_for_nba_region;
   int next_nba;
 
   //If `included directly in a program block, can't use a non-blocking assign,
-  //but it isn't needed since program blocks are in a seperate region.
+  //but it isn't needed since program blocks are in a separate region.
 `ifndef UVM_NO_WAIT_FOR_NBA
   next_nba++;
   nba <= next_nba;

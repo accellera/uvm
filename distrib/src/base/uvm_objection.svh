@@ -294,7 +294,7 @@ class uvm_objection extends uvm_report_object;
      if (!m_top_all_dropped && (get_objection_total() != 0)) begin
         `uvm_error("UVM/BASE/OBJTN/PROP_MODE",
                    {"The propagation mode of '", this.get_full_name(),
-                    "' can not be changed while the objection is raised ",
+                    "' cannot be changed while the objection is raised ",
                     "or draining!"})
         return;
      end
@@ -599,7 +599,7 @@ class uvm_objection extends uvm_report_object;
         // the propagation.
 
         // Using the background process just allows us to
-        // seperate the links of the chain.
+        // separate the links of the chain.
         m_scheduled_list.push_back(ctxt);
 
     end // else: !if(m_total_count[obj] != 0)
@@ -1211,7 +1211,7 @@ class uvm_test_done_objection extends uvm_objection;
 
   // Variable- stop_timeout DEPRECATED
   //
-  // These set watchdog timers for task-based phases and stop tasks. You can not
+  // These set watchdog timers for task-based phases and stop tasks. You cannot
   // disable the timeouts. When set to 0, a timeout of the maximum time possible
   // is applied. A timeout at this value usually indicates a problem with your
   // testbench. You should lower the timeout to prevent "never-ending"

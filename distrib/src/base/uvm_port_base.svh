@@ -186,7 +186,7 @@ endclass
 //
 // uvm_port_base possesses the properties of components in that they have a
 // hierarchical instance path and parent. Because SystemVerilog does not support
-// multiple inheritance, uvm_port_base can not extend both the interface it
+// multiple inheritance, uvm_port_base cannot extend both the interface it
 // implements and <uvm_component>. Thus, uvm_port_base contains a local instance
 // of uvm_component, to which it delegates such commands as get_name,
 // get_full_name, and get_parent.
@@ -406,7 +406,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   // 
   // - Ports of type <UVM_EXPORT> can only connect to other exports or imps.
   //
-  // - Ports of type <UVM_IMPLEMENTATION> can not be connected, as they are
+  // - Ports of type <UVM_IMPLEMENTATION> cannot be connected, as they are
   //   bound to the component that implements the interface at time of
   //   construction.
   //

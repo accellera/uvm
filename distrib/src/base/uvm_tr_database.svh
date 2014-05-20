@@ -327,7 +327,7 @@ class uvm_text_tr_database extends uvm_tr_database;
    // The text-backend will open a text file to dump all records in to.  The name
    // of this text file is controlled via <set_file_name>.
    //
-   // This will also lock the ~file_name~, so that it can not be
+   // This will also lock the ~file_name~, so that it cannot be
    // modified while the connection is open.
    protected virtual function bit do_open_db();
       if (m_file == 0) begin

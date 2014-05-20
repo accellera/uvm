@@ -137,7 +137,7 @@ class uvm_set_before_get_dap#(type T=int) extends uvm_set_get_dap_base#(T);
 
    // Group: Introspection
    //
-   // The ~uvm_set_before_get_dap~ can not support the standard UVM
+   // The ~uvm_set_before_get_dap~ cannot support the standard UVM
    // instrumentation methods (~copy~, ~clone~, ~pack~ and
    // ~unpack~), due to the fact that they would potentially 
    // violate the access policy.

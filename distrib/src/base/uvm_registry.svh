@@ -349,7 +349,7 @@ endclass
 // set overrides and create objects and components of non-parameterized types.
 //
 // For parameterized types, the type name changes with each specialization, so
-// you can not specify a ~Tname~ inside a parameterized class and get the behavior
+// you cannot specify a ~Tname~ inside a parameterized class and get the behavior
 // you want; the same type name string would be registered for all
 // specializations of the class! (The factory would produce warnings for each
 // specialization beyond the first.) To avoid the warnings and simulator
@@ -365,7 +365,7 @@ endclass
 //|  endclass
 //
 // The <`uvm_component_param_utils> and <`uvm_object_param_utils> macros are used
-// to register parameterized classes with the factory. Unlike the the non-param
+// to register parameterized classes with the factory. Unlike the non-param
 // versions, these macros do not specify the ~Tname~ parameter in the underlying
 // uvm_component_registry typedef, and they do not define the get_type_name
 // method for the user class. Consequently, you will not be able to use the
