@@ -79,7 +79,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   // instance that the configuration object applies to. ~field_name~
   // is the specific field in the scope that is being searched for.
   //
-  // The basic get_config_* methods from <uvm_component> are mapped to 
+  // The basic ~get_config_*~ methods from <uvm_component> are mapped to
   // this function as:
   //
   //| get_config_int(...) => uvm_config_db#(uvm_bitstream_t)::get(cntxt,...)
@@ -142,7 +142,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   // will have precedence over a setting from the test level that was 
   // made earlier in the simulation.
   //
-  // The basic set_config_* methods from <uvm_component> are mapped to 
+  // The basic ~set_config_*~ methods from <uvm_component> are mapped to
   // this function as:
   //
   //| set_config_int(...) => uvm_config_db#(uvm_bitstream_t)::set(cntxt,...)

@@ -500,9 +500,9 @@ function automatic void uvm_split_string (string str, byte sep, ref string value
 endfunction
 
 // Class: uvm_enum_wrapper#(T)
-
+//
 // The ~uvm_enum_wrapper#(T)~ class is a utility mechanism provided
-// as a convenience to the end user.  It provides a ~from_name~
+// as a convenience to the end user.  It provides a <from_name>
 // method which is the logical inverse of the System Verilog ~name~ 
 // method which is built into all enumerations.
 
@@ -514,7 +514,7 @@ class uvm_enum_wrapper#(type T=uvm_active_passive_enum);
     // Attempts to convert a string ~name~ to an enumerated value.
     //
     // If the conversion is successful, the method will return
-    // '1', otherwise '0'.
+    // 1, otherwise 0.
     //
     // Note that the ~name~ passed in to the method must exactly
     // match the value which would be produced by ~enum::name~, and

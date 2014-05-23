@@ -210,7 +210,7 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual function void build_phase(uvm_phase phase);
 
-  // For backward compatibility the base build_phase method calls build.
+  // For backward compatibility the base <build_phase> method calls <build>.
   extern virtual function void build();
 
 
@@ -233,7 +233,7 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual function void end_of_elaboration_phase(uvm_phase phase);
 
-  // For backward compatibility the base end_of_elaboration_phase method calls end_of_elaboration.
+  // For backward compatibility the base <end_of_elaboration_phase> method calls <end_of_elaboration>.
   extern virtual function void end_of_elaboration();
 
   // Function: start_of_simulation_phase
@@ -244,7 +244,7 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual function void start_of_simulation_phase(uvm_phase phase);
 
-  // For backward compatibility the base start_of_simulation_phase method calls start_of_simulation.
+  // For backward compatibility the base <start_of_simulation_phase> method calls <start_of_simulation>.
   extern virtual function void start_of_simulation();
 
   // Task: run_phase
@@ -264,7 +264,7 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual task run_phase(uvm_phase phase);
 
-  // For backward compatibility the base run_phase method calls run.
+  // For backward compatibility the base <run_phase> method calls <run>.
   extern virtual task run();
 
   // Task: pre_reset_phase
@@ -976,7 +976,7 @@ virtual class uvm_component extends uvm_report_object;
   // matching that field, if any, are printed. The field may not contain
   // wildcards. 
   //
-  // If ~comp~ is specified and non-null, then the configuration for that
+  // If ~comp~ is specified and non-~null~, then the configuration for that
   // component is printed.
   //
   // If ~recurse~ is set, then configuration information for all ~comp~'s

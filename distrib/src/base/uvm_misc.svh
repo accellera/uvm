@@ -340,7 +340,7 @@ uvm_seed_map uvm_random_seed_table_lookup [string];
 function string uvm_instance_scope();
   byte c;
   int pos;
-  //first time through the scope is null and we need to calculate, afterwards it
+  //first time through the scope is ~null~ and we need to calculate, afterwards it
   //is correctly set.
 
   if(uvm_instance_scope != "") 

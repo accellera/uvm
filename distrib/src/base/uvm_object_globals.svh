@@ -66,16 +66,19 @@ parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS;
 
 // Type: uvm_bitstream_t
 //
-// The bitstream type is used as an argument type for passing integral values
-// in such methods as set_int_local, get_int_local, uvm_config_int, report,
-// pack and unpack. 
+// The bitstream type is used as a argument type for passing integral values
+// in such methods as <uvm_object::set_int_local>, <uvm_config_int>, 
+// <uvm_printer::print_field>, <uvm_recorder::record_field>, 
+// <uvm_packer::pack_field> and <uvm_packer::unpack_field>.
 
 typedef logic signed [UVM_STREAMBITS-1:0] uvm_bitstream_t;
 
 // Type: uvm_integral_t
 //
-// The integral type is used as an argument type for passing integral values
-// of 64 bits or less to report, record, compare, pack and unpack.
+// The integral type is used as a argument type for passing integral values
+// of 64 bits or less in such methods as 
+// <uvm_printer::print_field_int>, <uvm_recorder::record_field_int>, 
+// <uvm_packer::pack_field_int> and <uvm_packer::unpack_field_int>.
 //
 
 typedef logic signed [63:0] uvm_integral_t;
@@ -147,7 +150,7 @@ endfunction
 //
 // Specifies the policy for copying objects.
 //
-// UVM_DEEP      - Objects are deep copied (object must implement copy method)
+// UVM_DEEP      - Objects are deep copied (object must implement <uvm_object::copy> method)
 // UVM_SHALLOW   - Objects are shallow copied using default SV copy.
 // UVM_REFERENCE - Only object handles are copied.
 
@@ -204,7 +207,7 @@ parameter UVM_ALL_ON      = 'b000000101010101;
 parameter UVM_FLAGS_ON    = 'b000000101010101;
 parameter UVM_FLAGS_OFF   = 0;
 
-//Values are or'ed into a 32 bit value
+//Values are OR'ed into a 32 bit value
 //and externally
 parameter UVM_COPY         = (1<<0);
 parameter UVM_NOCOPY       = (1<<1);

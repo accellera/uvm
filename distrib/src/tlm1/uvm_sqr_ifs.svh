@@ -64,7 +64,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // Task: try_next_item
   //
   // Retrieves the next available item from a sequence if one is available.
-  // Otherwise, the function returns immediately with request set to ~null~. 
+  // Otherwise, the function returns immediately with request set to ~null~.
   // The following steps occur on this call:
   //
   // 1 - Arbitrate among requesting, unlocked, relevant sequences - choose the

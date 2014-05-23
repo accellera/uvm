@@ -138,7 +138,7 @@ class uvm_packer;
   // Packs an object value into the pack array. 
   //
   // A 4-bit header is inserted ahead of the string to indicate the number of
-  // bits that was packed. If a null object was packed, then this header will
+  // bits that was packed. If a ~null~ object was packed, then this header will
   // be 0. 
   //
   // This is useful for mixed-language communication where unpacking may occur
@@ -260,7 +260,7 @@ class uvm_packer;
   //
   // ~value~ must be an allocated object that has enough space for the data
   // being unpacked. The first four bits of packed data are used to determine
-  // if a ~null~ object was packed into the array. 
+  // if a ~null~ object was packed into the array.
   //
   // The <is_null> function can be used to peek at the next four bits in
   // the pack array before calling this method.

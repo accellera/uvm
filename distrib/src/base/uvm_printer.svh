@@ -547,7 +547,8 @@ class uvm_printer_knobs;
   // Variable: default_radix
   //
   // This knob sets the default radix to use for integral values when no radix
-  // enum is explicitly supplied to the print_field() method.
+  // enum is explicitly supplied to the <uvm_printer::print_field> or 
+  // <uvm_printer::print_field_int> methods.
 
   uvm_radix_enum default_radix = UVM_HEX;
 

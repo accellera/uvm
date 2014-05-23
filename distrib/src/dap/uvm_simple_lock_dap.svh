@@ -73,8 +73,8 @@ class uvm_simple_lock_dap#(type T=int) extends uvm_set_get_dap_base#(T);
    // Function: try_set
    // Attempts to update the value stored within the DAP.
    //
-   // ~try_set~ will return a '1' if the value was successfully
-   // updated, or a '0' if the value cannot be updated due
+   // ~try_set~ will return a 1 if the value was successfully
+   // updated, or a 0 if the value can not be updated due
    // to the DAP being locked.  No errors will be reported
    // if ~try_set~ fails.
    virtual function bit try_set(T value);

@@ -167,7 +167,7 @@ virtual class uvm_report_server extends uvm_object;
         // server. This information will be sent to the command line if ~file~ is 0, or
         // to the file descriptor ~file~ if it is not 0.
         //
-        // The run_test method in uvm_top calls this method.
+        // The <run_test> method in uvm_top calls this method.
 
         pure virtual function void report_summarize(UVM_FILE file = 0);
 
@@ -305,7 +305,7 @@ class uvm_default_report_server extends uvm_report_server;
   // Function: print
   //
   // The uvm_report_server implements the <uvm_object::do_print()> such that
-  // <uvm_server_handler::print()> method provides UVM printer formatted output
+  // ~print~ method provides UVM printer formatted output
   // of the current configuration.  A snippet of example output is shown here:
   //
   // |uvm_report_server                 uvm_report_server  -     @13  
@@ -666,14 +666,14 @@ class uvm_default_report_server extends uvm_report_server;
        if (m_streams.exists(ro.get_name()) && (m_streams[ro.get_name()].exists(rh.get_name())))
          stream = m_streams[ro.get_name()][rh.get_name()];
 
-       // If no pre-existing stream (or for some reason pre-existing stream was null)
+       // If no pre-existing stream (or for some reason pre-existing stream was ~null~)
        if (stream == null) begin
           uvm_tr_database db;
 
           // Grab the database
           db = get_message_database();
 
-          // If database is null, use the default database
+          // If database is ~null~, use the default database
           if (db == null) begin
              uvm_coreservice_t cs = uvm_coreservice_t::get();
              db = cs.get_default_tr_database();
@@ -816,7 +816,7 @@ class uvm_default_report_server extends uvm_report_server;
   // server. This information will be sent to the command line if ~file~ is 0, or
   // to the file descriptor ~file~ if it is not 0.
   //
-  // The run_test method in uvm_top calls this method.
+  // The <run_test> method in uvm_top calls this method.
 
   virtual function void report_summarize(UVM_FILE file = 0);
     string id;

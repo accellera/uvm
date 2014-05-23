@@ -1107,7 +1107,7 @@ endfunction
 
 function uvm_reg_map uvm_mem::get_default_map(string caller="");
 
-   // if mem is not associated with any may, return null
+   // if mem is not associated with any may, return ~null~
    if (m_maps.num() == 0) begin
       `uvm_warning("RegModel", 
         {"Memory '",get_full_name(),"' is not registered with any map",

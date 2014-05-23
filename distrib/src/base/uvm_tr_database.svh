@@ -74,7 +74,7 @@ virtual class uvm_tr_database extends uvm_object;
    // Open the backend connection to the database.
    //
    // If the database is already open, then this
-   // method will return '1'.
+   // method will return 1.
    //
    // Otherwise, the method will call <do_open_db>,
    // and return the result.
@@ -91,7 +91,7 @@ virtual class uvm_tr_database extends uvm_object;
    // frees all <uvm_tr_streams> within the database.
    //
    // If the database is already closed, then this
-   // method will return '1'.
+   // method will return 1.
    // 
    // Otherwise, this method will trigger a <do_close_db>
    // call, and return the result.
@@ -106,7 +106,7 @@ virtual class uvm_tr_database extends uvm_object;
    // Function: is_open
    // Returns the open/closed status of the database.
    //
-   // This method returns '1' if the database has been
+   // This method returns 1 if the database has been
    // successfully opened, but not yet closed.
    //
    function bit is_open();

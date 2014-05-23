@@ -105,7 +105,7 @@ class uvm_algorithmic_comparator #( type BEFORE=int,
   // Creates an instance of a specialization of this class.
   // In addition to the standard uvm_component constructor arguments, ~name~
   // and ~parent~, the constructor takes a handle to a ~transformer~ object,
-  // which must already be allocated (no ~null~ handles) and must implement
+  // which must already be allocated (handles can't be ~null~) and must implement
   // the transform() method.
 
  function new(string name, uvm_component parent=null, TRANSFORMER transformer=null);

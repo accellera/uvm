@@ -173,7 +173,7 @@ endclass
 // so they are documented in that class even though the implementation
 // is in this class. 
 //
-// The add, delete, and display methods are implemented in this class.
+// The <add>, <delete>, and <display> methods are implemented in this class.
 
 class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
 
@@ -579,7 +579,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
   // ~ordering~ is UVM_APPEND (default), the callback will be executed
   // after previously added callbacks, else  the callback
   // will be executed ahead of previously added callbacks. The ~cb~
-  // is the callback handle; it must be non-null, and if the callback
+  // is the callback handle; it must be non-~null~, and if the callback
   // has already been added to the object instance then a warning is
   // issued. Note that the CB parameter is optional. For example, the 
   // following are equivalent:
@@ -738,9 +738,9 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
   // Function: delete
   //
   // Deletes the given callback object, ~cb~, from the queue associated with
-  //  the given ~obj~ handle. The ~obj~ handle can be ~null~, which allows 
+  //  the given ~obj~ handle. The ~obj~ handle can be ~null~, which allows
   // de-registration of callbacks without an object context. 
-  // The ~cb~ is the callback handle; it must be non-null, and if the callback
+  // The ~cb~ is the callback handle; it must be non-~null~, and if the callback
   // has already been removed from the object instance then a warning is
   // issued. Note that the CB parameter is optional. For example, the 
   // following are equivalent:
@@ -864,7 +864,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
   // it will be updated with a value that can be supplied to <get_prev> to get the previous
   // callback object.
   //
-  // If the queue is empty then ~null~ is returned. 
+  // If the queue is empty then ~null~ is returned.
   //
   // The iterator class <uvm_callback_iter> may be used as an alternative, simplified,
   // iterator interface.
@@ -884,7 +884,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
   // Function: get_next
   //
   // Returns the next enabled callback of type CB which resides in the queue for ~obj~,
-  // using ~itr~ as the starting point. If ~obj~ is null then the typewide queue for T 
+  // using ~itr~ as the starting point. If ~obj~ is ~null~ then the typewide queue for T
   // is searched. ~itr~ is the iterator; it will be updated with a value that can be 
   // supplied to <get_next> to get the next callback object.
   //
@@ -910,7 +910,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
   // Function: get_prev
   //
   // Returns the previous enabled callback of type CB which resides in the queue for ~obj~,
-  // using ~itr~ as the starting point. If ~obj~ is ~null~ then the typewide queue for T 
+  // using ~itr~ as the starting point. If ~obj~ is ~null~ then the typewide queue for T
   // is searched. ~itr~ is the iterator; it will be updated with a value that can be 
   // supplied to <get_prev> to get the previous callback object.
   //

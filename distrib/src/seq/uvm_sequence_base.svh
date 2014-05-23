@@ -525,7 +525,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Function: get_starting_phase
   // Returns the 'starting phase'.
   //
-  // If non-null, the starting phase specifies the phase in which this
+  // If non-~null~, the starting phase specifies the phase in which this
   // sequence was started.  The starting phase is set automatically when
   // this sequence is started as the default sequence on a sequencer.
   // See <uvm_sequencer_base::start_phase_sequence> for more information.
@@ -595,7 +595,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // its execution (either via natural termination, or being killed),
   // then the ~automatic_phase_objection~ value can be modified again.
   //
-  // NEVER set the automatic phase objection bit to '1' if your sequence
+  // NEVER set the automatic phase objection bit to 1 if your sequence
   // runs with a forever loop inside of the body, as the objection will
   // never get dropped!
   function void set_automatic_phase_objection(bit value);
@@ -606,8 +606,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Returns (and locks) the value of the 'automatically object to 
   // starting phase' bit.
   //
-  // If '1', then the sequence will automatically raise an objection
-  // to the starting phase (if the starting phase is not-null) immediately
+  // If 1, then the sequence will automatically raise an objection
+  // to the starting phase (if the starting phase is not ~null~) immediately
   // prior to <pre_start> being called.  The objection will be dropped
   // after <post_start> has executed, or <kill> has been called.
   //

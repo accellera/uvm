@@ -302,8 +302,8 @@ class uvm_phase extends uvm_object;
 
   // Function: get_imp
   //
-  // Returns the phase implementation for this node.
-  // Returns ~null~ if this phase type is not a UVM_PHASE_LEAF_NODE. 
+  // Returns the phase implementation for this this node.
+  // Returns ~null~ if this phase type is not a UVM_PHASE_LEAF_NODE.
   //
   extern function uvm_phase get_imp();
 
@@ -721,8 +721,8 @@ endclass
 //
 //------------------------------------------------------------------------------
 //
-// This class define a callback method that is invoked by the phaser
-// during the execution of a specific node in the phase graph or all phase node.
+// This class defines a callback method that is invoked by the phaser
+// during the execution of a specific node in the phase graph or all phase nodes.
 // User-defined callback extensions can be used to integrate data types that
 // are not natively phase-aware with the UVM phasing.
 //

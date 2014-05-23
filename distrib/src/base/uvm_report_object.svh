@@ -60,7 +60,7 @@ typedef class uvm_root;
 // whether a $finish should occur <UVM_EXIT>.
 //
 // Default Actions - The following provides the default actions assigned to
-// each severity. These can be overridden by any of the set_*_action methods. 
+// each severity. These can be overridden by any of the ~set_*_action~ methods.
 //|    UVM_INFO -       UVM_DISPLAY
 //|    UVM_WARNING -    UVM_DISPLAY
 //|    UVM_ERROR -      UVM_DISPLAY | UVM_COUNT
@@ -73,7 +73,7 @@ typedef class uvm_root;
 //
 // Default file handle - The default file handle is 0, which means that reports
 // are not sent to a file even if a UVM_LOG attribute is set in the action
-// associated with the report. This can be overridden by any of the set_*_file
+// associated with the report. This can be overridden by any of the ~set_*_file~
 // methods.
 //
 //------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ class uvm_report_object extends uvm_object;
   // Function: uvm_get_report_object
   //
   // Returns the nearest uvm_report_object when called.  From inside a
-  // uvm_component, the method simply returns 'this'.  
+  // uvm_component, the method simply returns ~this~.
   // 
   // See also the global version of <uvm_get_report_object>.
 
@@ -467,7 +467,7 @@ class uvm_report_object extends uvm_object;
   // Function: reset_report_handler
   //
   // Resets the underlying report handler to its default settings. This clears
-  // any settings made with the set_report_* methods (see below).
+  // any settings made with the ~set_report_*~ methods (see below).
 
   function void reset_report_handler;
     m_rh.initialize();
@@ -526,8 +526,8 @@ class uvm_report_object extends uvm_object;
   // implementations return 1, which allows the report to be processed. If an
   // override returns 0, then the report is not processed.
   //
-  // First, the report_hook method is called, followed by the severity 
-  // severity specific hook (report_info_hook, etc.). If either hook method
+  // First, the ~report_hook~ method is called, followed by the severity-specific
+  // hook (<report_info_hook>, etc.). If either hook method
   // returns 0 then the report is not processed further.
 
   virtual function bit report_hook(
@@ -560,7 +560,7 @@ class uvm_report_object extends uvm_object;
   // server. This information will be sent to the command line if ~file~ is 0, or
   // to the file descriptor ~file~ if it is not 0.
   //
-  // The run_test method in uvm_top calls this method.
+  // The <run_test> method in uvm_top calls this method.
   //
   // Use:
   // uvm_report_server rs =uvm_report_server::get_server();
