@@ -559,7 +559,7 @@ endfunction \
 // included in everything else.
 //
 // All possible values for ~FLAG~ are listed and described below. Multiple flag
-// values can be bitwise ORed together (in most cases they may be added together
+// values can be bitwise OR'ed together (in most cases they may be added together
 // as well, but care must be taken when using the + operator to ensure that the
 // same bit is not added more than once).
 //
@@ -3472,7 +3472,7 @@ endfunction \
 //| endfunction
 //
 // The 'N' versions of these macros take a explicit size argument, which must
-// be compile-time constant value greater than '0'.
+// be compile-time constant value greater than 0.
 //------------------------------------------------------------------------------
 
 //--------------------------------
@@ -3639,7 +3639,7 @@ endfunction \
 //| endfunction
 //
 // The 'N' versions of these macros take a explicit size argument, which must
-// be a compile-time constant value greater than '0'.
+// be a compile-time constant value greater than 0.
 //------------------------------------------------------------------------------
 
 //----------------------------------

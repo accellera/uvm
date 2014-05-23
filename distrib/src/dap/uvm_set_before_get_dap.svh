@@ -99,7 +99,7 @@ class uvm_set_before_get_dap#(type T=int) extends uvm_set_get_dap_base#(T);
    // Function: try_set
    // Attempts to update the value stored within the DAP.
    //
-   // ~try_set~ will always return a '1'.
+   // ~try_set~ will always return a 1.
    virtual function bit try_set(T value);
       set(value);
       return 1;
@@ -122,8 +122,8 @@ class uvm_set_before_get_dap#(type T=int) extends uvm_set_get_dap_base#(T);
    // Function: try_get
    // Attempts to retrieve the current value stored within the DAP
    //
-   // If the value has not been 'set', then try_get will return a '0',
-   // otherwise it will return a '1', and set ~value~ to the current
+   // If the value has not been 'set', then try_get will return a 0,
+   // otherwise it will return a 1, and set ~value~ to the current
    // value stored within the DAP.
    virtual function bit try_get(output T value);
       if (!m_set) begin

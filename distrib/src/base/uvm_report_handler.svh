@@ -93,8 +93,8 @@ class uvm_report_handler extends uvm_object;
 
   // Function: print
   //
-  // The uvm_report_handler implements the uvm_object::do_print() such that
-  // uvm_report_handler::print() method provides UVM printer formatted output
+  // The uvm_report_handler implements the <uvm_object::do_print()> such that
+  // ~print~ method provides UVM printer formatted output
   // of the current configuration.  A snippet of example output is shown here:
   //
   // |uvm_test_top                uvm_report_handler  -     @555                    
@@ -305,7 +305,7 @@ class uvm_report_handler extends uvm_object;
   // Function: process_report_message
   //
   // This is the common handler method used by the four core reporting methods
-  // (e.g., uvm_report_error) in <uvm_report_object>.
+  // (e.g. <uvm_report_error>) in <uvm_report_object>.
 
   virtual function void process_report_message(uvm_report_message report_message);
     process p = process::self();
@@ -634,7 +634,7 @@ class uvm_report_handler extends uvm_object;
 
   // Function- run_hooks
   //
-  // The run_hooks method is called if the <UVM_CALL_HOOK> action is set for a
+  // The ~run_hooks~ method is called if the <UVM_CALL_HOOK> action is set for a
   // report. It first calls the client's <uvm_report_object::report_hook> method, 
   // followed by the appropriate severity-specific hook method. If either 
   // returns 0, then the report is not processed.

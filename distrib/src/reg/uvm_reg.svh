@@ -253,7 +253,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // Finds a field with the specified name in this register
    // and returns its abstraction class.
-   // If no fields are found, returns null. 
+   // If no fields are found, returns ~null~.
    //
    extern virtual function uvm_reg_field get_field_by_name(string name);
 
@@ -708,7 +708,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // Returns the user-defined frontdoor for this register
    //
-   // If null, no user-defined frontdoor has been defined.
+   // If ~null~, no user-defined frontdoor has been defined.
    // A user-defined frontdoor is defined
    // by using the <uvm_reg::set_frontdoor()> method. 
    //
@@ -750,7 +750,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // Returns the user-defined backdoor for this register
    //
-   // If null, no user-defined backdoor has been defined.
+   // If ~null~, no user-defined backdoor has been defined.
    // A user-defined backdoor is defined
    // by using the <uvm_reg::set_backdoor()> method. 
    //
@@ -924,7 +924,7 @@ virtual class uvm_reg extends uvm_object;
    // Specify which coverage model that must be included in
    // various block, register or memory abstraction class instances.
    //
-   // The coverage models are specified by or'ing or adding the
+   // The coverage models are specified by OR'ing or adding the
    // <uvm_coverage_model_e> coverage model identifiers corresponding to the
    // coverage model to be included.
    //
@@ -1644,7 +1644,7 @@ endfunction
 
 function uvm_reg_map uvm_reg::get_default_map(string caller="");
 
-   // if reg is not associated with any map, return null
+   // if reg is not associated with any map, return ~null~
    if (m_maps.num() == 0) begin
       `uvm_warning("RegModel", 
         {"Register '",get_full_name(),"' is not registered with any map",

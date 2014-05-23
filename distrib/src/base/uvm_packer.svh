@@ -107,7 +107,7 @@ class uvm_packer;
   //
   // Packs a string value into the pack array. 
   //
-  // When the metadata flag is set, the packed string is terminated by a null
+  // When the metadata flag is set, the packed string is terminated by a ~null~
   // character to mark the end of the string.
   //
   // This is useful for mixed language communication where unpacking may occur
@@ -138,7 +138,7 @@ class uvm_packer;
   // Packs an object value into the pack array. 
   //
   // A 4-bit header is inserted ahead of the string to indicate the number of
-  // bits that was packed. If a null object was packed, then this header will
+  // bits that was packed. If a ~null~ object was packed, then this header will
   // be 0. 
   //
   // This is useful for mixed-language communication where unpacking may occur
@@ -230,7 +230,7 @@ class uvm_packer;
   // Unpacks a string. 
   //
   // num_chars bytes are unpacked into a string. If num_chars is -1 then
-  // unpacking stops on at the first null character that is encountered.
+  // unpacking stops on at the first ~null~ character that is encountered.
 
   extern virtual function string unpack_string (int num_chars=-1);
 
@@ -260,7 +260,7 @@ class uvm_packer;
   //
   // ~value~ must be an allocated object that has enough space for the data
   // being unpacked. The first four bits of packed data are used to determine
-  // if a null object was packed into the array. 
+  // if a ~null~ object was packed into the array.
   //
   // The <is_null> function can be used to peek at the next four bits in
   // the pack array before calling this method.
@@ -310,10 +310,10 @@ class uvm_packer;
   // and <uvm_object::do_unpack> should regard this bit when performing their
   // respective operation. When set, metadata should be encoded as follows:
   //
-  // - For strings, pack an additional null byte after the string is packed.
+  // - For strings, pack an additional ~null~ byte after the string is packed.
   //
   // - For objects, pack 4 bits prior to packing the object itself. Use 4'b0000
-  //   to indicate the object being packed is null, otherwise pack 4'b0001 (the
+  //   to indicate the object being packed is ~null~, otherwise pack 4'b0001 (the
   //   remaining 3 bits are reserved).
   //
   // - For queues, dynamic arrays, and associative arrays, pack 32 bits

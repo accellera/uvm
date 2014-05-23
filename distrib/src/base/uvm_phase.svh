@@ -74,7 +74,7 @@ typedef class uvm_phase_cb;
 // Singleton instances of those extensions are provided as package variables.
 // These instances define the attributes of the phase (not what state it is in)
 // They are then cloned into schedule nodes which point back to one of these
-// implementations, and calls it's virtual task or function methods on each
+// implementations, and calls its virtual task or function methods on each
 // participating component.
 // It is the base class for phase functors, for both predefined and
 // user-defined phases. Per-component overrides can use a customized imp.
@@ -86,7 +86,7 @@ typedef class uvm_phase_cb;
 // Extend the appropriate one of these to create a uvm_YOURNAME_phase class
 // (or YOURPREFIX_NAME_phase class) for each phase, containing the default
 // implementation of the new phase, which must be a uvm_component-compatible
-// delegate, and which may be a null implementation. Instantiate a singleton
+// delegate, and which may be a ~null~ implementation. Instantiate a singleton
 // instance of that class for your code to use when a phase handle is required.
 // If your custom phase depends on methods that are not in uvm_component, but
 // are within an extended class, then extend the base YOURPREFIX_NAME_phase
@@ -303,7 +303,7 @@ class uvm_phase extends uvm_object;
   // Function: get_imp
   //
   // Returns the phase implementation for this this node.
-  // Returns null if this phase type is not a UVM_PHASE_LEAF_NODE. 
+  // Returns ~null~ if this phase type is not a UVM_PHASE_LEAF_NODE.
   //
   extern function uvm_phase get_imp();
 
@@ -344,7 +344,7 @@ class uvm_phase extends uvm_object;
   // if the user attempts to ~raise~, ~drop~, or ~get_objection_count~.
    
   // Function- m_report_null_objection
-  // Simplifies the reporting of null objection errors
+  // Simplifies the reporting of ~null~ objection errors
   extern function void m_report_null_objection(uvm_object obj,
                                                string description,
                                                int count,
@@ -528,7 +528,7 @@ class uvm_phase extends uvm_object;
 
   // Function: get_jump_target
   //
-  // Return handle to the target phase of the current jump, or null if no jump
+  // Return handle to the target phase of the current jump, or ~null~ if no jump
   // is in progress. Valid for use during the phase_ended() callback
   //
   extern function uvm_phase get_jump_target();
@@ -721,8 +721,8 @@ endclass
 //
 //------------------------------------------------------------------------------
 //
-// This class define a callback method that is invoked by the phaser
-// during the execution of a specific node in the phase graph or all phase node.
+// This class defines a callback method that is invoked by the phaser
+// during the execution of a specific node in the phase graph or all phase nodes.
 // User-defined callback extensions can be used to integrate data types that
 // are not natively phase-aware with the UVM phasing.
 //

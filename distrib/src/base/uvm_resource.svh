@@ -449,8 +449,8 @@ virtual class uvm_resource_base extends uvm_object;
   //-------------------
   //
   // To find out what is happening as the simulation proceeds, an audit 
-  // trail of each read and write is kept. The read and write methods
-  // in uvm_resource#(T) each take an accessor argument.  This is a
+  // trail of each read and write is kept. The <uvm_resource#(T)::read> and 
+  // <uvm_resource#(T)::write> methods each take an accessor argument.  This is a
   // handle to the object that performed that resource access.
   //
   //|    function T read(uvm_object accessor = null);
@@ -583,7 +583,7 @@ endclass
 // Class - get_t
 //
 // Instances of get_t are stored in the history list as a record of each
-// get.  Failed gets are indicated with rsrc set to null.  This is part
+// get.  Failed gets are indicated with rsrc set to ~null~.  This is part
 // of the audit trail facility for resources.
 //----------------------------------------------------------------------
 class get_t;
@@ -718,7 +718,7 @@ class uvm_resource_pool;
     string name;
     uvm_resource_base type_handle;
 
-    // If resource handle is null then there is nothing to do.
+    // If resource handle is ~null~ then there is nothing to do.
     if(rsrc == null)
       return;
 
@@ -861,7 +861,7 @@ class uvm_resource_pool;
   // match the ~name~, ~scope~, and ~type_handle~.  If no resources
   // match the queue is returned empty. If ~rpterr~ is set then a
   // warning is issued if no matches are found, and the spell checker is
-  // invoked on ~name~.  If ~type_handle~ is null then a type check is
+  // invoked on ~name~.  If ~type_handle~ is ~null~ then a type check is
   // not made and resources are returned that match only ~name~ and
   // ~scope~.
 
@@ -1529,8 +1529,8 @@ end
   //
   // looks up a resource by ~type_handle~ in the type map. The first resource
   // with the specified ~type_handle~ that is visible in the specified ~scope~ is
-  // returned, if one exists. Null is returned if there is no resource matching
-  // the specifications.
+  // returned, if one exists. If there is no resource matching the specifications,
+  // ~null~ is returned.
 
   static function this_type get_by_type(string scope = "",
                                         uvm_resource_base type_handle);

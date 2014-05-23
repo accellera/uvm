@@ -30,7 +30,7 @@ typedef class uvm_parent_child_link;
 // CLASS: uvm_transaction
 //
 // The uvm_transaction class is the root base class for UVM transactions.
-// Inheriting all the methods of uvm_object, uvm_transaction adds a timing and
+// Inheriting all the methods of <uvm_object>, uvm_transaction adds a timing and
 // recording interface.
 //
 // This class provides timestamp properties, notification events, and transaction
@@ -44,7 +44,7 @@ typedef class uvm_parent_child_link;
 // <uvm_component::begin_tr>, and <uvm_component::end_tr> during the course of
 // sequence item execution. These methods in the component base class will
 // call into the corresponding methods in this class to set the corresponding
-// timestamps (accept_time, begin_time, and end_tr), trigger the
+// timestamps (~accept_time~, ~begin_time~, and ~end_time~), trigger the
 // corresponding event (<begin_event> and <end_event>, and, if enabled,
 // record the transaction contents to a vendor-specific transaction database.
 //
@@ -54,7 +54,7 @@ typedef class uvm_parent_child_link;
 // transaction's progress during execution.  To allow the driver or layering sequence
 // to control sequence item timestamps, events, and recording, you must call
 // <uvm_sqr_if_base#(REQ,RSP)::disable_auto_item_recording> at the beginning
-// of the run_phase() method.
+// of the driver's ~run_phase~ task.
 //
 // Users may also use the transaction's event pool, <events>,
 // to define custom events for the driver to trigger and the sequences to wait on. Any
@@ -135,7 +135,7 @@ virtual class uvm_transaction extends uvm_object;
   //
   // Calling ~accept_tr~ indicates that the transaction item has been received by
   // a consumer component. Typically a <uvm_driver #(REQ,RSP)> would call <uvm_component::accept_tr>,
-  // which calls this method-- upon return from a get_next_item(), get(), or peek()
+  // which calls this method-- upon return from a <get_next_item()>, <get()>, or <peek()>
   // call on its sequencer port, <uvm_driver#(REQ,RSP)::seq_item_port>.
   //
   // With some
@@ -222,7 +222,7 @@ virtual class uvm_transaction extends uvm_object;
   //   any time, past or future, but should not be less than the accept time.
   //
   // - If recording is enabled, then a new database-transaction is started with
-  //   the same begin time as above. The record method inherited from <uvm_object>
+  //   the same begin time as above. The inherited <uvm_object::record> method
   //   is then called, which records the current property values to this new
   //   transaction. Finally, the newly started transaction is linked to the
   //   parent transaction given by parent_handle.

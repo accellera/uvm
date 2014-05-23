@@ -273,9 +273,9 @@ class uvm_objection extends uvm_report_object;
   // unused by the testbench then they are simply an unnecessary
   // performance hit.  If the testbench is not going to use this
   // functionality, then the performance can be improved by setting
-  // the propagation mode to '0'.
+  // the propagation mode to 0.
   //
-  // When propagation mode is set to '0', all intermediate callbacks
+  // When propagation mode is set to 0, all intermediate callbacks
   // between the ~source~ and ~top~ will be skipped.  This would
   // result in the following counts and totals for the above objection:
   //  
@@ -312,7 +312,7 @@ class uvm_objection extends uvm_report_object;
   //
   // Raises the number of objections for the source ~object~ by ~count~, which
   // defaults to 1.  The ~object~ is usually the ~this~ handle of the caller.
-  // If ~object~ is not specified or null, the implicit top-level component,
+  // If ~object~ is not specified or ~null~, the implicit top-level component,
   // <uvm_root>, is chosen.
   //
   // Rasing an objection causes the following.
@@ -431,7 +431,7 @@ class uvm_objection extends uvm_report_object;
         // Determine the diff count, if it's positive, then we're
         // looking at a 'raise' total, if it's negative, then
         // we're looking at a 'drop', but not down to 0.  If it's
-        // a '0', that means that there is no change in the total.
+        // a 0, that means that there is no change in the total.
         diff_count = count - ctxt.count;
 
         if (diff_count != 0) begin
@@ -466,7 +466,7 @@ class uvm_objection extends uvm_report_object;
   //
   // Drops the number of objections for the source ~object~ by ~count~, which
   // defaults to 1.  The ~object~ is usually the ~this~ handle of the caller.
-  // If ~object~ is not specified or null, the implicit top-level component,
+  // If ~object~ is not specified or ~null~, the implicit top-level component,
   // <uvm_root>, is chosen.
   //
   // Dropping an objection causes the following.
@@ -1143,7 +1143,7 @@ class uvm_test_done_objection extends uvm_objection;
 
   // Function- new DEPRECATED
   //
-  // Creates the singleton test_done objection. Users must not to call
+  // Creates the singleton test_done objection. Users must not call
   // this method directly.
 
   function new(string name="uvm_test_done");

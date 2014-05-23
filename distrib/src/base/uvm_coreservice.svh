@@ -209,7 +209,7 @@ class uvm_default_coreservice_t extends uvm_coreservice_t;
 	
 	// Function: get_component_visitor
 	// retrieves the current component visitor 
-	// if unset(or null) returns a <uvm_component_name_check_visitor> instance
+	// if unset(or ~null~) returns a <uvm_component_name_check_visitor> instance
 	virtual function uvm_visitor#(uvm_component) get_component_visitor();
 		if(_visitor==null) begin
 			uvm_component_name_check_visitor v = new("name-check-visitor");

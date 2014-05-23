@@ -568,7 +568,7 @@ class uvm_mem extends uvm_object;
    //
    // Returns the user-defined frontdoor for this memory
    //
-   // If null, no user-defined frontdoor has been defined.
+   // If ~null~, no user-defined frontdoor has been defined.
    // A user-defined frontdoor is defined
    // by using the <uvm_mem::set_frontdoor()> method. 
    //
@@ -604,7 +604,7 @@ class uvm_mem extends uvm_object;
    //
    // Returns the user-defined backdoor for this memory
    //
-   // If null, no user-defined backdoor has been defined.
+   // If ~null~, no user-defined backdoor has been defined.
    // A user-defined backdoor is defined
    // by using the <uvm_reg::set_backdoor()> method. 
    //
@@ -1107,7 +1107,7 @@ endfunction
 
 function uvm_reg_map uvm_mem::get_default_map(string caller="");
 
-   // if mem is not associated with any may, return null
+   // if mem is not associated with any may, return ~null~
    if (m_maps.num() == 0) begin
       `uvm_warning("RegModel", 
         {"Memory '",get_full_name(),"' is not registered with any map",

@@ -63,12 +63,12 @@ virtual class uvm_component extends uvm_report_object;
   //
   // Creates a new component with the given leaf instance ~name~ and handle
   // to its ~parent~.  If the component is a top-level component (i.e. it is
-  // created in a static module or interface), ~parent~ should be null.
+  // created in a static module or interface), ~parent~ should be ~null~.
   //
   // The component will be inserted as a child of the ~parent~ object, if any.
   // If ~parent~ already has a child by the given ~name~, an error is produced.
   //
-  // If ~parent~ is null, then the component will become a child of the
+  // If ~parent~ is ~null~, then the component will become a child of the
   // implicit top-level component, ~uvm_top~.
   //
   // All classes derived from uvm_component must call super.new(name,parent).
@@ -87,7 +87,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: get_parent
   //
-  // Returns a handle to this component's parent, or null if it has no parent.
+  // Returns a handle to this component's parent, or ~null~ if it has no parent.
 
   extern virtual function uvm_component get_parent ();
 
@@ -164,7 +164,7 @@ virtual class uvm_component extends uvm_report_object;
   // Looks for a component with the given hierarchical ~name~ relative to this
   // component. If the given ~name~ is preceded with a '.' (dot), then the search
   // begins relative to the top level (absolute lookup). The handle of the
-  // matching component is returned, else null. The name must not contain
+  // matching component is returned, else ~null~. The name must not contain
   // wildcards.
 
   extern function uvm_component lookup (string name);
@@ -210,7 +210,7 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual function void build_phase(uvm_phase phase);
 
-  // For backward compatibility the base build_phase method calls build.
+  // For backward compatibility the base <build_phase> method calls <build>.
   extern virtual function void build();
 
 
@@ -233,7 +233,7 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual function void end_of_elaboration_phase(uvm_phase phase);
 
-  // For backward compatibility the base end_of_elaboration_phase method calls end_of_elaboration.
+  // For backward compatibility the base <end_of_elaboration_phase> method calls <end_of_elaboration>.
   extern virtual function void end_of_elaboration();
 
   // Function: start_of_simulation_phase
@@ -244,7 +244,7 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual function void start_of_simulation_phase(uvm_phase phase);
 
-  // For backward compatibility the base start_of_simulation_phase method calls start_of_simulation.
+  // For backward compatibility the base <start_of_simulation_phase> method calls <start_of_simulation>.
   extern virtual function void start_of_simulation();
 
   // Task: run_phase
@@ -264,7 +264,7 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual task run_phase(uvm_phase phase);
 
-  // For backward compatibility the base run_phase method calls run.
+  // For backward compatibility the base <run_phase> method calls <run>.
   extern virtual task run();
 
   // Task: pre_reset_phase
@@ -837,7 +837,7 @@ virtual class uvm_component extends uvm_report_object;
   // - For set_config_string, ~value~ is a string.
   //
   // - For set_config_object, ~value~ must be an <uvm_object>-based object or
-  //   null.  Its clone argument specifies whether the object should be cloned.
+  //   ~null~.  Its clone argument specifies whether the object should be cloned.
   //   If set, the object is cloned both going into the table (during the set)
   //   and coming out of the table (during the get), so that multiple components
   //   matched to the same setting (by way of wildcards) do not end up sharing
@@ -976,7 +976,7 @@ virtual class uvm_component extends uvm_report_object;
   // matching that field, if any, are printed. The field may not contain
   // wildcards. 
   //
-  // If ~comp~ is specified and non-null, then the configuration for that
+  // If ~comp~ is specified and non-~null~, then the configuration for that
   // component is printed.
   //
   // If ~recurse~ is set, then configuration information for all ~comp~'s

@@ -44,8 +44,8 @@ typedef uvm_port_component_base uvm_port_list[string];
 // The connectivity lists are returned in the form of handles to objects of this
 // type. This allowing traversal of any port's fan-out and fan-in network
 // through recursive calls to <get_connected_to> and <get_provided_to>. Each
-// port's full name and type name can be retrieved using get_full_name and
-// get_type_name methods inherited from <uvm_component>.
+// port's full name and type name can be retrieved using ~get_full_name~ and
+// ~get_type_name~ methods inherited from <uvm_component>.
 //------------------------------------------------------------------------------
 
 virtual class uvm_port_component_base extends uvm_component;
@@ -267,7 +267,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
 
   // Function: get_parent
   //
-  // Returns the handle to this port's parent, or null if it has no parent.
+  // Returns the handle to this port's parent, or ~null~ if it has no parent.
 
   virtual function uvm_component get_parent();
     return m_comp.get_parent();
@@ -426,8 +426,8 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   // If any relationship check is violated, a warning is issued.
   //
   // Note- the <uvm_component::connect_phase> method is related to but not the same
-  // as this method. The component's connect method is a phase callback where
-  // port's connect method calls are made.
+  // as this method. The component's ~connect~ method is a phase callback where
+  // port's ~connect~ method calls are made.
 
   virtual function void connect (this_type provider);
      uvm_root top;
@@ -489,7 +489,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
 
   // Function: debug_connected_to
   //
-  // The debug_connected_to method outputs a visual text display of the
+  // The ~debug_connected_to~ method outputs a visual text display of the
   // port/export/imp network to which this port connects (i.e., the port's
   // fanout).
   //
@@ -554,7 +554,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
 
   // Function: debug_provided_to
   //
-  // The debug_provided_to method outputs a visual display of the port/export
+  // The ~debug_provided_to~ method outputs a visual display of the port/export
   // network that ultimately connect to this port (i.e., the port's fanin).
   //
   // This method must not be called before the end_of_elaboration phase, as port

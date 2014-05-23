@@ -406,7 +406,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   
   // Funciton: debug_report_catcher
   //
-  // Turn on report catching debug information. ~what~ is a bitwise and of
+  // Turn on report catching debug information. ~what~ is a bitwise AND of
   // * DO_NOT_CATCH  -- forces catch to be ignored so that all catchers see the
   //   the reports.
   // * DO_NOT_MODIFY -- forces the message to remain unchanged
@@ -658,7 +658,7 @@ virtual class uvm_report_catcher extends uvm_callback;
 
 
   //process_report_catcher
-  //internal method to call user catch() method
+  //internal method to call user <catch()> method
   //
 
   local function int process_report_catcher();
