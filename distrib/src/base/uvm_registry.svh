@@ -102,7 +102,7 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
   //
   // Returns an instance of the component type, ~T~, represented by this proxy,
   // subject to any factory overrides based on the context provided by the
-  // ~parent~'s full name. The ~contxt~ argument, if supplied, supercedes the
+  // ~parent~'s full name. The ~contxt~ argument, if supplied, supersedes the
   // ~parent~'s context. The new instance will have the given leaf ~name~
   // and ~parent~.
 
@@ -243,7 +243,7 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
   //
   // Returns an instance of the object type, ~T~, represented by this proxy,
   // subject to any factory overrides based on the context provided by the
-  // ~parent~'s full name. The ~contxt~ argument, if supplied, supercedes the
+  // ~parent~'s full name. The ~contxt~ argument, if supplied, supersedes the
   // ~parent~'s context. The new instance will have the given leaf ~name~,
   // if provided.
 

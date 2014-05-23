@@ -55,7 +55,7 @@ virtual class uvm_report_server extends uvm_object;
 
         // Function: set_max_quit_count
         // ~count~ is the maximum number of ~UVM_QUIT~ actions the uvm_report_server
-        // will tolerate before before invoking client.die().
+        // will tolerate before invoking client.die().
         // when ~overridable~ = 0 is passed, the set quit count cannot be changed again
         pure virtual  function void set_max_quit_count(int count, bit overridable = 1);
 
@@ -92,7 +92,7 @@ virtual class uvm_report_server extends uvm_object;
         pure virtual function void get_id_set(output string q[$]);
 
         // Function: get_severity_set
-        // returns the set of severities's already used by this uvm_report_server
+        // returns the set of severities already used by this uvm_report_server
         pure virtual function void get_severity_set(output uvm_severity q[$]);
 
         // Function: set_message_database

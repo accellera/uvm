@@ -432,7 +432,7 @@ class uvm_report_handler extends uvm_object;
   // Returns the verbosity associated with the given ~severity~ and ~id~.
   // 
   // First, if there is a verbosity associated with the ~(severity,id)~ pair,
-  // return that.  Else, if there is an verbosity associated with the ~id~, return
+  // return that.  Else, if there is a verbosity associated with the ~id~, return
   // that.  Else, return the max verbosity setting.
 
   function int get_verbosity_level(uvm_severity severity=UVM_INFO, string id="" );

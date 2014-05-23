@@ -25,7 +25,7 @@
 //   with the original and then returns without doing the override.  
 //
 //   post: If the override is of the original type, the code still warns
-//   but the the override just still happen.  This test confirms that 
+//   but the override just still happen.  This test confirms that 
 //   code change in uvm_factory.svh.
 //----------------------------------------------------------------------
 

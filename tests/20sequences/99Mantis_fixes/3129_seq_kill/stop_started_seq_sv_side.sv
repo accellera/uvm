@@ -71,7 +71,7 @@ package my_uvc;
 				#10;
 				seq_item_port.get_next_item(req);
 				uvm_report_info("DRIVER_ITEM", 
-					$sformatf("my_uvc_driver recieved item: \n%s", req.sprint(uvm_default_tree_printer)),
+					$sformatf("my_uvc_driver received item: \n%s", req.sprint(uvm_default_tree_printer)),
 					UVM_HIGH, `uvm_file, `uvm_line);
 				#0;
 				packet_array[i] = req;

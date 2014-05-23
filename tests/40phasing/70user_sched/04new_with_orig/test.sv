@@ -44,7 +44,7 @@
 `include "uvm_macros.svh"
 
 // Macro for creating a phase that calls a phase implementation
-// task for a specific component type which implements. The implemenation
+// task for a specific component type which implements. The implementation
 // has to be a parameterized type parameterized to a component type which
 // has the phase implementation as part of this. The alternative would be
 // to explicitly call set_phase_imp in each component ctor.

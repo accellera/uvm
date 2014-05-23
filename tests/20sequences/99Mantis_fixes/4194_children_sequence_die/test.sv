@@ -72,7 +72,7 @@ class simple_driver extends uvm_driver#(simple_item);
          #10;
          `uvm_info("DRIVER_GET", "fetching item", UVM_LOW)
          seq_item_port.get(item);
-         `uvm_info("DRIVER_GOT", "recieved item", UVM_LOW)
+         `uvm_info("DRIVER_GOT", "received item", UVM_LOW)
       end
    endtask : run_phase
 

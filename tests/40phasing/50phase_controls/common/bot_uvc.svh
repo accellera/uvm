@@ -82,7 +82,7 @@ class bot_driver extends uvm_driver#(bot_item);
     forever begin
       seq_item_port.get_next_item(this_item); // Get the next data item the sequencer
       drive_item(this_item);                  // Drive it to the pins
-      seq_item_port.item_done();              // Give the control back the the sequencer
+      seq_item_port.item_done();              // Give the control back to the sequencer
     end
   endtask : get_and_drive
 

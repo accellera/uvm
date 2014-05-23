@@ -143,7 +143,7 @@ virtual class uvm_factory;
   // and matching instance path will produce the type represented by
   // ~override_type_name~, which must be preregistered with the factory.
   //
-  // The ~full_inst_path~ is matched against the contentation of
+  // The ~full_inst_path~ is matched against the concatenation of
   // {~parent_inst_path~, ".", ~name~} provided in future create requests. The
   // ~full_inst_path~ may include wildcards (* and ?) such that a single
   // instance override can be applied in multiple contexts. A ~full_inst_path~
@@ -555,7 +555,7 @@ endclass
 // - The <get_type_name> method and static type_name variable are not defined. You
 //   will need to implement these manually.
 //
-// - A type name is not associated with the type when registeriing with the
+// - A type name is not associated with the type when registering with the
 //   factory, so the factory's *_by_name operations will not work with
 //   parameterized classes.
 //
