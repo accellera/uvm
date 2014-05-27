@@ -265,3 +265,5 @@ Mantis 4893: Fixed bug in uvm_leaf_scope which could lead to stall of simulation
 
 Mantis 4920: Fixed random stability bug in lookup_name which would cause instability 
 when the config database is queried.
+
+Mantis 4923: Added check for out of bound queue access in uvm_misc.svh .
