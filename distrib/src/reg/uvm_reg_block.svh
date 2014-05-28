@@ -41,7 +41,7 @@ virtual class uvm_reg_block extends uvm_object;
 
    local static bit     m_roots[uvm_reg_block];
    local int unsigned   blks[uvm_reg_block];
-   local int unsigned   regs[uvm_reg];
+   local uvm_reg        regs[$];
    local int unsigned   vregs[uvm_vreg];
    local int unsigned   mems[uvm_mem];
    local bit            maps[uvm_reg_map];
@@ -997,13 +997,15 @@ function void uvm_reg_block::add_reg(uvm_reg rg);
       return;
    end
 
-   if (this.regs.exists(rg)) begin
-      `uvm_error("RegModel", {"Register '",rg.get_name(),
+   foreach(this.regs[i]) begin
+      if(this.regs[i].get_name() == rg.get_name()) begin 
+         `uvm_error("RegModel", {"Register '",rg.get_name(),
          "' has already been registered with block '",get_name(),"'"})
-       return;
+          return;
+      end
    end
-
-   regs[rg] = id++;
+    
+   this.regs.push_back(rg);
 endfunction: add_reg
 
 
@@ -1066,7 +1068,7 @@ function void uvm_reg_block::lock_model();
    locked = 1;
 
    foreach (regs[rg_]) begin
-      uvm_reg rg = rg_;
+      uvm_reg rg = regs[rg_];
       rg.Xlock_modelX();
    end
 
@@ -1141,7 +1143,7 @@ function void uvm_reg_block::get_fields(ref uvm_reg_field fields[$],
                                         input uvm_hier_e hier=UVM_HIER);
 
    foreach (regs[rg_]) begin
-     uvm_reg rg = rg_;
+     uvm_reg rg = regs[rg_];
      rg.get_fields(fields);
    end
    
@@ -1178,7 +1180,7 @@ endfunction: get_virtual_fields
 function void uvm_reg_block::get_registers(ref uvm_reg regs[$],
                                            input uvm_hier_e hier=UVM_HIER);
    foreach (this.regs[rg])
-     regs.push_back(rg);
+     regs.push_back(this.regs[rg]);
 
    if (hier == UVM_HIER)
      foreach (blks[blk_]) begin
@@ -1351,7 +1353,7 @@ endfunction: get_block_by_name
 function uvm_reg uvm_reg_block::get_reg_by_name(string name);
 
    foreach (regs[rg_]) begin
-     uvm_reg rg = rg_;
+     uvm_reg rg = regs[rg_];
      if (rg.get_name() == name)
        return rg;
    end
@@ -1432,7 +1434,7 @@ endfunction: get_mem_by_name
 function uvm_reg_field uvm_reg_block::get_field_by_name(string name);
 
    foreach (regs[rg_]) begin
-      uvm_reg rg = rg_;
+      uvm_reg rg = regs[rg_];
       uvm_reg_field fields[$];
 
       rg.get_fields(fields);
@@ -1510,7 +1512,7 @@ function uvm_reg_cvr_t uvm_reg_block::set_coverage(uvm_reg_cvr_t is_on);
    this.cover_on = this.has_cover & is_on;
 
    foreach (regs[rg_]) begin
-     uvm_reg rg = rg_;
+     uvm_reg rg = regs[rg_];
      void'(rg.set_coverage(is_on));
    end
 
@@ -1532,7 +1534,7 @@ endfunction: set_coverage
 
 function void uvm_reg_block::sample_values();
    foreach (regs[rg_]) begin
-      uvm_reg rg = rg_;
+      uvm_reg rg = regs[rg_];
       rg.sample_values();
    end
 
@@ -1597,7 +1599,7 @@ endfunction: get_coverage
 function void uvm_reg_block::reset(string kind = "HARD");
 
    foreach (regs[rg_]) begin
-     uvm_reg rg = rg_;
+     uvm_reg rg = regs[rg_];
      rg.reset(kind);
    end
 
@@ -1614,7 +1616,7 @@ function bit uvm_reg_block::needs_update();
    needs_update = 0;
 
    foreach (regs[rg_]) begin
-     uvm_reg rg = rg_;
+     uvm_reg rg = regs[rg_];
      if (rg.needs_update())
        return 1;
    end
@@ -1647,7 +1649,7 @@ task uvm_reg_block::update(output uvm_status_e  status,
                     fname, lineno, this.get_name(), path.name ), UVM_HIGH);
 
    foreach (regs[rg_]) begin
-      uvm_reg rg = rg_;
+      uvm_reg rg = regs[rg_];
       if (rg.needs_update()) begin
          rg.update(status, path, null, parent, prior, extension);
          if (status != UVM_IS_OK && status != UVM_HAS_X) begin;
@@ -1678,7 +1680,7 @@ task uvm_reg_block::mirror(output uvm_status_e       status,
    uvm_status_e final_status = UVM_IS_OK;
 
    foreach (regs[rg_]) begin 
-      uvm_reg rg = rg_;
+      uvm_reg rg = regs[rg_];
       rg.mirror(status, check, path, null,
                 parent, prior, extension, fname, lineno);
       if (status != UVM_IS_OK && status != UVM_HAS_X) begin;
@@ -2139,7 +2141,7 @@ function void uvm_reg_block::do_print (uvm_printer printer);
   end
    
   foreach(regs[i]) begin
-     uvm_reg r = i;
+     uvm_reg r = regs[i];
      uvm_object obj = r;
      printer.print_object(obj.get_name(), obj);
   end
