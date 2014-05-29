@@ -998,9 +998,9 @@ function void uvm_reg_block::add_reg(uvm_reg rg);
    end
 
    foreach(this.regs[i]) begin
-      if(this.regs[i].get_name() == rg.get_name()) begin 
-         `uvm_error("RegModel", {"Register '",rg.get_name(),
-         "' has already been registered with block '",get_name(),"'"})
+      if(this.regs[i].get_full_name() == rg.get_full_name()) begin 
+         `uvm_error("RegModel", {"Register '",rg.get_full_name(),
+         "' has already been registered with block '",get_full_name(),"'"})
           return;
       end
    end
