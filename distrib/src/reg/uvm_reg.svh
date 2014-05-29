@@ -1199,8 +1199,8 @@ function void uvm_reg::configure (uvm_reg_block blk_parent,
    end
 
    m_parent = blk_parent;
-   m_parent.add_reg(this);
    m_regfile_parent = regfile_parent;
+   m_parent.add_reg(this);
    if (hdl_path != "")
      add_hdl_path_slice(hdl_path, -1, -1);
 endfunction: configure
