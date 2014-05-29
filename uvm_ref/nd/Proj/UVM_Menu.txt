@@ -207,6 +207,7 @@ Group: Macros  {
 
    File: Overview                     (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/macros.txt)
    File: Report Macros                (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_message_defines.svh)
+   File: Global Macros                (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_global_defines.svh)
    File: Component and Object         (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_object_defines.svh)
    File: Sequence and Do Action       (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_sequence_defines.svh)
    File: Callbacks                    (no auto-title, UVM_ROOT/distrib/docs/html/src/macros/uvm_callback_defines.svh)
