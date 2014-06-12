@@ -28,7 +28,7 @@ $user = $ARGV[3];
 @fileset = ("release-notes.txt", "README.txt", "src/macros/uvm_version_defines.svh");
 
 #my $debug  =           1; # Do everything except push if TRUE
-my $debug  =           1; # Do everything except push if TRUE
+my $debug  =           0; # Do everything except push if TRUE
 #die "Please set params above\n";
 
 #
