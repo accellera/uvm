@@ -265,3 +265,7 @@ Mantis 4893: Fixed bug in uvm_leaf_scope which could lead to stall of simulation
 
 Mantis 4920: Fixed random stability bug in lookup_name which would cause instability 
 when the config database is queried.
+
+Mantis 4923: Added check for out of bound queue access in uvm_misc.svh .
+
+Mantis 4925: Moved macros from base/uvm_globals into macros/uvm_global_defines, removed duiplicate macros within uvm_pkg. These changes will make UVM_1.2 Reference HTML out of sync with UVM-1.2 PDF documentation.
