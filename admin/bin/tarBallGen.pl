@@ -8,9 +8,9 @@ use strict;
 # to appropriate values, comment the die message below and go ahead.
 #
 #
-# ./tarBallGen.pl <branch> <RC-label> <directory-prefix>
+# ./tarBallGen.pl <branch> <RC-label> <directory-prefix> <sf-username>
 #
-# ./tarBallGen.pl UVM_1_2 RC8 uvm-1.2
+# ./tarBallGen.pl UVM_1_2 RC8 uvm-1.2 alberteinstein
 
 my $tag = undef;
 my $rc = undef;
