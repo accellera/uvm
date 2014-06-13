@@ -1,5 +1,5 @@
 Accellera Universal Verification Methodology
-version %UVM:version%
+version 1.2
 
 (C) Copyright 2007-2012 Mentor Graphics Corporation
 (C) Copyright 2007-2012 Cadence Design Systems, Incorporated

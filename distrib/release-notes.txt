@@ -1,13 +1,13 @@
-Accellera UVM %UVM:version% Release Notes
+Accellera UVM 1.2 Release Notes
 ================================
 
-date: %UVM:date%
-repository state: %UVM:repo%
+date: Fri Jun 13 11:13:37 IDT 2014
+repository state: UVM_1_2_RELEASE-1-gd6e87e2
 
 General Overview
 ----------------
 
-This is release %UVM:version% of the Universal Verification Methodology (UVM)
+This is release 1.2 of the Universal Verification Methodology (UVM)
 reference implementation from Accellera. This distribution includes a
 SystemVerilog based class library, examples, UVM Stardard Reference
 (PDF and HTML), and a User's Guide.
@@ -28,9 +28,9 @@ and other UVM events.
 What's Changed
 --------------
 
-Release %UVM:version% contains enhancements and fixes to errata.
+Release 1.2 contains enhancements and fixes to errata.
 
-UVM %UVM:version% fixes the following enhancements and issues reported under the
+UVM 1.2 fixes the following enhancements and issues reported under the
 Mantis bug-tracking system. Issues affecting the reference
 documentation (API changes or semantic changes) are preceded with an
 plus sign (+). Issues affecting backward compatibility are precedded with
