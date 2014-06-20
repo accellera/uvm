@@ -302,7 +302,9 @@ has been retrieved via a 'get'.
 
 Topic: Backwards Compatibility
 This change could potentially effect users, as references to the
-~uvm_sequence_base::starting_phase~ variable will now miscompile.
+~uvm_sequence_base::starting_phase~ variable will now miscompile 
+(unless the deprecated behavior is restored by either 
+defining UVM_DEPRECATED_STARTING_PHASE or not defining UVM_NO_DEPRECATED).
 The <1.1 to 1.2 Migration Script> can be used to search-and-replace
 within the user code, updating it to the new methods.
 

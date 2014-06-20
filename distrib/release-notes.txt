@@ -113,9 +113,10 @@ The "starting_phase" variable is now data access protected within
 uvm_sequence_base, and the user must use the "get_starting_phase" and
 "set_starting_phase" accesors.  This prevents possible fatal errors
 and deadlocks caused when a starting_phase is changed after it has
-already been evaluated.  The bin/uvm11-to-uvm12.pl helper script can
-be used to perform a simple search-and-replace within the user code, 
-updating it to the new methods.
+already been evaluated.  The backward incompatibility can be avoided by
+not defining UVM_NO_DEPRECATED or by defining UVM_DEPRECATED_STARTING_PHASE,
+or it can be fixed by using manual edits or the bin/uvm11-to-uvm12.pl
+helper script to update user code to use the new accessor methods.
 
 (+) Mantis 4432: Provide auto-object-to-phase in uvm_sequence_base
 
