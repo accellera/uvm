@@ -383,7 +383,10 @@ virtual class uvm_resource_base extends uvm_object;
   // before it is stored.
   //
   function void set_scope(string s);
-    scope = uvm_glob_to_re(s);
+     if(s=="")
+       scope = "/^$/";
+     else
+       scope = uvm_glob_to_re(s);
   endfunction
 
   // Function: get_scope
@@ -401,7 +404,7 @@ virtual class uvm_resource_base extends uvm_object;
   // is visible in a scope.  Return one if it is, zero otherwise.
   //
   function bit match_scope(string s);
-    int err = uvm_re_match(scope, s);
+     int err = uvm_re_match(scope, s);
     return (err == 0);
   endfunction
 
