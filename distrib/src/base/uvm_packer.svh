@@ -59,6 +59,16 @@ class uvm_packer;
 
   extern virtual function void pack_field_int (uvm_integral_t value, int size);
 
+  // Function: pack_field_array_int_element
+  //
+  // Packs an integral value (less than or equal to 64 bits) of an 
+  // array element into the packed array. This version of <pack_field_int>
+  // allows a user-defined packer to pack array elements differently.
+  // The ~size~ is the number of bits to pack, usually obtained by
+  // ~$bits~.
+
+  extern virtual function void pack_field_array_int_element (uvm_integral_t value, int size);
+
   // Function: pack_bits
   //
   // Packs bits from upacked array of bits into the pack array.
@@ -182,6 +192,17 @@ class uvm_packer;
   // smaller vectors.
 
   extern virtual function uvm_integral_t unpack_field_int (int size);
+
+  // Function: unpack_field_array_int_element
+  //
+  // Unpacks bits from the pack array and returns the bit-stream that was
+  // unpacked. This version of <unpack_field_int>
+  // allows a user-defined packer to pack and unpack array elements 
+  // differently.
+  //
+  // ~size~ is the number of bits to unpack; the maximum is 64 bits. 
+
+  extern virtual function uvm_integral_t unpack_field_array_int_element (int size);
 
   // Function: unpack_bits
   //
@@ -701,6 +722,23 @@ function void uvm_packer::pack_field_int(uvm_integral_t value, int size);
   count += size;
 endfunction
   
+// pack_field_array_int_element
+// --------------
+
+function void uvm_packer::pack_field_array_int_element(uvm_integral_t value, int size);
+
+  // This fuction replicates the code of pack_field_int but it can be implemented
+  // differently in a user-defined packer. It does not call pack_field_int() to save
+  // runtime performance
+
+  for (int i=0; i<size; i++)
+    if(big_endian == 1)
+      m_bits[count+i] = value[size-1-i];
+    else
+      m_bits[count+i] = value[i];
+  count += size;
+endfunction
+  
 // pack_bits
 // -----------------
 
@@ -914,6 +952,26 @@ function uvm_integral_t uvm_packer::unpack_field_int(int size);
         unpack_field_int[i] = m_bits[count-i-1];
       else
         unpack_field_int[i] = m_bits[count-size+i];
+  end
+endfunction
+  
+// unpack_field_array_int_element
+// ----------------
+
+function uvm_integral_t uvm_packer::unpack_field_array_int_element(int size);
+
+  // This fuction replicates the code of unpack_field_int but it can be implemented
+  // differently in a user-defined packer. It does not call unpack_field_int() to save
+  // runtime performance
+
+  unpack_field_array_int_element = 'b0;
+  if (enough_bits(size,"integral")) begin
+    count += size;
+    for (int i=0; i<size; i++)
+      if(big_endian == 1)
+        unpack_field_array_int_element[i] = m_bits[count-i-1];
+      else
+        unpack_field_array_int_element[i] = m_bits[count-size+i];
   end
 endfunction
   

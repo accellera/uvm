@@ -1628,7 +1628,7 @@ endfunction \
         if(!((FLAG)&UVM_NOPACK)) begin \
           /**/ if(__m_uvm_status_container.packer.use_metadata) __m_uvm_status_container.packer.pack_field_int(ARG.size(), 32); \
           foreach(ARG[i])  \
-            if($bits(ARG[i]) <= 64) __m_uvm_status_container.packer.pack_field_int(ARG[i], $bits(ARG[i])); \
+            if($bits(ARG[i]) <= 64) __m_uvm_status_container.packer.pack_field_array_int_element(ARG[i], $bits(ARG[i])); \
             else __m_uvm_status_container.packer.pack_field(ARG[i], $bits(ARG[i])); \
         end \
       UVM_UNPACK: \
@@ -1639,7 +1639,7 @@ endfunction \
           `M_UVM_``TYPE``_RESIZE (ARG,0) \
           end \
           foreach(ARG[i]) \
-            if($bits(ARG[i]) <= 64) ARG[i] = __m_uvm_status_container.packer.unpack_field_int($bits(ARG[i])); \
+            if($bits(ARG[i]) <= 64) ARG[i] = __m_uvm_status_container.packer.unpack_field_array_int_element($bits(ARG[i])); \
             else ARG[i] = __m_uvm_status_container.packer.unpack_field($bits(ARG[i])); \
         end \
       UVM_RECORD: \
@@ -2134,7 +2134,7 @@ endfunction \
         if(!((FLAG)&UVM_NOPACK)) begin \
           /**/if(__m_uvm_status_container.packer.use_metadata) __m_uvm_status_container.packer.pack_field_int(ARG.size(), 32); \
           foreach(ARG[i])  \
-            __m_uvm_status_container.packer.pack_field_int(int'(ARG[i]), $bits(ARG[i])); \
+            __m_uvm_status_container.packer.pack_field_array_int_element(int'(ARG[i]), $bits(ARG[i])); \
         end \
       UVM_UNPACK: \
         if(!((FLAG)&UVM_NOPACK)) begin \
@@ -2145,7 +2145,7 @@ endfunction \
           /**/  `M_UVM_``TYPE``_RESIZE(ARG,tmp__) \
           /**/end \
           foreach(ARG[i]) \
-            ARG[i] = T'(__m_uvm_status_container.packer.unpack_field_int($bits(ARG[i]))); \
+            ARG[i] = T'(__m_uvm_status_container.packer.unpack_field_array_int_element($bits(ARG[i]))); \
         end \
       UVM_RECORD: \
         /**/`m_uvm_record_qda_enum(ARG,FLAG,ARG.size()) \
