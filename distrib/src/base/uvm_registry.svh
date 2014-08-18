@@ -76,7 +76,7 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
   // overrides the method in <uvm_object_wrapper>.
 
   virtual function string get_type_name();
-    return type_name;
+    return Tname;
   endfunction
 
   local static this_type me = get();
