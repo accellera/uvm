@@ -636,7 +636,7 @@ class uvm_phase extends uvm_object;
     string s;
     int i;
     s = "'{ ";
-    foreach (aa[ph]) begin
+    foreach (aa[ph]) begin // UNSAFE ORDER
       uvm_phase n = ph;
       s = {s, (n == null) ? "null" : n.get_name(),
         (i == aa.num()-1) ? "" : ", "};
@@ -651,7 +651,7 @@ class uvm_phase extends uvm_object;
   endfunction
 
   virtual function void m_get_transitive_children(ref uvm_phase phases[$]);
-    foreach (m_successors[succ])
+    foreach (m_successors[succ]) // UNSAFE ORDER
     begin
         phases.push_back(succ);
         succ.m_get_transitive_children(phases);
@@ -1128,7 +1128,7 @@ function void uvm_phase::m_print_successors();
     level = 0;
   `uvm_info("UVM/PHASE/SUCC",$sformatf("%s%s (%s) id=%0d",spaces.substr(0,level*2),get_name(), m_phase_type.name(),get_inst_id()),UVM_NONE)
   level++;
-  foreach (m_successors[succ]) begin
+  foreach (m_successors[succ]) begin // UNSAFE ORDER
     succ.m_print_successors();
   end
   level--;
@@ -1146,7 +1146,7 @@ function uvm_phase uvm_phase::m_find_predecessor(uvm_phase phase, bit stay_in_sc
   end
   if (phase == m_imp || phase == this)
     return this;
-  foreach (m_predecessors[pred]) begin
+  foreach (m_predecessors[pred]) begin // UNSAFE ORDER
     uvm_phase orig;
     orig = (orig_phase==null) ? this : orig_phase;
     if (!stay_in_scope || 
@@ -1169,7 +1169,7 @@ function uvm_phase uvm_phase::m_find_predecessor_by_name(string name, bit stay_i
   //$display("  FIND PRED node '",name,"' - checking against ",get_name()," (",m_phase_type.name()," id=",$sformatf("%0d",get_inst_id()),(m_imp==null)?"":{"/",$sformatf("%0d",m_imp.get_inst_id())},")");
   if (get_name() == name)
     return this;
-  foreach (m_predecessors[pred]) begin
+  foreach (m_predecessors[pred]) begin // UNSAFE ORDER
     uvm_phase orig;
     orig = (orig_phase==null) ? this : orig_phase;
     if (!stay_in_scope || 
@@ -1196,7 +1196,7 @@ function uvm_phase uvm_phase::m_find_successor(uvm_phase phase, bit stay_in_scop
   if (phase == m_imp || phase == this) begin
     return this;
     end
-  foreach (m_successors[succ]) begin
+  foreach (m_successors[succ]) begin // UNSAFE ORDER
     uvm_phase orig;
     orig = (orig_phase==null) ? this : orig_phase;
     if (!stay_in_scope || 
@@ -1220,7 +1220,7 @@ function uvm_phase uvm_phase::m_find_successor_by_name(string name, bit stay_in_
   //$display("  FIND SUCC node '",name,"' - checking against ",get_name()," (",m_phase_type.name()," id=",$sformatf("%0d",get_inst_id()),(m_imp==null)?"":{"/",$sformatf("%0d",m_imp.get_inst_id())},")");
   if (get_name() == name)
     return this;
-  foreach (m_successors[succ]) begin
+  foreach (m_successors[succ]) begin // UNSAFE ORDER
     uvm_phase orig;
     orig = (orig_phase==null) ? this : orig_phase;
     if (!stay_in_scope || 
@@ -1308,7 +1308,7 @@ task uvm_phase::execute_phase();
   // all its predecessor nodes to be marked DONE.
   // (the next conditional speeds this up)
   // Also, this helps us fast-forward through terminal (end) nodes
-  foreach (m_predecessors[pred])
+  foreach (m_predecessors[pred]) 
     wait (pred.m_state == UVM_PHASE_DONE);
 
 
@@ -1476,7 +1476,7 @@ task uvm_phase::execute_phase();
                   if ($time == `UVM_DEFAULT_TIMEOUT) begin
                      if (m_phase_trace)
                        `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
-                     foreach (m_executing_phases[p]) begin
+                     foreach (m_executing_phases[p]) begin // UNSAFE ORDER
                         if ((p.phase_done != null) && (p.phase_done.get_objection_total() > 0)) begin
                            if (m_phase_trace)
                              `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
@@ -1493,7 +1493,7 @@ task uvm_phase::execute_phase();
                   else begin
                      if (m_phase_trace)
                        `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
-                     foreach (m_executing_phases[p]) begin
+                     foreach (m_executing_phases[p]) begin // UNSAFE ORDER
                         if ((p.phase_done != null) && (p.phase_done.get_objection_total() > 0)) begin
                            if (m_phase_trace)
                              `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
@@ -1643,7 +1643,7 @@ task uvm_phase::execute_phase();
   end 
   else begin
     // execute all the successors
-    foreach (m_successors[succ]) begin
+    foreach (m_successors[succ]) begin // UNSAFE ORDER
       if(succ.m_state < UVM_PHASE_SCHEDULED) begin
         state_chg.m_prev_state = succ.m_state;
         state_chg.m_phase = succ;
@@ -1783,7 +1783,7 @@ task uvm_phase::m_wait_for_pred();
     if (m_phase_trace) begin
       if (pred_of_succ.num()) begin
         string s = "( ";
-        foreach (pred_of_succ[pred])
+        foreach (pred_of_succ[pred]) // UNSAFE ORDER
           s = {s, pred.get_full_name()," "};
         s = {s, ")"};
         `UVM_PH_TRACE("PH/TRC/WAIT_PRED_OF_SUCC",
@@ -1903,7 +1903,7 @@ function void uvm_phase::sync(uvm_domain target,
       if (node.m_imp != null) begin
         sync(target, node.m_imp);
       end
-      foreach (node.m_successors[succ]) begin
+      foreach (node.m_successors[succ]) begin // UNSAFE ORDER
         if (!visited.exists(succ)) begin
           queue.push_back(succ);
           visited[succ] = 1;
@@ -1951,7 +1951,7 @@ function void uvm_phase::unsync(uvm_domain target,
       uvm_phase node;
       node = queue.pop_front();
       if (node.m_imp != null) unsync(target,node.m_imp);
-      foreach (node.m_successors[succ]) begin
+      foreach (node.m_successors[succ]) begin // UNSAFE ORDER
         if (!visited.exists(succ)) begin
           queue.push_back(succ);
           visited[succ] = 1;
@@ -2149,7 +2149,7 @@ task uvm_phase::wait_for_self_and_siblings_to_drop() ;
     end
 
     // now wait for siblings to drop
-    foreach(siblings[sib]) begin
+    foreach(siblings[sib]) begin 
       sib.wait_for_state(UVM_PHASE_EXECUTING, UVM_GTE); // sibling must be at least executing 
       if ((sib.phase_done != null) && (sib.phase_done.get_objection_total(top) != 0)) begin
         m_state = UVM_PHASE_EXECUTING ;
@@ -2181,7 +2181,7 @@ endfunction
 // Using a depth-first traversal, kill all the successor phases of the
 // current phase.
 function void uvm_phase::kill_successors();
-  foreach (m_successors[succ])
+  foreach (m_successors[succ]) // UNSAFE ORDER
     succ.kill_successors();
   kill();
 endfunction

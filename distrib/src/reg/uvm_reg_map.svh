@@ -1185,7 +1185,7 @@ endfunction
 
 function void uvm_reg_map::get_submaps(ref uvm_reg_map maps[$], input uvm_hier_e hier=UVM_HIER);
 
-   foreach (m_submaps[submap])
+   foreach (m_submaps[submap]) //UNSAFE ORDER
      maps.push_back(submap);
 
    
@@ -1201,7 +1201,7 @@ endfunction
 
 function void uvm_reg_map::get_registers(ref uvm_reg regs[$], input uvm_hier_e hier=UVM_HIER);
 
-  foreach (m_regs_info[rg])
+  foreach (m_regs_info[rg])//UNSAFE ORDER
     regs.push_back(rg);
 
   if (hier == UVM_HIER)
@@ -1217,7 +1217,7 @@ endfunction
 
 function void uvm_reg_map::get_fields(ref uvm_reg_field fields[$], input uvm_hier_e hier=UVM_HIER);
 
-   foreach (m_regs_info[rg_]) begin
+   foreach (m_regs_info[rg_]) begin //UNSAFE ORDER
      uvm_reg rg = rg_;
      rg.get_fields(fields);
    end
@@ -1235,7 +1235,7 @@ endfunction
 
 function void uvm_reg_map::get_memories(ref uvm_mem mems[$], input uvm_hier_e hier=UVM_HIER);
 
-   foreach (m_mems_info[mem])
+   foreach (m_mems_info[mem]) //UNSAFE ORDER
      mems.push_back(mem);
     
    if (hier == UVM_HIER)

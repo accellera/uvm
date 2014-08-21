@@ -187,7 +187,7 @@ virtual class uvm_tr_database extends uvm_object;
       // Clear out the queue first...
       q.delete();
       // Then fill in the values
-      foreach (m_streams[idx])
+      foreach (m_streams[idx]) // UNSAFE ORDER
         q.push_back(idx);
       // Finally, return the size of the queue
       return q.size();

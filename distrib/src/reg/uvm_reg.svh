@@ -1583,7 +1583,7 @@ endfunction
 // get_maps
 
 function void uvm_reg::get_maps(ref uvm_reg_map maps[$]);
-   foreach (m_maps[map])
+   foreach (m_maps[map]) // UNSAFE ORDER
      maps.push_back(map);
 endfunction
 
@@ -1600,7 +1600,7 @@ endfunction
 function bit uvm_reg::is_in_map(uvm_reg_map map);
    if (m_maps.exists(map))
      return 1;
-   foreach (m_maps[l]) begin
+   foreach (m_maps[l]) begin 
      uvm_reg_map local_map = l;
      uvm_reg_map parent_map = local_map.get_parent_map();
 
@@ -1660,7 +1660,7 @@ function uvm_reg_map uvm_reg::get_default_map(string caller="");
    end
 
    // try to choose one based on default_map in parent blocks.
-   foreach (m_maps[l]) begin
+   foreach (m_maps[l]) begin // UNSAFE ORDER
      uvm_reg_map map = l;
      uvm_reg_block blk = map.get_parent();
      uvm_reg_map default_map = blk.get_default_map();
@@ -1795,7 +1795,7 @@ endfunction: get_max_size
 // get_fields
 
 function void uvm_reg::get_fields(ref uvm_reg_field fields[$]);
-   foreach(m_fields[i])
+   foreach(m_fields[i]) // UNSAFE ORDER
       fields.push_back(m_fields[i]);
 endfunction
 
@@ -1803,7 +1803,7 @@ endfunction
 // get_field_by_name
 
 function uvm_reg_field uvm_reg::get_field_by_name(string name);
-   foreach (m_fields[i])
+   foreach (m_fields[i]) // UNSAFE ORDER when fields with same name exist
       if (m_fields[i].get_name() == name)
          return m_fields[i];
    `uvm_warning("RegModel", {"Unable to locate field '",name,

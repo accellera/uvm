@@ -408,7 +408,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
     begin
     string name;
     printer.print_array_header("extensions", m_extensions.num(), "aa(obj,obj)");
-    foreach (m_extensions[ext_]) begin
+    foreach (m_extensions[ext_]) begin // UNSAFE ORDER
       uvm_tlm_extension_base ext = m_extensions[ext_];
       name = {"[",ext.get_name(),"]"};
       printer.print_object(name, ext, "[");
@@ -471,7 +471,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
      end
 
     if (do_compare)
-      foreach (m_extensions[ext_]) begin
+      foreach (m_extensions[ext_]) begin // UNSAFE ORDER
          uvm_tlm_extension_base ext = ext_;
          uvm_tlm_extension_base rhs_ext = gp.m_extensions.exists(ext) ?
                                           gp.m_extensions[ext] : null;
@@ -481,7 +481,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
       end
 
     if (do_compare)
-      foreach (gp.m_extensions[ext_]) begin
+      foreach (gp.m_extensions[ext_]) begin // UNSAFE ORDER
         uvm_tlm_extension_base ext = ext_;
         if (!m_extensions.exists(ext)) begin
               do_compare = comparer.compare_object(ext.get_name(),

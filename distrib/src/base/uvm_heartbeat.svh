@@ -232,7 +232,7 @@ class uvm_heartbeat extends uvm_object;
             case (m_mode)
               UVM_ALL_ACTIVE:              
                 begin
-                  foreach(m_cb.cnt[idx]) begin
+                  foreach(m_cb.cnt[idx]) begin // UNSAFE ORDER
                     obj = idx;
                     if(!m_cb.cnt[obj]) begin
                       m_cntxt.uvm_report_fatal("HBFAIL", $sformatf("Did not recieve an update of %s for component %s since last event trigger at time %0t : last update time was %0t",
@@ -245,7 +245,7 @@ class uvm_heartbeat extends uvm_object;
                 begin
                   if(m_cb.cnt.num() && !m_cb.objects_triggered()) begin
                     string s;
-                    foreach(m_cb.cnt[idx]) begin
+                    foreach(m_cb.cnt[idx]) begin // UNSAFE ORDER
                       obj = idx;
                       s={s,"\n  ",obj.get_full_name()};
                     end
@@ -257,7 +257,7 @@ class uvm_heartbeat extends uvm_object;
                 begin
                   if(m_cb.objects_triggered() > 1) begin
                     string s;
-                    foreach(m_cb.cnt[idx])  begin
+                    foreach(m_cb.cnt[idx])  begin // UNSAFE ORDER
                       obj = idx;
                       if(m_cb.cnt[obj]) $swrite(s,"%s\n  %s (updated: %0t)",
                          s, obj.get_full_name(), m_cb.last_trigger[obj]);
@@ -267,7 +267,7 @@ class uvm_heartbeat extends uvm_object;
                   end
                   if(m_cb.cnt.num() && !m_cb.objects_triggered()) begin
                     string s;
-                    foreach(m_cb.cnt[idx]) begin
+                    foreach(m_cb.cnt[idx]) begin // UNSAFE ORDER
                       obj = idx;
                       s={s,"\n  ",obj.get_full_name()};
                     end

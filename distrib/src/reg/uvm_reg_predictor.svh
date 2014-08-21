@@ -249,7 +249,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
 	 string q[$];
      super.check_phase(phase);
             
-     foreach (m_pending[l]) begin
+     foreach (m_pending[l]) begin // UNSAFE ORDER
 	     uvm_reg rg=l;
          q.push_back($sformatf("\n%s",rg.get_full_name()));
      end

@@ -1055,7 +1055,7 @@ endfunction: get_n_maps
 // get_maps
 
 function void uvm_mem::get_maps(ref uvm_reg_map maps[$]);
-   foreach (m_maps[map])
+   foreach (m_maps[map]) // UNSAFE ORDER
      maps.push_back(map);
 endfunction
 
@@ -1121,7 +1121,7 @@ function uvm_reg_map uvm_mem::get_default_map(string caller="");
    end
 
    // try to choose one based on default_map in parent blocks.
-   foreach (m_maps[l]) begin
+   foreach (m_maps[l]) begin // UNSAFE ORDER
      uvm_reg_map map = l;
      uvm_reg_block blk = map.get_parent();
      uvm_reg_map default_map = blk.get_default_map();
@@ -1235,7 +1235,7 @@ endfunction: get_offset
 // get_virtual_registers
 
 function void uvm_mem::get_virtual_registers(ref uvm_vreg regs[$]);
-  foreach (m_vregs[vreg])
+  foreach (m_vregs[vreg]) // UNSAFE ORDER
      regs.push_back(vreg);
 endfunction
 
@@ -1244,7 +1244,7 @@ endfunction
 
 function void uvm_mem::get_virtual_fields(ref uvm_vreg_field fields[$]);
 
-  foreach (m_vregs[l])
+  foreach (m_vregs[l]) // UNSAFE ORDER
   begin
     uvm_vreg vreg = l;
     vreg.get_fields(fields);
@@ -1274,7 +1274,7 @@ endfunction: get_vfield_by_name
 
 function uvm_vreg uvm_mem::get_vreg_by_name(string name);
 
-  foreach (m_vregs[l])
+  foreach (m_vregs[l]) // UNSAFE ORDER if same name for vreg is allowed
   begin
     uvm_vreg vreg = l;
     if (vreg.get_name() == name)
@@ -2313,7 +2313,7 @@ function string uvm_mem::convert2string();
      convert2string = {convert2string, "  (unmapped)\n"};
    else
      convert2string = {convert2string, "\n"};
-   foreach (m_maps[map]) begin
+   foreach (m_maps[map]) begin // UNSAFE ORDER
      uvm_reg_map parent_map = map;
      int unsigned offset;
      while (parent_map != null) begin

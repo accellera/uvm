@@ -1140,13 +1140,13 @@ endfunction: get_full_name
 function void uvm_reg_block::get_fields(ref uvm_reg_field fields[$],
                                         input uvm_hier_e hier=UVM_HIER);
 
-   foreach (regs[rg_]) begin
+   foreach (regs[rg_]) begin // UNSAFE ORDER
      uvm_reg rg = rg_;
      rg.get_fields(fields);
    end
    
    if (hier == UVM_HIER)
-     foreach (blks[blk_])
+     foreach (blks[blk_]) // UNSAFE ORDER
      begin
        uvm_reg_block blk = blk_;
        blk.get_fields(fields);
@@ -1160,13 +1160,13 @@ endfunction: get_fields
 function void uvm_reg_block::get_virtual_fields(ref uvm_vreg_field fields[$],
                                                 input uvm_hier_e hier=UVM_HIER);
 
-   foreach (vregs[vreg_]) begin
+   foreach (vregs[vreg_]) begin // UNSAFE ORDER
      uvm_vreg vreg = vreg_;
      vreg.get_fields(fields);
    end
    
    if (hier == UVM_HIER)
-     foreach (blks[blk_]) begin
+     foreach (blks[blk_]) begin // UNSAFE ORDER
        uvm_reg_block blk = blk_;
        blk.get_virtual_fields(fields);
      end
@@ -1177,11 +1177,11 @@ endfunction: get_virtual_fields
 
 function void uvm_reg_block::get_registers(ref uvm_reg regs[$],
                                            input uvm_hier_e hier=UVM_HIER);
-   foreach (this.regs[rg])
+   foreach (this.regs[rg]) // UNSAFE ORDER
      regs.push_back(rg);
 
    if (hier == UVM_HIER)
-     foreach (blks[blk_]) begin
+     foreach (blks[blk_]) begin // UNSAFE ORDER
        uvm_reg_block blk = blk_;
        blk.get_registers(regs);
      end
@@ -1193,11 +1193,11 @@ endfunction: get_registers
 function void uvm_reg_block::get_virtual_registers(ref uvm_vreg regs[$],
                                                    input uvm_hier_e hier=UVM_HIER);
 
-   foreach (vregs[rg])
+   foreach (vregs[rg]) // UNSAFE ORDER
      regs.push_back(rg);
 
    if (hier == UVM_HIER)
-     foreach (blks[blk_]) begin
+     foreach (blks[blk_]) begin // UNSAFE ORDER
        uvm_reg_block blk = blk_;
        blk.get_virtual_registers(regs);
      end
@@ -1209,13 +1209,13 @@ endfunction: get_virtual_registers
 function void uvm_reg_block::get_memories(ref uvm_mem mems[$],
                                           input uvm_hier_e hier=UVM_HIER);
 
-   foreach (this.mems[mem_]) begin
+   foreach (this.mems[mem_]) begin // UNSAFE ORDER
      uvm_mem mem = mem_;
      mems.push_back(mem);
    end
 
    if (hier == UVM_HIER)
-     foreach (blks[blk_]) begin
+     foreach (blks[blk_]) begin // UNSAFE ORDER
        uvm_reg_block blk = blk_;
        blk.get_memories(mems);
      end
@@ -1228,7 +1228,7 @@ endfunction: get_memories
 function void uvm_reg_block::get_blocks(ref uvm_reg_block blks[$],
                                         input uvm_hier_e hier=UVM_HIER);
 
-   foreach (this.blks[blk_]) begin
+   foreach (this.blks[blk_]) begin // UNSAFE ORDER
      uvm_reg_block blk = blk_;
      blks.push_back(blk);
      if (hier == UVM_HIER)
@@ -1242,7 +1242,7 @@ endfunction: get_blocks
 
 function void uvm_reg_block::get_root_blocks(ref uvm_reg_block blks[$]);
 
-   foreach (m_roots[blk]) begin
+   foreach (m_roots[blk]) begin // UNSAFE ORDER
       blks.push_back(blk);
    end
 
@@ -1298,7 +1298,7 @@ endfunction
 
 function void uvm_reg_block::get_maps(ref uvm_reg_map maps[$]);
 
-   foreach (this.maps[map])
+   foreach (this.maps[map]) // UNSAFE ORDER
      maps.push_back(map);
 
 endfunction
@@ -1322,19 +1322,19 @@ function uvm_reg_block uvm_reg_block::get_block_by_name(string name);
    if (get_name() == name)
      return this;
 
-   foreach (blks[blk_]) begin
+   foreach (blks[blk_]) begin // UNSAFE ORDER if multiple maps can have the same name
      uvm_reg_block blk = blk_;
 
      if (blk.get_name() == name)
        return blk;
    end
 
-   foreach (blks[blk_]) begin
+   foreach (blks[blk_]) begin // UNSAFE ORDER same block name exists in multiple block subtrees 
       uvm_reg_block blk = blk_;
       uvm_reg_block subblks[$];
       blk_.get_blocks(subblks, UVM_HIER);
 
-      foreach (subblks[j])
+      foreach (subblks[j]) 
          if (subblks[j].get_name() == name)
             return subblks[j];
    end
@@ -1350,13 +1350,13 @@ endfunction: get_block_by_name
 
 function uvm_reg uvm_reg_block::get_reg_by_name(string name);
 
-   foreach (regs[rg_]) begin
+   foreach (regs[rg_]) begin // UNSAFE ORDER if multiple regs have the same name
      uvm_reg rg = rg_;
      if (rg.get_name() == name)
        return rg;
    end
 
-   foreach (blks[blk_]) begin
+   foreach (blks[blk_]) begin // UNSAFE ORDER when reg with identical names exist in distint block subtrees
       uvm_reg_block blk = blk_;
       uvm_reg subregs[$];
       blk_.get_registers(subregs, UVM_HIER);
@@ -1377,18 +1377,18 @@ endfunction: get_reg_by_name
 
 function uvm_vreg uvm_reg_block::get_vreg_by_name(string name);
 
-   foreach (vregs[rg_]) begin
+   foreach (vregs[rg_]) begin // UNSAFE ORDER if multiple rvegs have the same name
      uvm_vreg rg = rg_;
      if (rg.get_name() == name)
        return rg;
    end
 
-   foreach (blks[blk_]) begin
+   foreach (blks[blk_]) begin // UNSAFE ORDER
       uvm_reg_block blk = blk_;
       uvm_vreg subvregs[$];
       blk_.get_virtual_registers(subvregs, UVM_HIER);
 
-      foreach (subvregs[j])
+      foreach (subvregs[j]) 
          if (subvregs[j].get_name() == name)
             return subvregs[j];
    end
@@ -1404,18 +1404,18 @@ endfunction: get_vreg_by_name
 
 function uvm_mem uvm_reg_block::get_mem_by_name(string name);
 
-   foreach (mems[mem_]) begin
+   foreach (mems[mem_]) begin // UNSAFE ORDER if multiple mems have the same name
      uvm_mem mem = mem_;
      if (mem.get_name() == name)
        return mem;
    end
 
-   foreach (blks[blk_]) begin
+   foreach (blks[blk_]) begin // UNSAFE ORDER 
       uvm_reg_block blk = blk_;
       uvm_mem submems[$];
       blk_.get_memories(submems, UVM_HIER);
 
-      foreach (submems[j])
+      foreach (submems[j]) 
          if (submems[j].get_name() == name)
             return submems[j];
    end
@@ -1431,25 +1431,25 @@ endfunction: get_mem_by_name
 
 function uvm_reg_field uvm_reg_block::get_field_by_name(string name);
 
-   foreach (regs[rg_]) begin
+   foreach (regs[rg_]) begin // UNSAFE ORDER 
       uvm_reg rg = rg_;
       uvm_reg_field fields[$];
 
       rg.get_fields(fields);
-      foreach (fields[i])
+      foreach (fields[i]) 
         if (fields[i].get_name() == name)
           return fields[i];
    end
 
-   foreach (blks[blk_]) begin
+   foreach (blks[blk_]) begin // UNSAFE ORDER 
       uvm_reg_block blk = blk_;
       uvm_reg subregs[$];
       blk_.get_registers(subregs, UVM_HIER);
 
-      foreach (subregs[j]) begin
+      foreach (subregs[j]) begin 
          uvm_reg_field fields[$];
          subregs[j].get_fields(fields);
-         foreach (fields[i])
+         foreach (fields[i]) 
             if (fields[i].get_name() == name)
                return fields[i];
       end
@@ -1467,22 +1467,22 @@ endfunction: get_field_by_name
 
 function uvm_vreg_field uvm_reg_block::get_vfield_by_name(string name);
 
-   foreach (vregs[rg_]) begin
+   foreach (vregs[rg_]) begin // UNSAFE ORDER 
       uvm_vreg rg =rg_;
       uvm_vreg_field fields[$];
 
       rg.get_fields(fields);
-      foreach (fields[i])
+      foreach (fields[i]) 
         if (fields[i].get_name() == name)
           return fields[i];
    end
 
-   foreach (blks[blk_]) begin
+   foreach (blks[blk_]) begin // UNSAFE ORDER 
       uvm_reg_block blk = blk_;
       uvm_vreg subvregs[$];
       blk_.get_virtual_registers(subvregs, UVM_HIER);
 
-      foreach (subvregs[j]) begin
+      foreach (subvregs[j]) begin 
          uvm_vreg_field fields[$];
          subvregs[j].get_fields(fields);
          foreach (fields[i])
@@ -1646,7 +1646,7 @@ task uvm_reg_block::update(output uvm_status_e  status,
    `uvm_info("RegModel", $sformatf("%s:%0d - Updating model block %s with %s path",
                     fname, lineno, this.get_name(), path.name ), UVM_HIGH);
 
-   foreach (regs[rg_]) begin
+   foreach (regs[rg_]) begin // UNSAFE ORDER
       uvm_reg rg = rg_;
       if (rg.needs_update()) begin
          rg.update(status, path, null, parent, prior, extension);
@@ -1658,7 +1658,7 @@ task uvm_reg_block::update(output uvm_status_e  status,
       end
    end
 
-   foreach (blks[blk_]) begin
+   foreach (blks[blk_]) begin // UNSAFE ORDER
      uvm_reg_block blk = blk_;
      blk.update(status,path,parent,prior,extension,fname,lineno);
    end
@@ -1677,7 +1677,7 @@ task uvm_reg_block::mirror(output uvm_status_e       status,
                            input  int                lineno = 0);
    uvm_status_e final_status = UVM_IS_OK;
 
-   foreach (regs[rg_]) begin 
+   foreach (regs[rg_]) begin //UNSAFE ORDER
       uvm_reg rg = rg_;
       rg.mirror(status, check, path, null,
                 parent, prior, extension, fname, lineno);
@@ -1686,7 +1686,7 @@ task uvm_reg_block::mirror(output uvm_status_e       status,
       end
    end
 
-   foreach (blks[blk_]) begin
+   foreach (blks[blk_]) begin // UNSAFE ORDER
       uvm_reg_block blk = blk_;
 
       blk.mirror(status, check, path, parent, prior, extension, fname, lineno);
@@ -2132,31 +2132,31 @@ endfunction
 function void uvm_reg_block::do_print (uvm_printer printer);
   super.do_print(printer);
 
-  foreach(blks[i]) begin
+  foreach(blks[i]) begin // UNSAFE ORDER
      uvm_reg_block b = i;
      uvm_object obj = b;
      printer.print_object(obj.get_name(), obj);
   end
    
-  foreach(regs[i]) begin
+  foreach(regs[i]) begin // UNSAFE ORDER
      uvm_reg r = i;
      uvm_object obj = r;
      printer.print_object(obj.get_name(), obj);
   end
 
-  foreach(vregs[i]) begin
+  foreach(vregs[i]) begin // UNSAFE ORDER
      uvm_vreg r = i;
      uvm_object obj = r;
      printer.print_object(obj.get_name(), obj);
   end
 
-  foreach(mems[i]) begin
+  foreach(mems[i]) begin // UNSAFE ORDER
      uvm_mem m = i;
      uvm_object obj = m;
      printer.print_object(obj.get_name(), obj);
   end
 
-  foreach(maps[i]) begin
+  foreach(maps[i]) begin // UNSAFE ORDER
      uvm_reg_map m = i;
      uvm_object obj = m;
      printer.print_object(obj.get_name(), obj);

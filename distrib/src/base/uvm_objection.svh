@@ -659,7 +659,7 @@ class uvm_objection extends uvm_report_object;
     end
 
     // running drains have a context and a process
-    foreach (m_forked_contexts[o]) begin
+    foreach (m_forked_contexts[o]) begin // UNSAFE ORDER
 `ifndef UVM_USE_PROCESS_CONTAINER       
         m_drain_proc[o].kill();
         m_drain_proc.delete(o);
@@ -884,7 +884,7 @@ class uvm_objection extends uvm_report_object;
 
   function void get_objectors(ref uvm_object list[$]);
     list.delete();
-    foreach (m_source_count[obj]) list.push_back(obj); 
+    foreach (m_source_count[obj]) list.push_back(obj); // UNSAFE ORDER
   endfunction
 
 

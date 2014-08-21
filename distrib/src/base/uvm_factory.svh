@@ -1529,7 +1529,7 @@ function void uvm_default_factory::print (int all_types=1);
   uvm_object_wrapper obj;
 
   //sort the override queues
-  foreach (m_inst_override_queues[i]) begin
+  foreach (m_inst_override_queues[i]) begin // UNSAFE ORDER
     obj = i;
     tmp = obj.get_type_name();
     if(tmp == "") $swrite(tmp, "__unnamed_id_%0d", id++);
