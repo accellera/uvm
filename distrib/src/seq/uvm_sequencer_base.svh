@@ -668,41 +668,31 @@ function void uvm_sequencer_base::grant_queued_locks();
 		remove_sequence_from_queues(q[idx].sequence_ptr);
 	  end	
   end
-  
-  // now move all is_blocked() into lock_list
   begin
-	uvm_sequence_request leading_lock_reqs[$],blocked_seqs[$],not_blocked_seqs[$];  
-	int q1[$];
-	int b=arb_sequence_q.size(); // index for first non-LOCK request
-	q1 = arb_sequence_q.find_first_index(item) with (item.request!=SEQ_TYPE_LOCK);
-	if(q1.size())
-		b=q1[0];  
-	if(b!=0) begin // at least one lock
-		leading_lock_reqs = arb_sequence_q[0:b-1]; // set of locks; arb_sequence[b] is the first req!=SEQ_TYPE_LOCK	
-		// split into blocked/not-blocked requests
-		foreach(leading_lock_reqs[i]) begin
-			uvm_sequence_request item = leading_lock_reqs[i];
-			if(is_blocked(item.sequence_ptr)!=0)
-				blocked_seqs.push_back(item);
-			else begin
-				not_blocked_seqs.push_back(item);
-			        lock_list.push_back(item.sequence_ptr);  
-			end
-		end
-		
-		if(b>arb_sequence_q.size()-1)
-			arb_sequence_q=blocked_seqs;
-		  else
-			arb_sequence_q={blocked_seqs,arb_sequence_q[b:arb_sequence_q.size()-1]};
-	  
-		foreach(not_blocked_seqs[idx]) begin
-			m_set_arbitration_completed(not_blocked_seqs[idx].request_id);
-		end
+   int not_blocked_seqs_idx[$];
 	
-		// trigger listeners if lock list has changed
-		if(not_blocked_seqs.size()) 	
-			m_update_lists();	
-	end	
+   foreach(arb_sequence_q[i]) begin
+      uvm_sequence_request item  = arb_sequence_q[i];
+      if(is_blocked(item.sequence_ptr) == 0) begin
+         if(item.request == SEQ_TYPE_LOCK) begin
+            not_blocked_seqs_idx.push_front(i); // push front so that when we delete we delete from back to front
+            lock_list.push_back(item.sequence_ptr); 
+            m_set_arbitration_completed(arb_sequence_q[i].request_id);
+         end
+         else begin
+            break;
+         end
+      end
+   end
+   
+   foreach(not_blocked_seqs_idx[i]) begin
+      arb_sequence_q.delete(not_blocked_seqs_idx[i]);
+   end
+   
+   // trigger listeners if lock list has changed
+   if(not_blocked_seqs_idx.size())
+      m_update_lists();	
+      
   end
 endfunction
 
