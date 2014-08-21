@@ -684,8 +684,10 @@ function void uvm_sequencer_base::grant_queued_locks();
 			uvm_sequence_request item = leading_lock_reqs[i];
 			if(is_blocked(item.sequence_ptr)!=0)
 				blocked_seqs.push_back(item);
-			else
+			else begin
 				not_blocked_seqs.push_back(item);
+			        lock_list.push_back(item.sequence_ptr);  
+			end
 		end
 		
 		if(b>arb_sequence_q.size()-1)
@@ -694,7 +696,6 @@ function void uvm_sequencer_base::grant_queued_locks();
 			arb_sequence_q={blocked_seqs,arb_sequence_q[b:arb_sequence_q.size()-1]};
 	  
 		foreach(not_blocked_seqs[idx]) begin
-			lock_list.push_back(not_blocked_seqs[idx].sequence_ptr);  
 			m_set_arbitration_completed(not_blocked_seqs[idx].request_id);
 		end
 	
