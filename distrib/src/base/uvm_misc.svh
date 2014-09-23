@@ -660,7 +660,7 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
         types.push_back(typ);
     end
     if (types.size() == 0) begin
-      `uvm_warning("find_type-no match",{"Instance of type '",TYPE::type_name,
+      `uvm_warning("find_type-no match",{"Instance of type '",`uvm_typename(TYPE),
          " not found in component hierarchy beginning at ",start.get_full_name()})
     end
     return types;
@@ -671,7 +671,7 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
     if (types.size() == 0)
       return null;
     if (types.size() > 1) begin
-      `uvm_warning("find_type-multi match",{"More than one instance of type '",TYPE::type_name,
+      `uvm_warning("find_type-multi match",{"More than one instance of type '",`uvm_typename(TYPE),
          " found in component hierarchy beginning at ",start.get_full_name()})
       return null;
     end
@@ -719,12 +719,12 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
       if (is_fatal)
         comp.uvm_report_fatal( "GET_CFG_TYPE_FAIL",
                           {"set_config_object with field name ",FIELD,
-                          " is not of type '",TYPE::type_name,"'"},
+                          " is not of type '",`uvm_typename(TYPE),"'"},
                           UVM_NONE , `uvm_file , `uvm_line );
       else
         comp.uvm_report_warning( "GET_CFG_TYPE_FAIL",
                           {"set_config_object with field name ",FIELD,
-                          " is not of type '",TYPE::type_name,"'"},
+                          " is not of type '",`uvm_typename(TYPE),"'"},
                           UVM_NONE , `uvm_file , `uvm_line );
     end
 
