@@ -419,6 +419,9 @@ task uvm_root::run_test(string test_name="");
   // Needs to be done in run_test since it needs to be in an
   // initial block to fork a process.
   uvm_objection::m_init_objections();
+  
+// dump cmdline args BEFORE the args are being used
+  m_do_dump_args();
 
 `ifndef UVM_NO_DPI
 
@@ -648,7 +651,6 @@ function void uvm_root::build_phase(uvm_phase phase);
   m_do_factory_settings();
   m_do_config_settings();
   m_do_max_quit_settings();
-  m_do_dump_args();
 
 endfunction
 
