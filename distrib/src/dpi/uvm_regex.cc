@@ -27,6 +27,7 @@ const char uvm_re_bracket_char = '/';
 #define UVM_REGEX_MAX_LENGTH 2048
 static char uvm_re[UVM_REGEX_MAX_LENGTH+4];
 
+static const char* empty_regex="/^$/";
 
 //--------------------------------------------------------------------
 // uvm_re_match
@@ -150,8 +151,7 @@ const char * uvm_glob_to_re(const char *glob)
   //      uvm_re_bracket_char  (i.e. "/")
   if(len == 0 || (len == 1 && *glob == uvm_re_bracket_char))
   {
-    uvm_re[0] = '\0';
-    return &uvm_re[0];  // return an empty string
+    return empty_regex;
   }
 
   // If bracketed with the /glob/, then it's already a regex
