@@ -2202,10 +2202,7 @@ endfunction
 // clone
 
 function uvm_object uvm_reg_map::clone();
-  //uvm_rap_map me;
-  //me = new this;
-  //return me;
-  return null;
+   `uvm_fatal("RegModel","uvm_reg_map doesnt support clone()")
 endfunction
 
 
