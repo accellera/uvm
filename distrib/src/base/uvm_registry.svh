@@ -67,9 +67,6 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
     return obj;
   endfunction
 
-
-  const static string type_name = Tname;
-
   // Function: get_type_name
   //
   // Returns the value given by the string parameter, ~Tname~. This method
@@ -115,8 +112,8 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
     obj = factory.create_component_by_type(get(),contxt,name,parent);
     if (!$cast(create, obj)) begin
       string msg;
-      msg = {"Factory did not return a component of type '",type_name,
-        "'. A component of type '",obj == null ? "null" : obj.get_type_name(),
+      msg = {"Factory did not return a component of type '",`uvm_typename(T),
+        "'. A component of type '",obj == null ? "null" : `uvm_typename(obj),
         "' was returned instead. Name=",name," Parent=",
         parent==null?"null":parent.get_type_name()," contxt=",contxt};
       uvm_report_fatal("FCTTYP", msg, UVM_NONE);
@@ -210,8 +207,6 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
     return obj;
   endfunction
 
-  const static string type_name = Tname;
-
   // Function: get_type_name
   //
   // Returns the value given by the string parameter, ~Tname~. This method
@@ -258,8 +253,8 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
     obj = factory.create_object_by_type(get(),contxt,name);
     if (!$cast(create, obj)) begin
       string msg;
-      msg = {"Factory did not return an object of type '",type_name,
-        "'. A component of type '",obj == null ? "null" : obj.get_type_name(),
+      msg = {"Factory did not return an object of type '",`uvm_typename(T),
+        "'. A component of type '",obj == null ? "null" : `uvm_typename(obj),
         "' was returned instead. Name=",name," Parent=",
         parent==null?"null":parent.get_type_name()," contxt=",contxt};
       uvm_report_fatal("FCTTYP", msg, UVM_NONE);

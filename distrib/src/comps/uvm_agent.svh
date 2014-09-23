@@ -114,10 +114,8 @@ virtual class uvm_agent extends uvm_component;
      
   endfunction
 
-  const static string type_name = "uvm_agent";
-
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_agent";
   endfunction
 
   // Function: get_is_active

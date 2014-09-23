@@ -92,10 +92,8 @@ virtual class bus_driver_cb extends uvm_callback;
     super.new(name);
   endfunction
 
-  static string type_name = "bus_driver_cb";
-
   virtual function string get_type_name();
-    return type_name;
+    return "bus_driver_cb";
   endfunction
 
 endclass
@@ -130,10 +128,8 @@ class bus_driver extends uvm_component;
     in = new("in",this);
   endfunction
 
-  static string type_name = "bus_driver";
-
   virtual function string get_type_name();
-    return type_name;
+    return "bus_driver";
   endfunction
 
   virtual function bit trans_received(bus_tr tr);

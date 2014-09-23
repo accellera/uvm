@@ -47,8 +47,6 @@ class uvm_tlm_req_rsp_channel #(type REQ=int, type RSP=REQ) extends uvm_componen
 
   typedef uvm_tlm_req_rsp_channel #(REQ, RSP) this_type;
 
-  const static string type_name = "uvm_tlm_req_rsp_channel #(REQ,RSP)";
-
   // Port: put_request_export
   //
   // The put_export provides both the blocking and non-blocking put interface
@@ -272,7 +270,7 @@ class uvm_tlm_req_rsp_channel #(type REQ=int, type RSP=REQ) extends uvm_componen
   // -------------
 
   function string get_type_name ();
-    return type_name;
+    return "uvm_tlm_req_rsp_channel #(REQ,RSP)";
   endfunction
 
 

@@ -43,7 +43,6 @@
               comp_.``PHASE``_phase(phase); \
           endtask \
           local static PREFIX``PHASE``_phase m_inst; \
-          static const string type_name = `"PREFIX``PHASE``_phase`"; \
           static function PREFIX``PHASE``_phase get(); \
             if(m_inst == null) begin \
               m_inst = new; \
@@ -54,7 +53,7 @@
             super.new(name); \
           endfunction \
           virtual function string get_type_name(); \
-            return type_name; \
+            return `"PREFIX``PHASE``_phase`"; \
           endfunction \
         endclass \
         //PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
@@ -67,7 +66,6 @@
               comp_.``PHASE``_phase(phase); \
           endfunction \
           local static PREFIX``PHASE``_phase m_inst; \
-          static const string type_name = `"PREFIX``PHASE``_phase`"; \
           static function PREFIX``PHASE``_phase get(); \
             if(m_inst == null) begin \
               m_inst = new(); \
@@ -78,7 +76,7 @@
             super.new(name); \
           endfunction \
           virtual function string get_type_name(); \
-            return type_name; \
+            return `"PREFIX``PHASE``_phase`"; \
           endfunction \
         endclass \
         //PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
@@ -91,7 +89,6 @@
               comp_.``PHASE``_phase(phase); \
           endfunction \
           static PREFIX``PHASE``_phase m_inst; \
-          static const string type_name = `"PREFIX``PHASE``_phase`"; \
           static function PREFIX``PHASE``_phase get(); \
             if(m_inst == null) begin \
               m_inst = new(); \
@@ -102,7 +99,7 @@
             super.new(name); \
           endfunction \
           virtual function string get_type_name(); \
-            return type_name; \
+            return `"PREFIX``PHASE``_phase`"; \
           endfunction \
         endclass \
         //PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();

@@ -78,10 +78,8 @@ class uvm_driver #(type REQ=uvm_sequence_item,
     seq_item_prod_if = seq_item_port;
   endfunction // new
 
-  const static string type_name = "uvm_driver #(REQ,RSP)";
-
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_driver #(REQ,RSP)";
   endfunction
 
 endclass

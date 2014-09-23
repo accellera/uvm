@@ -76,7 +76,6 @@ class uvm_pre_reset_phase extends uvm_task_phase;
       comp.pre_reset_phase(phase); 
    endtask
    local static uvm_pre_reset_phase m_inst; 
-   static const string type_name = "uvm_pre_reset_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -89,7 +88,7 @@ class uvm_pre_reset_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_pre_reset_phase"; 
    endfunction
 endclass
 
@@ -124,7 +123,6 @@ class uvm_reset_phase extends uvm_task_phase;
       comp.reset_phase(phase); 
    endtask
    local static uvm_reset_phase m_inst; 
-   static const string type_name = "uvm_reset_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -137,7 +135,7 @@ class uvm_reset_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_reset_phase"; 
    endfunction
 endclass
 
@@ -165,7 +163,6 @@ class uvm_post_reset_phase extends uvm_task_phase;
       comp.post_reset_phase(phase); 
    endtask
    local static uvm_post_reset_phase m_inst; 
-   static const string type_name = "uvm_post_reset_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -178,7 +175,7 @@ class uvm_post_reset_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_post_reset_phase"; 
    endfunction
 endclass
 
@@ -208,7 +205,6 @@ class uvm_pre_configure_phase extends uvm_task_phase;
       comp.pre_configure_phase(phase); 
    endtask
    local static uvm_pre_configure_phase m_inst; 
-   static const string type_name = "uvm_pre_configure_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -221,7 +217,7 @@ class uvm_pre_configure_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_pre_configure_phase"; 
    endfunction
 endclass
 
@@ -250,7 +246,6 @@ class uvm_configure_phase extends uvm_task_phase;
       comp.configure_phase(phase); 
    endtask
    local static uvm_configure_phase m_inst; 
-   static const string type_name = "uvm_configure_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -263,7 +258,7 @@ class uvm_configure_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_configure_phase"; 
    endfunction
 endclass
 
@@ -292,7 +287,6 @@ class uvm_post_configure_phase extends uvm_task_phase;
       comp.post_configure_phase(phase); 
    endtask
    local static uvm_post_configure_phase m_inst; 
-   static const string type_name = "uvm_post_configure_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -305,7 +299,7 @@ class uvm_post_configure_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_post_configure_phase"; 
    endfunction
 endclass
 
@@ -331,7 +325,6 @@ class uvm_pre_main_phase extends uvm_task_phase;
       comp.pre_main_phase(phase); 
    endtask
    local static uvm_pre_main_phase m_inst; 
-   static const string type_name = "uvm_pre_main_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -344,7 +337,7 @@ class uvm_pre_main_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_pre_main_phase"; 
    endfunction
 endclass
 
@@ -374,7 +367,6 @@ class uvm_main_phase extends uvm_task_phase;
       comp.main_phase(phase); 
    endtask
    local static uvm_main_phase m_inst; 
-   static const string type_name = "uvm_main_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -387,7 +379,7 @@ class uvm_main_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_main_phase"; 
    endfunction
 endclass
 
@@ -413,8 +405,7 @@ class uvm_post_main_phase extends uvm_task_phase;
       comp.post_main_phase(phase); 
    endtask
    local static uvm_post_main_phase m_inst; 
-   static const string type_name = "uvm_post_main_phase"; 
-
+ 
    // Function: get
    // Returns the singleton phase handle 
    static function uvm_post_main_phase get(); 
@@ -426,7 +417,7 @@ class uvm_post_main_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_post_main_phase"; 
    endfunction
 endclass
 
@@ -452,7 +443,6 @@ class uvm_pre_shutdown_phase extends uvm_task_phase;
       comp.pre_shutdown_phase(phase); 
    endtask
    local static uvm_pre_shutdown_phase m_inst; 
-   static const string type_name = "uvm_pre_shutdown_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -465,7 +455,7 @@ class uvm_pre_shutdown_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_pre_shutdown_phase"; 
    endfunction
 endclass
 
@@ -494,7 +484,6 @@ class uvm_shutdown_phase extends uvm_task_phase;
       comp.shutdown_phase(phase); 
    endtask
    local static uvm_shutdown_phase m_inst; 
-   static const string type_name = "uvm_shutdown_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -507,7 +496,7 @@ class uvm_shutdown_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_shutdown_phase"; 
    endfunction
 endclass
 
@@ -537,7 +526,6 @@ class uvm_post_shutdown_phase extends uvm_task_phase;
       comp.post_shutdown_phase(phase); 
    endtask
    local static uvm_post_shutdown_phase m_inst; 
-   static const string type_name = "uvm_post_shutdown_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -550,6 +538,6 @@ class uvm_post_shutdown_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_post_shutdown_phase"; 
    endfunction
 endclass

@@ -86,10 +86,8 @@ class uvm_push_driver #(type REQ=uvm_sequence_item,
     uvm_report_fatal("UVM_PUSH_DRIVER", "Put task for push driver is not implemented", UVM_NONE);
   endtask
 
-  const static string type_name = "uvm_push_driver #(REQ,RSP)";
-
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_push_driver #(REQ,RSP)";
   endfunction
 
 endclass

@@ -71,10 +71,8 @@ virtual class uvm_test extends uvm_component;
     super.new(name,parent);
   endfunction
 
-  const static string type_name = "uvm_test";
-
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_test";
   endfunction
 
 endclass

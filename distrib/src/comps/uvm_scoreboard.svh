@@ -45,10 +45,8 @@ virtual class uvm_scoreboard extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  const static string type_name = "uvm_scoreboard";
-
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_scoreboard";
   endfunction
 
 endclass

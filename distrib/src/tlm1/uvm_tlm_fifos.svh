@@ -45,8 +45,6 @@ typedef class uvm_tlm_event;
 
 class uvm_tlm_fifo #(type T=int) extends uvm_tlm_fifo_base #(T);
 
-  const static string type_name = "uvm_tlm_fifo #(T)";
-
   local mailbox #( T ) m;
   local int m_size;
   protected int m_pending_blocked_gets;
@@ -66,7 +64,7 @@ class uvm_tlm_fifo #(type T=int) extends uvm_tlm_fifo_base #(T);
   endfunction
 
   virtual function string get_type_name();
-    return type_name;
+    return "uvm_tlm_fifo #(T)";
   endfunction
 
 
@@ -225,10 +223,8 @@ class uvm_tlm_analysis_fifo #(type T = int) extends uvm_tlm_fifo #(T);
     analysis_export = new("analysis_export", this);
   endfunction
 
-  const static string type_name = "uvm_tlm_analysis_fifo #(T)";
-
   virtual function string get_type_name();
-    return type_name;
+    return "uvm_tlm_analysis_fifo #(T)";
   endfunction
 
   function void write(input T t);

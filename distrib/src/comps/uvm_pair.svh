@@ -39,8 +39,6 @@ class uvm_class_pair #(type T1=int, T2=T1) extends uvm_object;
   typedef uvm_class_pair #(T1, T2 ) this_type;
 
   `uvm_object_param_utils(this_type)
-  
-  const static string type_name = "uvm_class_pair #(T1,T2)";
 
 // Variable: T1 first
 //
@@ -76,7 +74,7 @@ class uvm_class_pair #(type T1=int, T2=T1) extends uvm_object;
   endfunction  
   
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_class_pair #(T1,T2)";
   endfunction
 
   virtual function string convert2string;
@@ -117,8 +115,6 @@ class uvm_built_in_pair #(type T1=int, T2=T1) extends uvm_object;
   typedef uvm_built_in_pair #(T1,T2) this_type;
 
   `uvm_object_param_utils(this_type)
-  
-  const static string type_name = "uvm_built_in_pair #(T1,T2)";
 
 // Variable: T1 first
 //
@@ -142,7 +138,7 @@ class uvm_built_in_pair #(type T1=int, T2=T1) extends uvm_object;
   endfunction  
   
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_built_in_pair #(T1,T2)";
   endfunction
 
   virtual function string convert2string;

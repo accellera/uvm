@@ -65,7 +65,6 @@ class uvm_build_phase extends uvm_topdown_phase;
       comp.build_phase(phase); 
    endfunction
    local static uvm_build_phase m_inst;
-   static const string type_name = "uvm_build_phase";
 
    // Function: get
    // Returns the singleton phase handle
@@ -79,7 +78,7 @@ class uvm_build_phase extends uvm_topdown_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name();
-      return type_name;
+      return "uvm_build_phase";
    endfunction
 endclass
 
@@ -111,7 +110,6 @@ class uvm_connect_phase extends uvm_bottomup_phase;
       comp.connect_phase(phase); 
    endfunction
    local static uvm_connect_phase m_inst;
-   static const string type_name = "uvm_connect_phase";
 
    // Function: get
    // Returns the singleton phase handle 
@@ -124,7 +122,7 @@ class uvm_connect_phase extends uvm_bottomup_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name();
-      return type_name;
+      return "uvm_connect_phase";
    endfunction
 endclass
 
@@ -153,7 +151,6 @@ class uvm_end_of_elaboration_phase extends uvm_bottomup_phase;
       comp.end_of_elaboration_phase(phase); 
    endfunction
    local static uvm_end_of_elaboration_phase m_inst;
-   static const string type_name = "uvm_end_of_elaboration_phase";
 
    // Function: get
    // Returns the singleton phase handle 
@@ -167,7 +164,7 @@ class uvm_end_of_elaboration_phase extends uvm_bottomup_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name();
-      return type_name;
+      return "uvm_end_of_elaboration_phase";
    endfunction
 endclass
 
@@ -200,7 +197,6 @@ class uvm_start_of_simulation_phase extends uvm_bottomup_phase;
       comp.start_of_simulation_phase(phase); 
    endfunction
    local static uvm_start_of_simulation_phase m_inst;
-   static const string type_name = "uvm_start_of_simulation_phase";
 
    // Function: get
    // Returns the singleton phase handle 
@@ -213,7 +209,7 @@ class uvm_start_of_simulation_phase extends uvm_bottomup_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name();
-      return type_name;
+      return "uvm_start_of_simulation_phase";
    endfunction
 endclass
 
@@ -269,7 +265,6 @@ class uvm_run_phase extends uvm_task_phase;
       comp.run_phase(phase); 
    endtask
    local static uvm_run_phase m_inst; 
-   static const string type_name = "uvm_run_phase"; 
 
    // Function: get
    // Returns the singleton phase handle 
@@ -282,7 +277,7 @@ class uvm_run_phase extends uvm_task_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
-      return type_name; 
+      return "uvm_run_phase"; 
    endfunction
 endclass
 
@@ -315,7 +310,6 @@ class uvm_extract_phase extends uvm_bottomup_phase;
       comp.extract_phase(phase); 
    endfunction
    local static uvm_extract_phase m_inst;
-   static const string type_name = "uvm_extract_phase";
 
    // Function: get
    // Returns the singleton phase handle 
@@ -328,7 +322,7 @@ class uvm_extract_phase extends uvm_bottomup_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name();
-      return type_name;
+      return "uvm_extract_phase";
    endfunction
 endclass
 
@@ -353,7 +347,6 @@ class uvm_check_phase extends uvm_bottomup_phase;
       comp.check_phase(phase); 
    endfunction
    local static uvm_check_phase m_inst;
-   static const string type_name = "uvm_check_phase";
 
    // Function: get
    // Returns the singleton phase handle 
@@ -366,7 +359,7 @@ class uvm_check_phase extends uvm_bottomup_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name();
-      return type_name;
+      return "uvm_check_phase";
    endfunction
 endclass
 
@@ -392,7 +385,6 @@ class uvm_report_phase extends uvm_bottomup_phase;
       comp.report_phase(phase); 
    endfunction
    local static uvm_report_phase m_inst;
-   static const string type_name = "uvm_report_phase";
 
    // Function: get
    // Returns the singleton phase handle 
@@ -405,7 +397,7 @@ class uvm_report_phase extends uvm_bottomup_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name();
-      return type_name;
+      return "uvm_report_phase";
    endfunction
 endclass
 
@@ -433,7 +425,6 @@ class uvm_final_phase extends uvm_topdown_phase;
       comp.final_phase(phase); 
    endfunction
    local static uvm_final_phase m_inst;
-   static const string type_name = "uvm_final_phase";
 
    // Function: get
    // Returns the singleton phase handle 
@@ -446,6 +437,6 @@ class uvm_final_phase extends uvm_topdown_phase;
       super.new(name); 
    endfunction
    virtual function string get_type_name();
-      return type_name;
+      return "uvm_final_phase";
    endfunction
 endclass

@@ -79,8 +79,6 @@ class uvm_in_order_comparator
   typedef uvm_in_order_comparator #(T,comp_type,convert,pair_type) this_type;
   `uvm_component_param_utils(this_type)
 
-  const static string type_name = 
-    "uvm_in_order_comparator #(T,comp_type,convert,pair_type)";
 
   // Port: before_export
   //
@@ -127,7 +125,7 @@ class uvm_in_order_comparator
   endfunction
   
   virtual function string get_type_name();
-    return type_name;
+    return "uvm_in_order_comparator #(T,comp_type,convert,pair_type)";
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);
@@ -214,14 +212,12 @@ class uvm_in_order_built_in_comparator #(type T=int)
   typedef uvm_in_order_built_in_comparator #(T) this_type;
   `uvm_component_param_utils(this_type)
 
-  const static string type_name = "uvm_in_order_built_in_comparator #(T)";
-
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction
   
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_in_order_built_in_comparator #(T)";
   endfunction
 
 endclass
@@ -246,14 +242,12 @@ class uvm_in_order_class_comparator #( type T = int )
   typedef uvm_in_order_class_comparator #(T) this_type;
   `uvm_component_param_utils(this_type)
 
-  const static string type_name = "uvm_in_order_class_comparator #(T)";
-
   function new( string name  , uvm_component parent);
     super.new( name, parent );
   endfunction
   
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_in_order_class_comparator #(T)";
   endfunction
 
 endclass

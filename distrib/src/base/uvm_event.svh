@@ -32,7 +32,6 @@
 //------------------------------------------------------------------------------
 
 virtual class uvm_event_base extends uvm_object;
-	const static string type_name = "uvm_event_base";
 	protected event      m_event;
 	protected int        num_waiters;
 	protected bit        on;
@@ -208,7 +207,7 @@ virtual class uvm_event_base extends uvm_object;
 
 
 	virtual function string get_type_name();
-		return type_name;
+		return "uvm_event_base";
 	endfunction
 
 
@@ -252,8 +251,6 @@ endclass
 //------------------------------------------------------------------------------
 
 class uvm_event#(type T=uvm_object) extends uvm_event_base;
-
-	const static string type_name = "uvm_event";
 
 	local T trigger_data;
 
@@ -331,7 +328,7 @@ class uvm_event#(type T=uvm_object) extends uvm_event_base;
 	endfunction
 
 	virtual function string get_type_name();
-		return type_name;
+		return "uvm_event";
 	endfunction
 	
 		//-----------//

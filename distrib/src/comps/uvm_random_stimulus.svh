@@ -44,8 +44,6 @@
 
 class uvm_random_stimulus #(type T=uvm_transaction) extends uvm_component;
 
-  const static string type_name = "uvm_random_stimulus #(T)";
-
   typedef uvm_random_stimulus #(T) this_type;
   `uvm_component_param_utils(this_type)
 
@@ -125,7 +123,7 @@ class uvm_random_stimulus #(type T=uvm_transaction) extends uvm_component;
   
 
   virtual function string get_type_name();
-    return type_name;
+    return "uvm_random_stimulus #(T)";
   endfunction
 
 endclass : uvm_random_stimulus

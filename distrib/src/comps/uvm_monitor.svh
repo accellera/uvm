@@ -43,10 +43,8 @@ virtual class uvm_monitor extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  const static string type_name = "uvm_monitor";
-
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_monitor";
   endfunction
 
 endclass

@@ -35,8 +35,6 @@
 
 class uvm_queue #(type T=int) extends uvm_object;
 
-  const static string type_name = "uvm_queue";
-
   typedef uvm_queue #(T) this_type;
 
   static local this_type m_global_queue;
@@ -180,7 +178,7 @@ class uvm_queue #(type T=int) extends uvm_object;
   endfunction
 
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_queue";
   endfunction
 
   virtual function void do_copy (uvm_object rhs);

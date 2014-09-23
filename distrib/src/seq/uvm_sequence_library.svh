@@ -74,8 +74,9 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    //
    // Get the type name of this class
    //
-   extern virtual function string get_type_name();
-
+   virtual function string get_type_name();
+      return "uvm_sequence_library #(REQ,RSP)";
+   endfunction
 
 
    //--------------------------
@@ -329,7 +330,6 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    `uvm_object_param_utils(uvm_sequence_library #(REQ,RSP))
    typedef uvm_sequence_library #(REQ,RSP) this_type;
 
-   static const string type_name = "uvm_sequence_library #(REQ,RSP)";
    static protected uvm_object_wrapper m_typewide_sequences[$];
    bit m_abort;
 
@@ -395,14 +395,6 @@ function uvm_sequence_library::new(string name="");
    init_sequence_library();
    valid_rand_selection.constraint_mode(0);
    valid_randc_selection.constraint_mode(0);
-endfunction
-
-
-// get_type_name
-// -------------
-
-function string uvm_sequence_library::get_type_name();
-  return type_name;
 endfunction
 
 

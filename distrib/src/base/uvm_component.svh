@@ -1663,9 +1663,8 @@ virtual class uvm_component extends uvm_report_object;
 
   string m_name;
 
-  const static string type_name = "uvm_component";
   virtual function string get_type_name();
-    return type_name;
+    return "uvm_component";
   endfunction
 
   protected uvm_event_pool event_pool;

@@ -69,7 +69,6 @@ class uvm_algorithmic_comparator #( type BEFORE=int,
                                     type AFTER=int,
                                     type TRANSFORMER=int) extends uvm_component;
 
-  const static string type_name = "uvm_algorithmic_comparator #(BEFORE,AFTER,TRANSFORMER)";
 
   typedef uvm_algorithmic_comparator #( BEFORE , 
                                         AFTER , 
@@ -120,7 +119,7 @@ class uvm_algorithmic_comparator #( type BEFORE=int,
   endfunction
 
   virtual function string get_type_name();
-    return type_name;
+    return "uvm_algorithmic_comparator #(BEFORE,AFTER,TRANSFORMER)";
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);

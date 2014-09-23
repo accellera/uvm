@@ -42,10 +42,8 @@ virtual class uvm_env extends uvm_component;
     super.new(name,parent);
   endfunction
 
-  const static string type_name = "uvm_env";
-
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_env";
   endfunction
 
 endclass

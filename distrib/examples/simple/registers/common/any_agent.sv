@@ -96,9 +96,9 @@ class any_driver #(type REQ=int,RSP=REQ) extends uvm_component;
 
   `uvm_component_param_utils(any_driver #(REQ,RSP))
 
-  static string type_name = {"any_driver#(",REQ::type_name,",",RSP::type_name,")"};
+  typedef any_driver#(REQ,RSP) this_type;
   virtual function string get_type_name();
-    return type_name;
+    return `uvm_typename( this_type );
   endfunction
 
   uvm_seq_item_pull_port #(REQ) seqr_port;

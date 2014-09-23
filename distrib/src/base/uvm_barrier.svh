@@ -166,9 +166,6 @@ class uvm_barrier extends uvm_object;
     num_waiters = m_event.get_num_waiters();
   endfunction
 
-
-  const static string type_name = "uvm_barrier";
-
   virtual  function uvm_object create(string name=""); 
     uvm_barrier v;
     v=new(name);
@@ -176,7 +173,7 @@ class uvm_barrier extends uvm_object;
   endfunction
 
   virtual  function string get_type_name();
-    return type_name;
+    return "uvm_barrier";
   endfunction
 
   local task m_trigger();

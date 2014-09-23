@@ -592,9 +592,8 @@ endclass
 //|    endfunction
 //|
 //|    // get_type_name not implemented by macro for parameterized classes
-//|    const static string type_name = {"driverB #(",T::type_name,")"};
 //|    virtual function string get_type_name();
-//|      return type_name;
+//|      return {"driverB #(",T::type_name,")"};
 //|    endfunction
 //|
 //|    // using the factory allows pkt overrides from outside the class
@@ -622,9 +621,8 @@ endclass
 //|      super.new(name,parent);
 //|    endfunction
 //|
-//|    const static string type_name = {"driverD1 #(",T::type_name,")"};
 //|    virtual function string get_type_name();
-//|      ...return type_name;
+//|      ...return {"driverD1 #(",T::type_name,")"};
 //|    endfunction
 //|
 //|  endclass
@@ -637,9 +635,8 @@ endclass
 //|      super.new(name,parent);
 //|    endfunction
 //|
-//|    const static string type_name = {"driverD2 #(",T::type_name,")"};
 //|    virtual function string get_type_name();
-//|      return type_name;
+//|      return {"driverD2 #(",T::type_name,")"};
 //|    endfunction
 //|
 //|  endclass

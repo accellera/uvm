@@ -425,9 +425,8 @@ endfunction \
 // ----------------------
 
 `define m_uvm_get_type_name_func(T) \
-   const static string type_name = `"T`"; \
    virtual function string get_type_name (); \
-     return type_name; \
+     return `"T`"; \
    endfunction 
 
 

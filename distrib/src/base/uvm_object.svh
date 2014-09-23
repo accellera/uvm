@@ -207,15 +207,10 @@ virtual class uvm_object extends uvm_void;
   //
   //|  class mytype extends uvm_object;
   //|    ...
-  //|    const static string type_name = "mytype";
-  //|
   //|    virtual function string get_type_name();
-  //|      return type_name;
+  //|      return "mytype";
   //|    endfunction
   //
-  // We define the ~type_name~ static variable to enable access to the type name
-  // without need of an object of the class, i.e., to enable access via the
-  // scope operator, ~mytype::type_name~.
 
   virtual function string get_type_name (); return "<unknown>"; endfunction
 

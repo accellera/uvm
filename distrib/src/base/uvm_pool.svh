@@ -34,8 +34,6 @@
 
 class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
 
-  const static string type_name = "uvm_pool";
-
   typedef uvm_pool #(KEY,T) this_type;
 
   static protected this_type m_global_pool;
@@ -200,7 +198,7 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
   endfunction
 
   virtual function string get_type_name ();
-    return type_name;
+    return "uvm_pool";
   endfunction
 
   virtual function void do_copy (uvm_object rhs);
@@ -258,15 +256,12 @@ class uvm_object_string_pool #(type T=uvm_object) extends uvm_pool #(string,T);
     super.new(name);
   endfunction
 
-
-  const static string type_name = {"uvm_obj_str_pool"};
-
   // Function: get_type_name
   //
   // Returns the type name of this object.
 
   virtual function string get_type_name();
-    return type_name;
+    return "uvm_obj_str_pool";
   endfunction
 
 
