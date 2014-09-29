@@ -2804,7 +2804,7 @@ function void uvm_component::end_tr (uvm_transaction tr,
 
          m_tr_h.delete(tr);
 
-         tr.record(recorder);
+         recorder.record_object(tr);
 
          recorder.close(end_time);
 
