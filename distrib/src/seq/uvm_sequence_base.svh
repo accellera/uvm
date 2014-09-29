@@ -598,10 +598,9 @@ class uvm_sequence_base extends uvm_sequence_item;
                             "' manually.  See documentation for uvm_sequence_base::set_starting_phase."})
               m_warn_deprecated_set = 1;
            end
-
-           starting_phase = phase;
-           m_set_starting_phase = phase;
-        end
+	end
+        starting_phase = phase;
+        m_set_starting_phase = phase;
      end
 `endif
            
