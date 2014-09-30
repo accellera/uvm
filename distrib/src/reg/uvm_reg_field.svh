@@ -942,13 +942,19 @@ function string uvm_reg_field::get_access(uvm_reg_map map = null);
 
      "WO":
        case (field_access)
-         "RW",
-         "WO": field_access = "WO";
-         default: begin
-            field_access = "NOACCESS";
-         end
-
+	     "RW","WRC","WRS" : field_access = "WO";
+	     "W1SRC" : field_access = "W1S";
+	     "W0SRC": field_access = "W0S";
+	     "W1CRS": field_access = "W1C";
+	     "W0CRS": field_access = "W0C";
+		 "WCRS": field_access = "WC";
+	     "W1" : field_access = "W1";
+	     "WO1" : field_access = "WO1";
+	     "WSRC" : field_access = "WS";
+         "RO","RC","RS": field_access = "NOACCESS";
          // No change for the other modes
+         //         "WO","WC","WS","W1C","W1S","W0C","W0S","W0T","W1" : null;
+         
        endcase
 
      default:
