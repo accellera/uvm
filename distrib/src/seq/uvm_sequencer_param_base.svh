@@ -28,7 +28,7 @@
 // request (REQ) and response (RSP) types.
 //------------------------------------------------------------------------------
 
-class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
+virtual class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
                                  type RSP = REQ) extends uvm_sequencer_base;
 
   typedef uvm_sequencer_param_base #( REQ , RSP) this_type;

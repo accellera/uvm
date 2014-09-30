@@ -38,7 +38,7 @@ endclass : uvm_sequence_process_wrapper
 //
 //------------------------------------------------------------------------------
 
-class uvm_sequencer_base extends uvm_component;
+virtual class uvm_sequencer_base extends uvm_component;
 
   typedef enum {SEQ_TYPE_REQ,
                 SEQ_TYPE_LOCK,
