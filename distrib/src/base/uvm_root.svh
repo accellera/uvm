@@ -967,12 +967,9 @@ function void uvm_root::m_do_dump_args();
   string out_string;
   if(clp.get_arg_matches("+UVM_DUMP_CMDLINE_ARGS", dump_args)) begin
     clp.get_args(all_args);
-    for (int i = 0; i < all_args.size(); i++) begin
-      if (all_args[i] == "__-f__")
-        continue;
-      out_string = {out_string, all_args[i], " "};
+    foreach (all_args[idx]) begin
+       uvm_report_info("DUMPARGS", $sformatf("idx=%0d arg=[%s]",idx,all_args[idx]), UVM_NONE);
     end
-    uvm_report_info("DUMPARGS", out_string, UVM_NONE);
   end
 endfunction
 
