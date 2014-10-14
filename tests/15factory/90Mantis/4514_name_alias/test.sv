@@ -33,10 +33,21 @@ class special_tlm_gp extends uvm_tlm_gp;
 
 endclass : special_tlm_gp
 
+class other_tlm_gp extends uvm_tlm_gp;
+
+   `uvm_object_utils(other_tlm_gp)
+
+   function new(string name="unnamed-other_tlm_gp");
+      super.new(name);
+   endfunction : new
+
+endclass : other_tlm_gp
+
 initial begin
    uvm_factory f = uvm_factory::get();
    uvm_tlm_generic_payload gp;
    special_tlm_gp sgp;
+   other_tlm_gp ogp;
 
    f.set_type_override_by_name("uvm_tlm_gp", "uvm_tlm_generic_payload");
 
@@ -73,17 +84,17 @@ initial begin
      `uvm_fatal("TEST", "failed to create gp using 'uvm_pkg::uvm_tlm_gp'")
    end
 
-   f.set_inst_override_by_type(uvm_tlm_gp::get_type(), special_tlm_gp::get_type(), "foo.bar*");
+   f.set_inst_override_by_type(uvm_tlm_gp::get_type(), other_tlm_gp::get_type(), "foo.bar*");
 
-   sgp = null;
-   $cast(sgp, f.create_object_by_name(.requested_type_name("uvm_pkg::uvm_tlm_gp"),
+   ogp = null;
+   $cast(ogp, f.create_object_by_name(.requested_type_name("uvm_pkg::uvm_tlm_gp"),
                                       .parent_inst_path("foo.bar"),
-                                      .name("sgp")));
+                                      .name("ogp")));
 
-   if (sgp == null) begin
+   if (ogp == null) begin
       f.debug_create_by_name(.requested_type_name("uvm_pkg::uvm_tlm_gp"),
                              .parent_inst_path("foo.bar"),
-                             .name("sgp"));
+                             .name("ogp"));
       `uvm_fatal("TEST", "failed to create sgp using 'uvm_pkg::uvm_tlm_gp'")
    end
 
