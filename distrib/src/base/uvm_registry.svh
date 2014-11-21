@@ -79,7 +79,7 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
     return type_name;
   endfunction
 
-  local static this_type me = get();
+  local static this_type me;
 
 
   // Function: get
@@ -97,7 +97,20 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
     return me;
   endfunction
 
-
+  static function bit __deferred_init();
+	  if(me==null)
+		  me=new();
+	  uvm_deferred_init.push_back(me);
+	  return 1;
+  endfunction
+  local static bit m__initialized=__deferred_init();
+ 
+  virtual function void initialize();                                                   
+	  uvm_factory factory =uvm_factory::get();
+      factory.register(me);
+  endfunction
+  
+  
   // Function: create
   //
   // Returns an instance of the component type, ~T~, represented by this proxy,
@@ -221,7 +234,7 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
     return type_name;
   endfunction
 
-  local static this_type me = get();
+  local static this_type me;
 
   // Function: get
   //
@@ -313,6 +326,18 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
     factory.set_inst_override_by_type(get(),override_type,inst_path);
   endfunction
 
+  static function bit  __deferred_init();
+	  if(me==null)
+		  me=new();
+	  uvm_deferred_init.push_back(me);
+	  return 1;
+  endfunction
+  local static bit __initialized=__deferred_init();
+
+  virtual function void initialize();                                                   
+	  uvm_factory factory =uvm_factory::get();
+      factory.register(me);
+  endfunction
 endclass
 
 

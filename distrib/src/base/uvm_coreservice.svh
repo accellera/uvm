@@ -90,7 +90,7 @@ virtual class uvm_coreservice_t;
 	// returns the uvm_root instance
 	pure virtual function uvm_root get_root();
 
-	local static `UVM_CORESERVICE_TYPE inst;
+	local static uvm_coreservice_t inst;
 	// Function: get
 	//
 	// Returns an instance providing the uvm_coreservice_t interface.
@@ -104,12 +104,17 @@ virtual class uvm_coreservice_t;
 	//| endclass
 	//|
 	static function uvm_coreservice_t get();
-		if(inst==null)
-			inst=new;
-
+		if(inst==null) begin
+			`UVM_CORESERVICE_TYPE i;
+			i=new;
+			inst=i;
+		end	
 		return inst;
 	endfunction // get
 
+	static function void set(uvm_coreservice_t cs);
+			inst=cs;
+	endfunction	
 endclass
 
 //----------------------------------------------------------------------
@@ -219,5 +224,3 @@ class uvm_default_coreservice_t extends uvm_coreservice_t;
 	endfunction	
 	
 endclass
-
-

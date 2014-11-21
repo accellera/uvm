@@ -51,9 +51,9 @@ module ubus_tb_top;
     vif.sig_error
   );
 
-  initial begin automatic uvm_coreservice_t cs_ = uvm_coreservice_t::get();
-
-    uvm_config_db#(virtual ubus_if)::set(cs_.get_root(), "*", "vif", vif);
+  initial begin 
+    uvm_init();
+    uvm_config_db#(virtual ubus_if)::set(uvm_root::get(), "*", "vif", vif);
     run_test();
   end
 

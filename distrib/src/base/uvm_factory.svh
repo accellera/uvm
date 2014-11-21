@@ -840,6 +840,7 @@ virtual class uvm_object_wrapper;
 
   pure virtual function string get_type_name();
 
+  pure virtual function void initialize();
 endclass
 
 

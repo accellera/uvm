@@ -401,7 +401,10 @@ virtual class uvm_report_catcher extends uvm_callback;
 	  end
 	  q.push_back("--------------------------------------------------------------\n");
 
-	  `uvm_info_context("UVM/REPORT/CATCHER",`UVM_STRING_QUEUE_STREAMING_PACK(q),UVM_LOW,uvm_top)
+	  begin
+		  uvm_root r = uvm_root::get();
+	  	`uvm_info_context("UVM/REPORT/CATCHER",`UVM_STRING_QUEUE_STREAMING_PACK(q),UVM_LOW,r)
+	  end
   endfunction
   
   // Funciton: debug_report_catcher
@@ -702,7 +705,10 @@ virtual class uvm_report_catcher extends uvm_callback;
       q.push_back($sformatf("Number of caught UVM_ERROR reports   :%5d\n", m_caught_error));
       q.push_back($sformatf("Number of caught UVM_WARNING reports :%5d\n", m_caught_warning));
 
- 	 `uvm_info_context("UVM/REPORT/CATCHER",`UVM_STRING_QUEUE_STREAMING_PACK(q),UVM_LOW,uvm_top)
+	    begin
+		    uvm_root r=uvm_root::get();
+ 	 		`uvm_info_context("UVM/REPORT/CATCHER",`UVM_STRING_QUEUE_STREAMING_PACK(q),UVM_LOW,r)
+	    end	
     end
   endfunction
 

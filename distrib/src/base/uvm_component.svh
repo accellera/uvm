@@ -1944,9 +1944,7 @@ endfunction
 // ---------------
 
 function void uvm_component::m_set_full_name();
-  uvm_root top;
-  top = uvm_top;
-  if (m_parent == top || m_parent==null)
+  if (m_parent==null || m_parent.m_parent==null)
     m_name = get_name();
   else 
     m_name = {m_parent.get_full_name(), ".", get_name()};

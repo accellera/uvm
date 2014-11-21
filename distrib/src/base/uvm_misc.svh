@@ -751,3 +751,27 @@ function automatic string m_uvm_string_queue_join(ref string i[$]);
 		m_uvm_string_queue_join = {m_uvm_string_queue_join,i[idx]};
 `endif
 endfunction
+
+typedef class uvm_object_wrapper;
+uvm_object_wrapper uvm_deferred_init[$];
+bit uvm_init_performed=0;
+
+function void uvm_init(uvm_coreservice_t cs=null);
+	uvm_coreservice_t dcs;
+	if(cs!=null)
+		dcs=cs;
+	else begin
+		uvm_default_coreservice_t ncs;
+		ncs=new();
+		dcs=ncs;
+	end	
+	uvm_coreservice_t::set(dcs);
+	foreach(uvm_deferred_init[idx])
+		uvm_deferred_init[idx].initialize();
+	
+	void'(uvm_root::get());
+	
+	uvm_init_performed=1;
+endfunction
+
+			

@@ -312,7 +312,7 @@ endclass
 // This is the top-level that governs phase execution and provides component
 // search interface. See <uvm_root> for more information.
 //------------------------------------------------------------------------------
-const uvm_root uvm_top = uvm_root::get();
+//const uvm_root uvm_top = uvm_root::get();
 
 //-----------------------------------------------------------------------------
 // IMPLEMENTATION
@@ -400,8 +400,8 @@ endfunction
 task uvm_root::run_test(string test_name="");
 
   uvm_report_server l_rs;
-  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
-  uvm_factory factory=cs.get_factory();
+  uvm_coreservice_t cs;                                                     
+  uvm_factory factory;
   bit testname_plusarg;
   int test_name_count;
   string test_names[$];
@@ -410,6 +410,12 @@ task uvm_root::run_test(string test_name="");
 
   process phase_runner_proc; // store thread forked below for final cleanup
 
+  if(!uvm_init_performed)
+	  	uvm_init();
+
+  cs=uvm_coreservice_t::get();
+  factory=cs.get_factory();
+	
   testname_plusarg = 0;
 
   // Set up the process that decouples the thread that drops objections from
