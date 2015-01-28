@@ -31,7 +31,8 @@
 // Class: uvm_class_pair #(T1,T2)
 //
 // Container holding handles to two objects whose types are specified by the
-// type parameters, T1 and T2.
+// type parameters, T1 and T2. The implementation assumes T1,T2 implement 
+// a T::clone() function returning a T
 //-----------------------------------------------------------------------------
 
 class uvm_class_pair #(type T1=int, T2=T1) extends uvm_object;
@@ -92,6 +93,7 @@ class uvm_class_pair #(type T1=int, T2=T1) extends uvm_object;
     this_type rhs_;
     if(!$cast(rhs_,rhs))
       `uvm_fatal("WRONG_TYPE", {"do_copy: rhs argument is not of type '",get_type_name(),"'"})
+    
     $cast(first,rhs_.first.clone());
     $cast(second,rhs_.second.clone());
   endfunction
