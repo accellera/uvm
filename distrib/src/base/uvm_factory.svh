@@ -204,8 +204,7 @@ virtual class uvm_factory;
   // Function: create_component_by_type
 
   pure virtual function
-      uvm_component create_component_by_type (uvm_object_wrapper requested_type,  
-                                              string parent_inst_path="",
+      uvm_component create_component_by_type (uvm_object_wrapper requested_type,
                                               string name, 
                                               uvm_component parent);
 
@@ -253,8 +252,7 @@ virtual class uvm_factory;
   // overrides ~xyz~, then ~bar~ is returned after the error is issued.
 
   pure virtual function
-      uvm_component create_component_by_name (string requested_type_name,  
-                                              string parent_inst_path="",
+      uvm_component create_component_by_name (string requested_type_name,
                                               string name, 
                                               uvm_component parent);
 
@@ -389,8 +387,7 @@ class uvm_default_factory extends uvm_factory;
   // Function: create_component_by_type
 
   extern virtual function
-      uvm_component create_component_by_type (uvm_object_wrapper requested_type,  
-                                              string parent_inst_path="",
+      uvm_component create_component_by_type (uvm_object_wrapper requested_type, 
                                               string name, 
                                               uvm_component parent);
 
@@ -408,7 +405,6 @@ class uvm_default_factory extends uvm_factory;
    
   extern virtual function
       uvm_component create_component_by_name (string requested_type_name,  
-                                              string parent_inst_path="",
                                               string name, 
                                               uvm_component parent);
 
@@ -1249,19 +1245,16 @@ endfunction
 // create_component_by_name
 // ------------------------
 
-function uvm_component uvm_default_factory::create_component_by_name (string requested_type_name,  
-                                                              string parent_inst_path="",  
+function uvm_component uvm_default_factory::create_component_by_name (string requested_type_name,
                                                               string name, 
                                                               uvm_component parent);
   uvm_object_wrapper wrapper;
   string inst_path;
 
-  if (parent_inst_path == "")
+  if (parent == null)
     inst_path = name;
-  else if (name != "")
-    inst_path = {parent_inst_path,".",name};
   else
-    inst_path = parent_inst_path;
+    inst_path = {parent.get_full_name(),".",name};
 
   m_override_info.delete();
 
@@ -1286,17 +1279,14 @@ endfunction
 // ------------------------
 
 function uvm_component uvm_default_factory::create_component_by_type (uvm_object_wrapper requested_type,  
-                                                            string parent_inst_path="",  
                                                             string name, 
                                                             uvm_component parent);
   string full_inst_path;
 
-  if (parent_inst_path == "")
+  if (parent== null)
     full_inst_path = name;
-  else if (name != "")
-    full_inst_path = {parent_inst_path,".",name};
-  else
-    full_inst_path = parent_inst_path;
+  else 
+    full_inst_path = {parent.get_full_name(),".",name};
 
   m_override_info.delete();
 

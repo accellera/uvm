@@ -102,23 +102,21 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
   //
   // Returns an instance of the component type, ~T~, represented by this proxy,
   // subject to any factory overrides based on the context provided by the
-  // ~parent~'s full name. The ~contxt~ argument, if supplied, supersedes the
-  // ~parent~'s context. The new instance will have the given leaf ~name~
+  // ~parent~'s full name. The new instance will have the given leaf ~name~
   // and ~parent~.
 
-  static function T create(string name, uvm_component parent, string contxt="");
+  static function T create(string name, uvm_component parent);
     uvm_object obj;
     uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
     uvm_factory factory=cs.get_factory();
-    if (contxt == "" && parent != null)
-      contxt = parent.get_full_name();
-    obj = factory.create_component_by_type(get(),contxt,name,parent);
+
+    obj = factory.create_component_by_type(get(),name,parent);
     if (!$cast(create, obj)) begin
       string msg;
       msg = {"Factory did not return a component of type '",type_name,
         "'. A component of type '",obj == null ? "null" : obj.get_type_name(),
         "' was returned instead. Name=",name," Parent=",
-        parent==null?"null":parent.get_type_name()," contxt=",contxt};
+        parent==null?"null":parent.get_type_name()};
       uvm_report_fatal("FCTTYP", msg, UVM_NONE);
     end
   endfunction

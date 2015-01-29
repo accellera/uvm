@@ -89,11 +89,10 @@ module test;
 			return delegate.create_object_by_type(requested_type,parent_inst_path,name);
 		endfunction 
 
-		virtual function uvm_component create_component_by_type (uvm_object_wrapper requested_type,  
-				string parent_inst_path="",
+		virtual function uvm_component create_component_by_type (uvm_object_wrapper requested_type, 
 				string name, 
 				uvm_component parent);
-			return delegate.create_component_by_type(requested_type,parent_inst_path,name,parent);
+			return delegate.create_component_by_type(requested_type,name,parent);
 		endfunction 
 
 		virtual function uvm_object    create_object_by_name    (string requested_type_name,  
@@ -102,11 +101,10 @@ module test;
 			return delegate.create_object_by_name(requested_type_name,parent_inst_path,name);
 		endfunction 
 
-		virtual function uvm_component create_component_by_name (string requested_type_name,  
-				string parent_inst_path="",
+		virtual function uvm_component create_component_by_name (string requested_type_name, 
 				string name, 
 				uvm_component parent);
-			return delegate.create_component_by_name(requested_type_name,parent_inst_path,name,parent);
+			return delegate.create_component_by_name(requested_type_name,name,parent);
 		endfunction 
 
 		virtual function void debug_create_by_type (uvm_object_wrapper requested_type,

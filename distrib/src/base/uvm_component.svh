@@ -2098,8 +2098,7 @@ function uvm_component uvm_component::create_component (string requested_type_na
                                                         string name);
   uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
   uvm_factory factory=cs.get_factory();
-  return factory.create_component_by_name(requested_type_name, get_full_name(),
-                                          name, this);
+  return factory.create_component_by_name(requested_type_name, name, this);
 endfunction
 
 
