@@ -44,7 +44,7 @@
 // IS-A forward imp; has no backward path except via the payload
 // contents.
 //----------------------------------------------------------------------
-class uvm_tlm_b_target_socket_base #(type T=uvm_tlm_generic_payload)
+virtual class uvm_tlm_b_target_socket_base #(type T=uvm_tlm_generic_payload)
   extends uvm_port_base #(uvm_tlm_if #(T));
 
   function new (string name, uvm_component parent);
@@ -62,7 +62,7 @@ endclass
 // IS-A forward port; has no backward path except via the payload
 // contents
 //----------------------------------------------------------------------
-class uvm_tlm_b_initiator_socket_base #(type T=uvm_tlm_generic_payload)
+virtual class uvm_tlm_b_initiator_socket_base #(type T=uvm_tlm_generic_payload)
   extends uvm_port_base #(uvm_tlm_if #(T));
 
   `UVM_PORT_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_initiator_socket")
@@ -75,7 +75,7 @@ endclass
 //
 // IS-A forward imp; HAS-A backward port
 //----------------------------------------------------------------------
-class uvm_tlm_nb_target_socket_base #(type T=uvm_tlm_generic_payload,
+virtual class uvm_tlm_nb_target_socket_base #(type T=uvm_tlm_generic_payload,
                                    type P=uvm_tlm_phase_e)
   extends uvm_port_base #(uvm_tlm_if #(T,P));
 
@@ -97,7 +97,7 @@ endclass
 //
 // IS-A forward port; HAS-A backward imp
 //----------------------------------------------------------------------
-class uvm_tlm_nb_initiator_socket_base #(type T=uvm_tlm_generic_payload,
+virtual class uvm_tlm_nb_initiator_socket_base #(type T=uvm_tlm_generic_payload,
                                       type P=uvm_tlm_phase_e)
   extends uvm_port_base #(uvm_tlm_if #(T,P));
 
@@ -120,7 +120,7 @@ endclass
 //
 // IS-A forward port; HAS-A backward export
 //----------------------------------------------------------------------
-class uvm_tlm_nb_passthrough_initiator_socket_base #(type T=uvm_tlm_generic_payload,
+virtual class uvm_tlm_nb_passthrough_initiator_socket_base #(type T=uvm_tlm_generic_payload,
                                                   type P=uvm_tlm_phase_e)
   extends uvm_port_base #(uvm_tlm_if #(T,P));
 
@@ -145,7 +145,7 @@ endclass
 //
 // IS-A forward export; HAS-A backward port
 //----------------------------------------------------------------------
-class uvm_tlm_nb_passthrough_target_socket_base #(type T=uvm_tlm_generic_payload,
+virtual class uvm_tlm_nb_passthrough_target_socket_base #(type T=uvm_tlm_generic_payload,
                                                type P=uvm_tlm_phase_e)
   extends uvm_port_base #(uvm_tlm_if #(T,P));
 
@@ -170,7 +170,7 @@ endclass
 //
 // IS-A forward port
 //----------------------------------------------------------------------
-class uvm_tlm_b_passthrough_initiator_socket_base #(type T=uvm_tlm_generic_payload)
+virtual class uvm_tlm_b_passthrough_initiator_socket_base #(type T=uvm_tlm_generic_payload)
   extends uvm_port_base #(uvm_tlm_if #(T));
 
   `UVM_PORT_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_passthrough_initiator_socket")
@@ -184,7 +184,7 @@ endclass
 //
 // IS-A forward export
 //----------------------------------------------------------------------
-class uvm_tlm_b_passthrough_target_socket_base #(type T=uvm_tlm_generic_payload)
+virtual class uvm_tlm_b_passthrough_target_socket_base #(type T=uvm_tlm_generic_payload)
   extends uvm_port_base #(uvm_tlm_if #(T));
 
   `UVM_EXPORT_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_passthrough_target_socket")
