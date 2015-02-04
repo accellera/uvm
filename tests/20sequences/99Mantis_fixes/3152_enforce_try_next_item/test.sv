@@ -150,7 +150,7 @@ module test();
     endtask
 
     function void report_phase(uvm_phase phase);
-      uvm_report_server svr = uvm_report_server::get_server();
+      uvm_report_server svr = uvm_report_server::get_default();
       if (svr.get_id_count("TRY_NEXT_BLOCKED") != 1) begin
         $display("** UVM TEST FAILED **");
         return;

@@ -281,6 +281,19 @@ virtual class uvm_tr_database extends uvm_object;
    // Backend implementation of <establish_link>
    pure virtual protected function void do_establish_link(uvm_link_base link);
 
+
+   // Function: get_default
+  // shortcut for uvm_coreservice_t::get().get_default_tr_database()
+  static function uvm_tr_database get_default();
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  return cs.get_default_tr_database();
+  endfunction
+   // Function: set_default
+  // shortcut for uvm_coreservice_t::get().set_default_tr_database() 
+  static function void set_default(uvm_tr_database p);
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  cs.set_default_tr_database(p);
+  endfunction
 endclass : uvm_tr_database
 
 //------------------------------------------------------------------------------

@@ -24,7 +24,7 @@ module top;
 
   class test extends uvm_component;
 
-    uvm_report_server l_rs = uvm_report_server::get_server();
+    uvm_report_server l_rs = uvm_report_server::get_default();
 
     `uvm_component_utils(test)
     function new(string name, uvm_component parent);

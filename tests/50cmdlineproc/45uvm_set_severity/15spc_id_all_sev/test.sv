@@ -45,7 +45,7 @@ class test extends uvm_test;
    endtask
 
    virtual function void report();
-     uvm_report_server rs = uvm_report_server::get_server();
+     uvm_report_server rs = uvm_report_server::get_default();
      $write("ID A count = %0d\n", rs.get_id_count("A"));
      $write("UVM_INFO count = %0d\n", rs.get_severity_count(UVM_INFO));
      $write("UVM_WARNING count = %0d\n", rs.get_severity_count(UVM_WARNING));

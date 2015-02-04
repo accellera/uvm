@@ -352,7 +352,7 @@ module top;
     end
 
     $display("*** UVM TEST PASSED ***");
-    l_rs = uvm_report_server::get_server();
+    l_rs = uvm_report_server::get_default();
     l_rs.report_summarize();
   end
 

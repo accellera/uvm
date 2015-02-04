@@ -40,7 +40,7 @@ module top();
     `uvm_component_utils(test)
 
     function void report_phase(uvm_phase phase); 
-      uvm_report_server server = uvm_report_server::get_server();
+      uvm_report_server server = uvm_report_server::get_default();
       if(server.get_id_count("OBJTN_ZERO") != 0) $display("*** UVM TEST FAILED ***");
       if(server.get_id_count("Done") != 1) $display("*** UVM TEST FAILED ***");
       else $display("*** UVM TEST PASSED ***");

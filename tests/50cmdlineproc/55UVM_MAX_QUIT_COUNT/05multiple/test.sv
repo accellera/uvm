@@ -51,7 +51,7 @@ uvm_report_server rs;
 
 final
   begin
-    rs = uvm_report_server::get_server();
+    rs = uvm_report_server::get_default();
     if(rs.get_id_count("MULTMAXQUIT") != 1)
       pass_the_test = pass_the_test & 0;
     if ($time == 500 && pass_the_test == 1) begin

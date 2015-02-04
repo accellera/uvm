@@ -49,7 +49,7 @@ endclass
 
 initial run_test();
 
-uvm_report_server rs = uvm_report_server::get_server();
+uvm_report_server rs = uvm_report_server::get_default();
 
 final
   begin

@@ -418,5 +418,18 @@ class uvm_comparer;
   uvm_object compare_map[uvm_object];
   uvm_scope_stack scope    = new;
 
+  // Function: get_default
+  // shortcut for uvm_coreservice_t::get().get_default_comparer()
+  static function uvm_comparer get_default();
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  return cs.get_default_comparer();
+  endfunction
+  
+  // Function: set_default
+  // shortcut for uvm_coreservice_t::get().set_default_comparer()
+  static function void set_default(uvm_comparer p);
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  cs.set_default_comparer(p);
+  endfunction
 endclass
 

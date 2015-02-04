@@ -76,7 +76,7 @@ class test extends base;
    endfunction
 
    virtual task run_phase(uvm_phase phase);
-      uvm_report_server l_rs = uvm_report_server::get_server();
+      uvm_report_server l_rs = uvm_report_server::get_default();
       $display("UVM TEST EXPECT 1 UVM_ERROR");
       l_rs.set_max_quit_count(1);
 

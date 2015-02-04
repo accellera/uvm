@@ -35,7 +35,7 @@ module top();
 
     function void report();
       uvm_resource_pool rp = uvm_resource_pool::get();
-      uvm_report_server rs = uvm_report_server::get_server();
+      uvm_report_server rs = uvm_report_server::get_default();
       if(rs.get_severity_count(UVM_ERROR) > 0)
         $display("** UVM TEST FAIL **");
       else

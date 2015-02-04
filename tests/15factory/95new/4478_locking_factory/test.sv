@@ -112,7 +112,7 @@ module test;
 
 		begin
 			uvm_report_server svr;
-			svr = uvm_report_server::get_server();
+			svr = uvm_report_server::get_default();
 
 			$display("UVM TEST EXPECT 1 UVM_ERROR");
 

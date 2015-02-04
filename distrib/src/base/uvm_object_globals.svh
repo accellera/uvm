@@ -603,55 +603,55 @@ typedef class uvm_text_tr_database;
 typedef class uvm_recorder;
 
 // Variable: uvm_default_table_printer
-//
+// @deprecated
 // The table printer is a global object that can be used with
 // <uvm_object::do_print> to get tabular style printing.
 
-uvm_table_printer uvm_default_table_printer = new();
+uvm_table_printer uvm_default_table_printer = uvm_table_printer::get_default();
 
 
 // Variable: uvm_default_tree_printer
-//
-// The tree printer is a global object that can be used with
+// @deprecated
+// The tree printer is an object that can be used with
 // <uvm_object::do_print> to get multi-line tree style printing.
 
-uvm_tree_printer uvm_default_tree_printer  = new();
+uvm_tree_printer uvm_default_tree_printer  = uvm_tree_printer::get_default();
 
 
 // Variable: uvm_default_line_printer
-//
-// The line printer is a global object that can be used with
+// @deprecated
+// The line printer is an object that can be used with
 // <uvm_object::do_print> to get single-line style printing.
 
-uvm_line_printer uvm_default_line_printer  = new();
+uvm_line_printer uvm_default_line_printer  = uvm_line_printer::get_default();
 
 
 // Variable: uvm_default_printer
-//
+// @deprecated
 // The default printer policy. Used when calls to <uvm_object::print>
 // or <uvm_object::sprint> do not specify a printer policy.
 //
 // The default printer may be set to any legal <uvm_printer> derived type,
 // including the global line, tree, and table printers described above.
 
-uvm_printer uvm_default_printer = uvm_default_table_printer;
+uvm_printer uvm_default_printer = uvm_printer::get_default();
 
 
 // Variable: uvm_default_packer
-//
+// @deprecated
 // The default packer policy. Used when calls to <uvm_object::pack>
 // and <uvm_object::unpack> do not specify a packer policy.
 
-uvm_packer uvm_default_packer = new();
+uvm_packer uvm_default_packer = uvm_packer::get_default();
 
 
 // Variable: uvm_default_comparer
-//
+// @deprecated
 //
 // The default compare policy. Used when calls to <uvm_object::compare>
 // do not specify a comparer policy.
 
-uvm_comparer uvm_default_comparer = new(); // uvm_comparer::init();
+uvm_comparer uvm_default_comparer = uvm_comparer::get_default(); 
 
 
 

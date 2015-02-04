@@ -174,7 +174,7 @@ class test extends uvm_component;
    endfunction : build_phase
 
    virtual function void start_of_simulation_phase(uvm_phase phase);
-      uvm_report_server report_server = uvm_report_server::get_server();
+      uvm_report_server report_server = uvm_report_server::get_default();
       int  warning_count = report_server.get_severity_count(UVM_WARNING);
       super.start_of_simulation_phase(phase);
 

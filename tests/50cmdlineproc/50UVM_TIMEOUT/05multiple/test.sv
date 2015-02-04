@@ -47,7 +47,7 @@ initial run_test();
 final
   begin
     uvm_report_server rs;
-    rs = uvm_report_server::get_server();
+    rs = uvm_report_server::get_default();
     if(rs.get_id_count("MULTTIMOUT") != 1)
       pass_the_test = pass_the_test & 0;
     if ($time == 25 && pass_the_test == 1) begin

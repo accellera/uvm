@@ -207,7 +207,7 @@ initial begin
   run_test();
   phasing_test::check_phasing();
   begin
-    static uvm_report_server svr = uvm_report_server::get_server();
+    static uvm_report_server svr = uvm_report_server::get_default();
     svr.report_summarize();
     if (phasing_test::pass &&
         (svr.get_severity_count(UVM_FATAL) +

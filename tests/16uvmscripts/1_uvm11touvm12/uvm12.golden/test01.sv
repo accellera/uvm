@@ -9,7 +9,7 @@ module test;
       $display("UVM TEST PASSED");
 
     begin
-	uvm_report_server svr = uvm_report_server::get_server();
+	uvm_report_server svr = uvm_report_server::get_default();
         svr.report_summarize();
     end
   end

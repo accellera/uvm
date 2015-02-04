@@ -82,7 +82,7 @@ final
   begin
     uvm_report_server srvr;
 
-    srvr = uvm_report_server::get_server();
+    srvr = uvm_report_server::get_default();
     srvr.report_summarize();
   end
 

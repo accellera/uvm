@@ -127,7 +127,7 @@ class uvm_root extends uvm_component;
   // with ~$finish~.
 
   virtual function void die();
-    uvm_report_server l_rs = uvm_report_server::get_server();
+    uvm_report_server l_rs = uvm_report_server::get_default();
     // do the pre_abort callbacks
     m_do_pre_abort();
 
@@ -254,7 +254,7 @@ class uvm_root extends uvm_component;
       if (enable_print_topology) print_topology();
       begin
           uvm_report_server srvr;
-          srvr = uvm_report_server::get_server();
+          srvr = uvm_report_server::get_default();
           if(srvr.get_severity_count(UVM_ERROR) > 0) begin
             uvm_report_fatal("BUILDERR", "stopping due to build errors", UVM_NONE);
           end
@@ -351,7 +351,7 @@ function void uvm_root::report_header(UVM_FILE file = 0);
 	uvm_cmdline_processor clp;
 	string args[$];
 
-	srvr = uvm_report_server::get_server();
+	srvr = uvm_report_server::get_default();
 	clp = uvm_cmdline_processor::get_inst();
 
 	if (clp.get_arg_matches("+UVM_NO_RELNOTES", args)) return;
@@ -510,7 +510,7 @@ task uvm_root::run_test(string test_name="");
   // clean up after ourselves
   phase_runner_proc.kill();
 
-  l_rs = uvm_report_server::get_server();
+  l_rs = uvm_report_server::get_default();
   l_rs.report_summarize();
 
   if (finish_on_completion)
@@ -925,7 +925,7 @@ function void uvm_root::m_do_max_quit_settings();
   string max_quit;
   string split_max_quit[$];
   int max_quit_int;
-  srvr = uvm_report_server::get_server();
+  srvr = uvm_report_server::get_default();
   max_quit_count = clp.get_arg_values("+UVM_MAX_QUIT_COUNT=", max_quit_settings);
   if (max_quit_count ==  0)
     return;

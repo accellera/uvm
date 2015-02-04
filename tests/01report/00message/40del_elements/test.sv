@@ -162,7 +162,7 @@ initial begin
      static my_server server = new();
      static my_catcher catcher = new();
      uvm_report_cb::add(null, catcher);
-     uvm_report_server::set_server(server);
+     uvm_report_server::set_default(server);
      fact.set_type_override_by_type(uvm_report_handler::get_type(), my_handler::get_type());
      fact.print();
 

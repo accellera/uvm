@@ -567,7 +567,7 @@ class uvm_report_object extends uvm_object;
   // rs.report_summarize();
 
   virtual function void report_summarize(UVM_FILE file = 0);
-    uvm_report_server l_rs = uvm_report_server::get_server();
+    uvm_report_server l_rs = uvm_report_server::get_default();
     l_rs.report_summarize(file);
   endfunction
 
@@ -609,7 +609,7 @@ class uvm_report_object extends uvm_object;
   // rs.set_max_quit_count()
 
   function void set_report_max_quit_count(int max_count);
-    uvm_report_server l_rs = uvm_report_server::get_server();
+    uvm_report_server l_rs = uvm_report_server::get_default();
     l_rs.set_max_quit_count(max_count);
   endfunction
 
@@ -621,7 +621,7 @@ class uvm_report_object extends uvm_object;
   // Use <uvm_report_server::get_server()>
 
   function uvm_report_server get_report_server();
-    uvm_report_server l_rs = uvm_report_server::get_server();
+    uvm_report_server l_rs = uvm_report_server::get_default();
     return l_rs;
   endfunction
 

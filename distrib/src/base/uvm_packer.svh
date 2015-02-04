@@ -397,6 +397,19 @@ class uvm_packer;
 
   extern function void reset();
 
+
+  // Function: get_default
+  // shortcut for uvm_coreservice_t::get().get_default_packer()
+  static function uvm_packer get_default();
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  return cs.get_default_packer();
+  endfunction
+  // Function: set_default
+  // shortcut for uvm_coreservice_t::get().set_default_packer()  
+  static function void set_default(uvm_packer p);
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  cs.set_default_packer(p);
+  endfunction
 endclass
 
 

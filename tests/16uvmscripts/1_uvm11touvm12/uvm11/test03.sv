@@ -62,7 +62,7 @@ module top;
 
         uvm_factory f;
         ctchr1 =  new("Catcher1");
-        f = uvm_factory::get();
+        f = uvm_factory::get_default();
         f.set_type_override_by_name("test","test2"); 
         f.print();
         f.debug_create_by_name("test", "", "uvm_test_top");

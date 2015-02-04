@@ -35,7 +35,7 @@ initial begin
 		
 		begin
 			uvm_report_server svr;
-			svr = uvm_report_server::get_server();
+			svr = uvm_report_server::get_default();
 
 			if (svr.get_severity_count(UVM_ERROR)==0)
 				$write("** UVM TEST PASSED **\n");

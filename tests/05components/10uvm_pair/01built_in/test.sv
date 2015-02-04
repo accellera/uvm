@@ -55,7 +55,7 @@ else
 initial 
 begin
 
-  static uvm_report_server l_rs = uvm_report_server::get_server();
+  static uvm_report_server l_rs = uvm_report_server::get_default();
 
   aa0["0"]=0;      aa0["1"]=1;
   aa1["foo"]=-30;  aa1["bar"]=-40;

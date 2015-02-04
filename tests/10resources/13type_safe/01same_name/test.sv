@@ -76,7 +76,7 @@ class test extends uvm_component;
     endtask
 
   function void report_phase(uvm_phase phase);
-    uvm_report_server rs = uvm_report_server::get_server();
+    uvm_report_server rs = uvm_report_server::get_default();
   	  super.report_phase(phase);
     if(rs.get_severity_count(UVM_ERROR) > 0)
       $display("** UVM TEST FAIL **");

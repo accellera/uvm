@@ -25,7 +25,7 @@ import uvm_pkg::*;
 
 bit pass_the_test = 1;
 
-uvm_report_server rs = uvm_report_server::get_server();
+uvm_report_server rs = uvm_report_server::get_default();
 
 class test extends uvm_test;
 

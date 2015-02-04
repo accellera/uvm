@@ -44,7 +44,7 @@ class test extends uvm_test;
    endtask
 
    virtual function void report();
-     uvm_report_server rs = uvm_report_server::get_server();
+     uvm_report_server rs = uvm_report_server::get_default();
 	 bit passed=1;
 	 print();
 	   

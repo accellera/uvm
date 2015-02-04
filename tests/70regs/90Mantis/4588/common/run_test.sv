@@ -76,7 +76,7 @@ class test extends reset_test;
    	
       begin
          uvm_cmdline_processor opts = uvm_cmdline_processor::get_inst();
-	 uvm_factory factory =uvm_factory::get();
+	 uvm_factory factory =uvm_factory::get_default();
 	 
          uvm_reg_sequence  seq;
          string            seq_name;

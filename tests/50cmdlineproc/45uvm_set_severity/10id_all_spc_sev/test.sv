@@ -46,7 +46,7 @@ class test extends uvm_test;
    endtask
 
    virtual function void report();
-     uvm_report_server rs = uvm_report_server::get_server();
+     uvm_report_server rs = uvm_report_server::get_default();
      if((rs.get_id_count("A") == 1) && (rs.get_id_count("B") == 1) &&
        (rs.get_id_count("C") == 1) && (rs.get_id_count("D") == 1) &&
        (rs.get_severity_count(UVM_ERROR) == 0))

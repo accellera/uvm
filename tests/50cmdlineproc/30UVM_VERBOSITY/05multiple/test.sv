@@ -61,7 +61,7 @@ class test extends uvm_test;
    endtask
 
    virtual function void report();
-     uvm_report_server rs = uvm_report_server::get_server();
+     uvm_report_server rs = uvm_report_server::get_default();
      if(rs.get_id_count("MULTVERB") != 1) begin
        pass_the_test = pass_the_test & 0;
        $display("** UVM TEST FAILED -- expected 1 MULTVERB message, but got %0d", rs.get_id_count("MULTVERB"));

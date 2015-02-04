@@ -165,7 +165,7 @@ initial begin
    static uvm_coreservice_t cs_ = uvm_coreservice_t::get();
 
    tb_env env;
-   static uvm_report_server svr = uvm_report_server::get_server();
+   static uvm_report_server svr = uvm_report_server::get_default();
    
    env = new("env");
 

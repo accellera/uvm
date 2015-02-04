@@ -37,7 +37,7 @@ module top;
 
     function void build_phase(uvm_phase phase);
 
-      uvm_report_server l_rs = uvm_report_server::get_server();
+      uvm_report_server l_rs = uvm_report_server::get_default();
 
       myenv.set_report_id_verbosity("ID1", UVM_LOW);
       set_report_id_verbosity_hier("ID2", UVM_MEDIUM);

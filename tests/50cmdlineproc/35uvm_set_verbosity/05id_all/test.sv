@@ -98,7 +98,7 @@ class test extends uvm_test;
    //+uvm_set_verbosity=*,_ALL_,UVM_LOW,report
 
    virtual function void final_phase(uvm_phase phase);
-     uvm_report_server rs = uvm_report_server::get_server();
+     uvm_report_server rs = uvm_report_server::get_default();
 
      //Should get none and low in build
      pass_the_test &= check_counts("build", UVM_LOW, 1);
@@ -140,7 +140,7 @@ class test extends uvm_test;
    endfunction
 
    function int check_counts(string ph, uvm_verbosity v, int num);
-     uvm_report_server rs = uvm_report_server::get_server();
+     uvm_report_server rs = uvm_report_server::get_default();
      uvm_verbosity vs[$];
      string v_str[$];
      string msg;

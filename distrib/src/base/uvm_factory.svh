@@ -77,7 +77,7 @@ virtual class uvm_factory;
   // Group: Retrieving the factory
 
  
-  // Function: get
+  // Function: get_default
   // Static accessor for <uvm_factory>
   //
   // The static accessor is provided as a convenience wrapper
@@ -92,13 +92,24 @@ virtual class uvm_factory;
   //
   // | // Not using the uvm_coreservice_t:
   // | uvm_factory f;
-  // | f = uvm_factory::get();
+  // | f = uvm_factory::get_default();
   //         
-  static function uvm_factory get();
+  static function uvm_factory get_default();
 	  	uvm_coreservice_t s;
 	  	s = uvm_coreservice_t::get();
 	  	return s.get_factory();
   endfunction	
+  
+  static function void set_default(uvm_factory f);
+	  	uvm_coreservice_t s;
+	  	s = uvm_coreservice_t::get();
+	  	s.set_factory(f);
+  endfunction	
+  
+  // @deprecated
+  static function uvm_factory get();
+  	return get_default();
+  endfunction
   
   // Group: Registering Types
 

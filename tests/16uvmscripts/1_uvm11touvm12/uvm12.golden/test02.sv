@@ -205,7 +205,7 @@ begin
    
    begin
       uvm_report_server svr;
-      svr = uvm_report_server::get_server();
+      svr = uvm_report_server::get_default();
 
       svr.report_summarize();
 

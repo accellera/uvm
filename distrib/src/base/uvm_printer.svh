@@ -282,6 +282,19 @@ virtual class uvm_printer;
   // holds each cell entry
   protected uvm_printer_row_info m_rows[$];
 
+  // Function: get_default
+  // shortcut for uvm_coreservice_t::get().get_default_printer()
+  static function uvm_printer get_default();
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  return cs.get_default_printer();
+  endfunction
+  // Function: set_default
+  // shortcut for uvm_coreservice_t::get().set_default_printer()  
+  static function void set_default(uvm_printer p);
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  cs.set_default_printer(p);
+  endfunction
+  
 endclass
 
 
@@ -332,6 +345,19 @@ class uvm_table_printer extends uvm_printer;
 
   extern function void calculate_max_widths();
 
+  // Function: get_default
+  // shortcut for uvm_coreservice_t::get().get_default_table_printer()
+  static function uvm_table_printer get_default();
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  return cs.get_default_table_printer();
+  endfunction
+  // Function: set_default
+  // shortcut for uvm_coreservice_t::get().set_default_table_printer()  
+  static function void set_default(uvm_table_printer p);
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  cs.set_default_table_printer(p);
+  endfunction
+  
 endclass
 
 
@@ -372,6 +398,19 @@ class uvm_tree_printer extends uvm_printer;
   //
   extern virtual function string emit();
 
+  // Function: get_default
+  // shortcut for uvm_coreservice_t::get().get_default_tree_printer()
+  static function uvm_tree_printer get_default();
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  return cs.get_default_tree_printer();
+  endfunction
+  
+  // Function: get_default
+  // shortcut for uvm_coreservice_t::get().set_default_tree_printer(p)
+  static function void set_default(uvm_tree_printer p);
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  cs.set_default_tree_printer(p);
+  endfunction
 endclass
 
 
@@ -399,7 +438,18 @@ class uvm_line_printer extends uvm_tree_printer;
     newline = " ";
     knobs.indent = 0;
   endfunction
-
+  // Function: get_default
+  // shortcut for uvm_coreservice_t::get().get_default_line_printer()
+  static function uvm_line_printer get_default();
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  return cs.get_default_line_printer();
+  endfunction
+   // Function: set_default
+  // shortcut for uvm_coreservice_t::get().set_default_line_printer() 
+  static function void set_default(uvm_line_printer p);
+	  uvm_coreservice_t cs = uvm_coreservice_t::get();
+	  cs.set_default_line_printer(p);
+  endfunction
 endclass
 
 

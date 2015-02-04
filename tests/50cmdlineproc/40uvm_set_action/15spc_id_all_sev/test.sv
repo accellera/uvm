@@ -50,7 +50,7 @@ class test extends uvm_test;
    //+uvm_set_action=uvm_test_top,A,_ALL_,UVM_NO_ACTION
 
    virtual function void report();
-     uvm_report_server rs = uvm_report_server::get_server();
+     uvm_report_server rs = uvm_report_server::get_default();
      if(rs.get_id_count("A") == 0)
        $write("** UVM TEST PASSED **\n");
    endfunction

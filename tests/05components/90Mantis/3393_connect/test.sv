@@ -92,7 +92,7 @@ class test extends uvm_test;
 
 
    function void report_phase(uvm_phase phase);
-      uvm_report_server svr = uvm_report_server::get_server();
+      uvm_report_server svr = uvm_report_server::get_default();
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0)
          $write("** UVM TEST PASSED **\n");

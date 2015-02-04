@@ -266,7 +266,7 @@ class test extends uvm_test;
    endtask
    
    function void final_phase(uvm_phase phase);
-      uvm_report_server svr = uvm_report_server::get_server();
+      uvm_report_server svr = uvm_report_server::get_default();
       
       super.final_phase(phase);
 

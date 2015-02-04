@@ -56,7 +56,7 @@ class test extends uvm_test;
 
 
    virtual function void report();
-     uvm_report_server rs = uvm_report_server::get_server();
+     uvm_report_server rs = uvm_report_server::get_default();
      if(rs.get_id_count("NSTVERB") != 1)
        pass_the_test = pass_the_test & 0;
      if(pass_the_test)

@@ -309,7 +309,7 @@ class uvm_report_handler extends uvm_object;
 
   virtual function void process_report_message(uvm_report_message report_message);
     process p = process::self();
-    uvm_report_server srvr = uvm_report_server::get_server();
+    uvm_report_server srvr = uvm_report_server::get_default();
     string id = report_message.get_id();
     uvm_severity severity = report_message.get_severity();
 
@@ -782,7 +782,7 @@ class uvm_report_handler extends uvm_object;
 
     begin
 		uvm_report_server srvr;
-	    srvr=uvm_report_server::get_server();        
+	    srvr=uvm_report_server::get_default();        
     	srvr.report_summarize();
     end
     

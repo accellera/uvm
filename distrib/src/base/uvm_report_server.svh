@@ -183,7 +183,7 @@ virtual class uvm_report_server extends uvm_object;
 
 `endif
 
-        // Function: set_server
+        // Function: set_default
         //
         // Sets the global report server to use for reporting.
         //
@@ -201,16 +201,16 @@ virtual class uvm_report_server extends uvm_object;
         // | cs.set_report_server(your_server);
         // |
         // | // Not using the uvm_coreservice_t:
-        // | uvm_report_server::set_server(your_server);
+        // | uvm_report_server::set_default(your_server);
    
-        static function void set_server(uvm_report_server server);
+        static function void set_default(uvm_report_server server);
 	        uvm_coreservice_t cs = uvm_coreservice_t::get();
-                server.copy(cs.get_report_server());
-                cs.set_report_server(server);
+	        server.copy(cs.get_report_server());
+	        cs.set_report_server(server);
         endfunction
 
 
-        // Function: get_server
+        // Function: get_default
         //
         // Gets the global report server used for reporting.
         //
@@ -226,13 +226,23 @@ virtual class uvm_report_server extends uvm_object;
         // |
         // | // Not using the uvm_coreservice_t:
         // | uvm_report_server rs;
-        // | rs = uvm_report_server::get_server();
+        // | rs = uvm_report_server::get_default();
         //
 
-        static function uvm_report_server get_server();
+        static function uvm_report_server get_default();
 	        uvm_coreservice_t cs = uvm_coreservice_t::get();
-                return cs.get_report_server();
+	        return cs.get_report_server();
         endfunction
+        
+        // @deprecated
+        static function void set_server(uvm_report_server server);
+	        set_default(server);
+       	endfunction
+                
+        // @deprecated
+	    static function uvm_report_server get_server();  
+		    return get_default();
+	    endfunction
 endclass
 
 //------------------------------------------------------------------------------

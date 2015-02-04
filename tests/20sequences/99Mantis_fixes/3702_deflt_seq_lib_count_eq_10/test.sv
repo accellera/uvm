@@ -96,7 +96,7 @@ module top;
       uvm_report_server svr;
       cs_ = uvm_coreservice_t::get();
       top = cs_.get_root();
-      svr = uvm_report_server::get_server();
+      svr = uvm_report_server::get_default();
 
        if (svr.get_id_count("SEQ_START") != 10) begin
          `uvm_error("SEQ_COUNT_NOT_10",$sformatf("Expected 10 sequences. Got %0d",svr.get_id_count("SEQ_START")))
