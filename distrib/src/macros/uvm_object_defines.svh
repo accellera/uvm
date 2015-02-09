@@ -733,7 +733,10 @@ endfunction \
       UVM_UNPACK: \
         if(!((FLAG)&UVM_NOPACK)) begin \
           if(((FLAG)&UVM_NOPACK) == 0 && ((FLAG)&UVM_REFERENCE) == 0) \
-            __m_uvm_status_container.packer.unpack_object(ARG); \
+          uvm_object lhs__; \
+          lhs__ = ARG; \
+            __m_uvm_status_container.packer.unpack_object_ext(lhs__); \
+            void'($cast(ARG, lhs__)); \ 
         end \
       UVM_RECORD: \
         `m_uvm_record_object(ARG,FLAG) \
@@ -1226,8 +1229,12 @@ endfunction \
         end \
       UVM_UNPACK: \
         if(!((FLAG)&UVM_NOPACK)) begin \
-          foreach(ARG[i]) \
-            __m_uvm_status_container.packer.unpack_object(ARG[i]); \
+          uvm_object lhs__; \
+          foreach(ARG[i]) begin \
+            lhs__ = ARG[i]; \
+            void'(__m_uvm_status_container.packer.unpack_object_ext(lhs__)); \
+            void'($cast(ARG[i], lhs__)); \
+          end \
         end \
       UVM_RECORD: \
         `m_uvm_record_qda_object(ARG,FLAG,$size(ARG)) \
@@ -1796,13 +1803,17 @@ endfunction \
         end \
       UVM_UNPACK: \
         if(!((FLAG)&UVM_NOPACK)) begin \
+          uvm_object lhs__; \
           int sz = ARG.size(); \
           if(__m_uvm_status_container.packer.use_metadata) sz = __m_uvm_status_container.packer.unpack_field_int(32); \
           if(sz != ARG.size()) begin \
             `M_UVM_``TYPE``_RESIZE(ARG,null) \
           end \
-          foreach(ARG[i]) \
-            __m_uvm_status_container.packer.unpack_object(ARG[i]); \
+          foreach(ARG[i]) begin \
+            lhs__ = ARG[i]; \
+            void'(__m_uvm_status_container.packer.unpack_object_ext(lhs__)); \
+            void'($cast(ARG[i], lhs__)); \
+          end \
         end \
       UVM_RECORD: \
         `m_uvm_record_qda_object(ARG,FLAG,ARG.size()) \
