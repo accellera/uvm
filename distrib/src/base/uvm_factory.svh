@@ -216,6 +216,18 @@ virtual class uvm_factory;
                                               string parent_inst_path="",
                                               string name=""); 
 
+   // Function: is_type_name_registered
+    
+     pure virtual
+        function bit is_type_name_registered  (string type_name);
+
+ 
+   // Function: is_type_registered 
+
+     pure virtual 
+        function bit is_type_registered     (uvm_object_wrapper obj); 
+
+    
   // Function: create_component_by_name
   //
   // Creates and returns a component or object of the requested type, which may
@@ -411,6 +423,21 @@ class uvm_default_factory extends uvm_factory;
                                               string parent_inst_path="",
                                               string name, 
                                               uvm_component parent);
+
+  // Function: is_type_name_registered
+  //
+  // silently check type with a given name was registered in the factory or not
+ 
+  extern virtual
+      function bit is_type_name_registered    (string type_name);
+
+   
+  // Function: is_type_registered
+  //
+  // silently check type is registered in the factory or not
+ 
+  extern virtual
+      function bit is_type_registered    (uvm_object_wrapper obj);
 
   // Group: Debug
 
@@ -1244,6 +1271,20 @@ function uvm_object uvm_default_factory::create_object_by_type (uvm_object_wrapp
   return requested_type.create_object(name);
 
 endfunction
+
+// is_type_name_registered
+// ---------------------
+function bit uvm_default_factory::is_type_name_registered (string type_name);
+  return (m_type_names.exists(type_name));
+endfunction
+
+
+// is_type_registered
+// ---------------------
+function bit uvm_default_factory::is_type_registered (uvm_object_wrapper obj);
+  return (m_types.exists(obj));
+endfunction
+
 
 
 // create_component_by_name

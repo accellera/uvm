@@ -67,6 +67,8 @@ module top;
         test_objection.raise_objection(this.tc, "raise tc");
         test_objection.raise_objection(uvm_root::get(), "raise root");
 
+
+	test_objection.display_objections();
         if (test_objection.get_objection_total(uvm_root::get()) != 3)
           `uvm_fatal("FAIL", "wrong total for root")
         if (test_objection.get_objection_count(uvm_root::get()) != 1)
