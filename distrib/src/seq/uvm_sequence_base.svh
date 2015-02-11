@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
-//   Copyright 2007-2011 Cadence Design Systems, Inc. 
+//   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -29,20 +29,20 @@
 //
 // A sequence is executed by calling its <start> method, either directly
 // or invocation of any of the `uvm_do_* macros.
-// 
+//
 // Executing sequences via <start>:
-// 
+//
 // A sequence's <start> method has a ~parent_sequence~ argument that controls
 // whether <pre_do>, <mid_do>, and <post_do> are called *in the parent*
 // sequence. It also has a ~call_pre_post~ argument that controls whether its
 // <pre_body> and <post_body> methods are called.
 // In all cases, its <pre_start> and <post_start> methods are always called.
-// 
+//
 // When <start> is called directly, you can provide the appropriate arguments
 // according to your application.
 //
 // The sequence execution flow looks like this
-// 
+//
 // User code
 //
 //| sub_seq.randomize(...); // optional
@@ -60,7 +60,7 @@
 //|     parent_seq.post_do(this) (func)  if parent_sequence!=null
 //|   sub_seq.post_body()        (task)  if call_pre_post==1
 //|   sub_seq.post_start()       (task)
-// 
+//
 //
 // Executing sub-sequences via `uvm_do macros:
 //
@@ -74,7 +74,7 @@
 // are called.
 //
 // The sub-sequence execution flow looks like
-// 
+//
 // User code
 //
 //|
@@ -93,18 +93,18 @@
 //|
 //
 // Remember, it is the *parent* sequence's pre|mid|post_do that are called, not
-// the sequence being executed. 
+// the sequence being executed.
 //
-// 
+//
 // Executing sequence items via <start_item>/<finish_item> or `uvm_do macros:
-// 
+//
 // Items are started in the <body> of a parent sequence via calls to
 // <start_item>/<finish_item> or invocations of any of the `uvm_do
 // macros. The <pre_do>, <mid_do>, and <post_do> methods of the parent
 // sequence will be called as the item is executed.
 //
 // The sequence-item execution flow looks like
-// 
+//
 // User code
 //
 //| parent_seq.start_item(item, priority);
@@ -126,7 +126,7 @@
 //|   sequencer.send_request(item)    (func)  \finish_item /
 //|   sequencer.wait_for_item_done()  (task)  /
 //|   parent_seq.post_do(item)        (func) /
-// 
+//
 // Attempting to execute a sequence via <start_item>/<finish_item>
 // will produce a run-time error.
 //------------------------------------------------------------------------------
@@ -144,10 +144,10 @@ class uvm_sequence_base extends uvm_sequence_item;
   protected int m_sqr_seq_ids[int];
 
   protected bit children_array[uvm_sequence_base];
-   
+
   protected uvm_sequence_item response_queue[$];
   protected int               response_queue_depth = 8;
-  protected bit               response_queue_error_report_disabled;
+  protected bit               response_queue_error_report_enabled;
 
   // Variable: do_not_randomize
   //
@@ -169,7 +169,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Function: new
   //
-  // The constructor for uvm_sequence_base. 
+  // The constructor for uvm_sequence_base.
   //
   function new (string name = "uvm_sequence");
 
@@ -203,7 +203,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
 
   // Task: wait_for_sequence_state
-  // 
+  //
   // Waits until the sequence reaches one of the given ~state~. If the sequence
   // is already in one of the state, this method returns immediately.
   //
@@ -260,11 +260,11 @@ class uvm_sequence_base extends uvm_sequence_item;
                       int this_priority = -1,
                       bit call_pre_post = 1);
     bit                  old_automatic_phase_objection;
-     
+
     set_item_context(parent_sequence, sequencer);
 
     if (!(m_sequence_state inside {UVM_CREATED,UVM_STOPPED,UVM_FINISHED})) begin
-      uvm_report_fatal("SEQ_NOT_DONE", 
+      uvm_report_fatal("SEQ_NOT_DONE",
          {"Sequence ", get_full_name(), " already started"},UVM_NONE);
     end
 
@@ -296,8 +296,8 @@ class uvm_sequence_base extends uvm_sequence_item;
           m_tr_recorder = uvm_recorder::get_recorder_from_handle(handle);
        end else begin
           stream = m_sequencer.get_tr_stream(get_root_sequence_name(), "Transactions");
-          handle = m_sequencer.begin_child_tr(this, 
-                                              (m_parent_sequence.m_tr_recorder == null) ? 0 : m_parent_sequence.m_tr_recorder.get_handle(), 
+          handle = m_sequencer.begin_child_tr(this,
+                                              (m_parent_sequence.m_tr_recorder == null) ? 0 : m_parent_sequence.m_tr_recorder.get_handle(),
                                               get_root_sequence_name());
           m_tr_recorder = uvm_recorder::get_recorder_from_handle(handle);
        end
@@ -328,7 +328,7 @@ class uvm_sequence_base extends uvm_sequence_item;
         if (get_automatic_phase_objection()) begin
            m_safe_raise_starting_phase("automatic phase objection");
         end
-         
+
         pre_start();
 
         if (call_pre_post == 1) begin
@@ -367,17 +367,17 @@ class uvm_sequence_base extends uvm_sequence_item;
         if (get_automatic_phase_objection()) begin
            m_safe_drop_starting_phase("automatic phase objection");
         end
-         
+
         m_sequence_state = UVM_FINISHED;
         #0;
 
       end
     join
 
-    if (m_sequencer != null) begin      
+    if (m_sequencer != null) begin
       m_sequencer.end_tr(this);
     end
-        
+
     // Clean up any sequencer queues after exiting; if we
     // were forcibly stoped, this step has already taken place
     if (m_sequence_state != UVM_STOPPED) begin
@@ -403,7 +403,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // optional execution of <pre_body>.
   // This method should not be called directly by the user.
 
-  virtual task pre_start();  
+  virtual task pre_start();
     return;
   endtask
 
@@ -416,7 +416,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // called.
   // This method should not be called directly by the user.
 
-  virtual task pre_body();  
+  virtual task pre_body();
     return;
   endtask
 
@@ -447,8 +447,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   virtual function void mid_do(uvm_sequence_item this_item);
     return;
   endfunction
-  
-  
+
+
   // Task: body
   //
   // This is the user-defined task where the main sequence code resides.
@@ -457,7 +457,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   virtual task body();
     uvm_report_warning("uvm_sequence_base", "Body definition undefined");
     return;
-  endtask  
+  endtask
 
 
   // Function: post_do
@@ -485,7 +485,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   virtual task post_body();
     return;
   endtask
-    
+
 
   // Task: post_start
   //
@@ -493,7 +493,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // optional execution of <post_body>.
   // This method should not be called directly by the user.
 
-  virtual task post_start();  
+  virtual task post_start();
     return;
   endtask
 
@@ -533,8 +533,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   uvm_phase m_set_starting_phase;
   // Ensures we only warn once per sequence
   bit m_warn_deprecated_set;
-`endif 
-   
+`endif
+
   // Function: get_starting_phase
   // Returns the 'starting phase'.
   //
@@ -543,9 +543,9 @@ class uvm_sequence_base extends uvm_sequence_item;
   // this sequence is started as the default sequence on a sequencer.
   // See <uvm_sequencer_base::start_phase_sequence> for more information.
   //
-  // Internally, the <uvm_sequence_base> uses an <uvm_get_to_lock_dap> to 
-  // protect the starting phase value from being modified 
-  // after the reference has been read.  Once the sequence has ended 
+  // Internally, the <uvm_sequence_base> uses an <uvm_get_to_lock_dap> to
+  // protect the starting phase value from being modified
+  // after the reference has been read.  Once the sequence has ended
   // its execution (either via natural termination, or being killed),
   // then the starting phase value can be modified again.
   //
@@ -559,16 +559,16 @@ class uvm_sequence_base extends uvm_sequence_item;
               `uvm_warning("UVM_DEPRECATED", "'starting_phase' is deprecated and not part of the UVM standard.  See documentation for uvm_sequence_base::set_starting_phase")
               m_warn_deprecated_set = 1;
            end
-           
+
            if (m_starting_phase_dap.try_set(starting_phase))
              m_set_starting_phase = starting_phase;
            else begin
               uvm_phase dap_phase = m_starting_phase_dap.get();
               `uvm_error("UVM/SEQ/LOCK_DEPR",
                          {"The deprecated 'starting_phase' variable has been set to '",
-                          (starting_phase == null) ? "<null>" : starting_phase.get_full_name(), 
+                          (starting_phase == null) ? "<null>" : starting_phase.get_full_name(),
                           "' after a call to get_starting_phase locked the value to '",
-                          (dap_phase == null) ? "<null>" : dap_phase.get_full_name(), 
+                          (dap_phase == null) ? "<null>" : dap_phase.get_full_name(),
                           "'.  See documentation for uvm_sequence_base::set_starting_phase."})
            end
         end
@@ -581,9 +581,9 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Function: set_starting_phase
   // Sets the 'starting phase'.
   //
-  // Internally, the <uvm_sequence_base> uses a <uvm_get_to_lock_dap> to 
-  // protect the starting phase value from being modified 
-  // after the reference has been read.  Once the sequence has ended 
+  // Internally, the <uvm_sequence_base> uses a <uvm_get_to_lock_dap> to
+  // protect the starting phase value from being modified
+  // after the reference has been read.  Once the sequence has ended
   // its execution (either via natural termination, or being killed),
   // then the starting phase value can be modified again.
   //
@@ -592,7 +592,7 @@ class uvm_sequence_base extends uvm_sequence_item;
      begin
         if (starting_phase != m_set_starting_phase) begin
            if (!m_warn_deprecated_set) begin
-              `uvm_warning("UVM_DEPRECATED", 
+              `uvm_warning("UVM_DEPRECATED",
                            {"The deprecated 'starting_phase' variable has been set to '",
                             starting_phase.get_full_name(),
                             "' manually.  See documentation for uvm_sequence_base::set_starting_phase."})
@@ -604,10 +604,10 @@ class uvm_sequence_base extends uvm_sequence_item;
         end
      end
 `endif
-           
+
      m_starting_phase_dap.set(phase);
   endfunction : set_starting_phase
-   
+
   // Function: set_automatic_phase_objection
   // Sets the 'automatically object to starting phase' bit.
   //
@@ -615,7 +615,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // within a sequence is to simply ~raise~ the phase's objection
   // prior to executing the sequence, and ~drop~ the objection
   // after ending the sequence (either naturally, or
-  // via a call to <kill>). In order to 
+  // via a call to <kill>). In order to
   // simplify this interaction for the user, the UVM
   // provides the ability to perform this functionality
   // automatically.
@@ -644,9 +644,9 @@ class uvm_sequence_base extends uvm_sequence_item;
   //| seq.set_automatic_phase_objection(1);
   //| seq.start(my_sequencer);
   //
-  // Internally, the <uvm_sequence_base> uses a <uvm_get_to_lock_dap> to 
-  // protect the ~automatic_phase_objection~ value from being modified 
-  // after the reference has been read.  Once the sequence has ended 
+  // Internally, the <uvm_sequence_base> uses a <uvm_get_to_lock_dap> to
+  // protect the ~automatic_phase_objection~ value from being modified
+  // after the reference has been read.  Once the sequence has ended
   // its execution (either via natural termination, or being killed),
   // then the ~automatic_phase_objection~ value can be modified again.
   //
@@ -658,7 +658,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction : set_automatic_phase_objection
 
   // Function: get_automatic_phase_objection
-  // Returns (and locks) the value of the 'automatically object to 
+  // Returns (and locks) the value of the 'automatically object to
   // starting phase' bit.
   //
   // If 1, then the sequence will automatically raise an objection
@@ -685,7 +685,7 @@ class uvm_sequence_base extends uvm_sequence_item;
      if (starting_phase != null)
        starting_phase.drop_objection(this, description, count);
   endfunction : m_safe_drop_starting_phase
-   
+
   //------------------------
   // Group: Sequence Control
   //------------------------
@@ -733,7 +733,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // wait_for_relevant so that the sequencer has a way to wait for a
   // sequence to become relevant.
 
-  virtual function bit is_relevant(); 
+  virtual function bit is_relevant();
     is_rel_default = 1;
     return 1;
   endfunction
@@ -743,7 +743,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   // This method is called by the sequencer when all available sequences are
   // not relevant.  When wait_for_relevant returns the sequencer attempt to
-  // re-arbitrate. 
+  // re-arbitrate.
   //
   // Returning from this call does not guarantee a sequence is relevant,
   // although that would be the ideal. The method provide some delay to
@@ -751,17 +751,17 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   // If a sequence defines is_relevant so that it is not always relevant (by
   // default, a sequence is always relevant), then the sequence must also supply
-  // a wait_for_relevant method.  
+  // a wait_for_relevant method.
 
   virtual task wait_for_relevant();
     event e;
     wait_rel_default = 1;
     if (is_rel_default != wait_rel_default)
-      uvm_report_fatal("RELMSM", 
+      uvm_report_fatal("RELMSM",
         "is_relevant() was implemented without defining wait_for_relevant()", UVM_NONE);
     @e;  // this is intended to never return
   endtask
- 
+
 
   // Task: lock
   //
@@ -786,7 +786,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
 
   // Task: grab
-  // 
+  //
   // Requests a lock on the specified sequencer.  If no argument is supplied,
   // the lock will be requested on the current default sequencer.
   //
@@ -874,7 +874,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   // If a sequence has issued locks, grabs, or requests on sequencers other than
   // the default sequencer, then care must be taken to unregister the sequence
-  // with the other sequencer(s) using the sequencer unregister_sequence() 
+  // with the other sequencer(s) using the sequencer unregister_sequence()
   // method.
 
   function void kill();
@@ -902,7 +902,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
 
   // Function: do_kill
-  // 
+  //
   // This function is a user hook that is called whenever a sequence is
   // terminated by using either sequence.kill() or sequencer.stop_sequences()
   // (which effectively calls sequence.kill()).
@@ -936,10 +936,10 @@ class uvm_sequence_base extends uvm_sequence_item;
   // using the factory.  The sequence_item or sequence will be initialized
   // to communicate with the specified sequencer.
 
-  protected function uvm_sequence_item create_item(uvm_object_wrapper type_var, 
+  protected function uvm_sequence_item create_item(uvm_object_wrapper type_var,
                                                    uvm_sequencer_base l_sequencer, string name);
 
-    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_coreservice_t cs = uvm_coreservice_t::get();
     uvm_factory factory=cs.get_factory();
     $cast(create_item,  factory.create_object_by_type( type_var, this.get_full_name(), name ));
 
@@ -960,27 +960,27 @@ class uvm_sequence_base extends uvm_sequence_item;
                            int set_priority = -1,
                            uvm_sequencer_base sequencer=null);
     uvm_sequence_base seq;
-     
+
     if(item == null) begin
       uvm_report_fatal("NULLITM",
          {"attempting to start a null item from sequence '",
           get_full_name(), "'"}, UVM_NONE);
       return;
     end
-          
+
     if($cast(seq, item)) begin
       uvm_report_fatal("SEQNOTITM",
          {"attempting to start a sequence using start_item() from sequence '",
           get_full_name(), "'. Use seq.start() instead."}, UVM_NONE);
       return;
     end
-          
+
     if (sequencer == null)
         sequencer = item.get_sequencer();
-        
+
     if(sequencer == null)
-        sequencer = get_sequencer();   
-        
+        sequencer = get_sequencer();
+
     if(sequencer == null) begin
         uvm_report_fatal("SEQ",{"neither the item's sequencer nor dedicated sequencer has been supplied to start item in ",get_full_name()},UVM_NONE);
        return;
@@ -990,23 +990,23 @@ class uvm_sequence_base extends uvm_sequence_item;
 
     if (set_priority < 0)
       set_priority = get_priority();
-    
+
     sequencer.wait_for_grant(this, set_priority);
 
     if (sequencer.is_auto_item_recording_enabled()) begin
-      void'(sequencer.begin_child_tr(item, 
-                                     (m_tr_recorder == null) ? 0 : m_tr_recorder.get_handle(), 
+      void'(sequencer.begin_child_tr(item,
+                                     (m_tr_recorder == null) ? 0 : m_tr_recorder.get_handle(),
                                      item.get_root_sequence_name(), "Transactions"));
     end
-    
+
     pre_do(1);
 
-  endtask  
+  endtask
 
 
   // Function: finish_item
   //
-  // finish_item, together with start_item together will initiate operation of 
+  // finish_item, together with start_item together will initiate operation of
   // a sequence_item.  Finish_item must be called
   // after start_item with no delays or delta-cycles.  Randomization, or other
   // functions may be called between the start_item and finish_item calls.
@@ -1016,7 +1016,7 @@ class uvm_sequence_base extends uvm_sequence_item;
                             int set_priority = -1);
 
     uvm_sequencer_base sequencer;
-    
+
     sequencer = item.get_sequencer();
 
     if (sequencer == null) begin
@@ -1035,7 +1035,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   endtask
 
-  
+
   // Task: wait_for_grant
   //
   // This task issues a request to the current sequencer.  If item_priority is
@@ -1059,7 +1059,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Function: send_request
   //
-  // The send_request function may only be called after a wait_for_grant call. 
+  // The send_request function may only be called after a wait_for_grant call.
   // This call will send the request item to the sequencer, which will forward
   // it to the driver. If the rerandomize bit is set, the item will be
   // randomized before being sent to the driver.
@@ -1131,8 +1131,30 @@ class uvm_sequence_base extends uvm_sequence_item;
     return;
   endfunction
 
+  // Function: set_response_queue_error_report_enabled
+  //
+  // By default, if the internal esponse queue overflows, an error is
+  // reported.  The response queue will overflow if more responses are
+  // sent to this from the driver than ~get_response~ calls are made.
+  //
+  // Setting the value to '0' disables these errors, while setting it to
+  // '1' enables them.
+  function void set_response_queue_error_report_enabled(bit value);
+    response_queue_error_report_enabled = value;
+  endfunction : set_response_queue_error_report_enabled
 
-  // Function: set_response_queue_error_report_disabled
+  // Function: get_response_queue_error_report_enabled
+  //
+  // When this bit is '1' (default value), error reports are generated when
+  // the response queue overflows.  When this bit is '0', no such error
+  // reports are generated.
+  function bit get_response_queue_error_report_enabled();
+    return response_queue_error_report_enabled;
+  endfunction : get_response_queue_error_report_enabled
+
+`ifndef UVM_NO_DEPRECATED
+
+  // Function- set_response_queue_error_report_disabled
   //
   // By default, if the response_queue overflows, an error is reported. The
   // response_queue will overflow if more responses are sent to this sequence
@@ -1140,20 +1162,21 @@ class uvm_sequence_base extends uvm_sequence_item;
   // disables these errors, while setting it to 1 enables them.
 
   function void set_response_queue_error_report_disabled(bit value);
-    response_queue_error_report_disabled = value;
+    response_queue_error_report_enabled = !value;
   endfunction
 
-  
-  // Function: get_response_queue_error_report_disabled
+
+  // Function- get_response_queue_error_report_disabled
   //
   // When this bit is 0 (default value), error reports are generated when
   // the response queue overflows. When this bit is 1, no such error
   // reports are generated.
 
   function bit get_response_queue_error_report_disabled();
-    return response_queue_error_report_disabled;
+    return !response_queue_error_report_enabled;
   endfunction
 
+`endif
 
   // Function: set_response_queue_depth
   //
@@ -1165,7 +1188,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   function void set_response_queue_depth(int value);
     response_queue_depth = value;
-  endfunction  
+  endfunction
 
 
   // Function: get_response_queue_depth
@@ -1174,7 +1197,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   function int get_response_queue_depth();
     return response_queue_depth;
-  endfunction  
+  endfunction
 
 
   // Function: clear_response_queue
@@ -1192,7 +1215,7 @@ class uvm_sequence_base extends uvm_sequence_item;
       response_queue.push_back(response);
       return;
     end
-    if (response_queue_error_report_disabled == 0) begin
+    if (response_queue_error_report_enabled) begin
       uvm_report_error(get_full_name(), "Response queue overflow, response was dropped", UVM_NONE);
     end
   endfunction
@@ -1224,7 +1247,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     forever begin
       queue_size = response_queue.size();
       for (i = 0; i < queue_size; i++) begin
-        if (response_queue[i].get_transaction_id() == transaction_id) 
+        if (response_queue[i].get_transaction_id() == transaction_id)
           begin
             $cast(response,response_queue[i]);
             response_queue.delete(i);
@@ -1251,13 +1274,13 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // For user random selection. This excludes the exhaustive and
   // random sequences.
-  constraint pick_sequence { 
+  constraint pick_sequence {
        (num_sequences() <= 2) || (seq_kind >= 2);
        (seq_kind <  num_sequences()) || (seq_kind == 0); }
 
 
   // Function- num_sequences
-  // 
+  //
   // Returns the number of sequences in the sequencer's sequence library.
 
   function int num_sequences();
@@ -1278,7 +1301,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     if(m_sequencer != null)
       return m_sequencer.get_seq_kind(type_name);
-    else 
+    else
       uvm_report_warning("NULLSQ", $sformatf("%0s sequencer is null.",
                                            get_type_name()), UVM_NONE);
   endfunction
@@ -1292,17 +1315,17 @@ class uvm_sequence_base extends uvm_sequence_item;
   function uvm_sequence_base get_sequence(int unsigned req_kind);
     uvm_sequence_base m_seq;
     string m_seq_type;
-    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_coreservice_t cs = uvm_coreservice_t::get();
     uvm_factory factory=cs.get_factory();
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     if (req_kind < 0 || req_kind >= m_sequencer.sequences.size()) begin
-      uvm_report_error("SEQRNG", 
+      uvm_report_error("SEQRNG",
         $sformatf("Kind arg '%0d' out of range. Need 0-%0d",
         req_kind, m_sequencer.sequences.size()-1), UVM_NONE);
     end
     m_seq_type = m_sequencer.sequences[req_kind];
     if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
-      uvm_report_fatal("FCTSEQ", 
+      uvm_report_fatal("FCTSEQ",
         $sformatf("Factory cannot produce a sequence of type %0s.",
         m_seq_type), UVM_NONE);
     end
@@ -1319,17 +1342,17 @@ class uvm_sequence_base extends uvm_sequence_item;
   task do_sequence_kind(int unsigned req_kind);
     string m_seq_type;
     uvm_sequence_base m_seq;
-    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_coreservice_t cs = uvm_coreservice_t::get();
     uvm_factory factory=cs.get_factory();
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     m_seq_type = m_sequencer.sequences[req_kind];
     if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
-      uvm_report_fatal("FCTSEQ", 
+      uvm_report_fatal("FCTSEQ",
         $sformatf("Factory cannot produce a sequence of type %0s.", m_seq_type), UVM_NONE);
     end
 
     m_seq.set_item_context(this, m_sequencer);
-    
+
     if(!m_seq.randomize()) begin
       uvm_report_warning("RNDFLD", "Randomization failed in do_sequence_kind()");
     end
@@ -1343,11 +1366,11 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   function uvm_sequence_base get_sequence_by_name(string seq_name);
     uvm_sequence_base m_seq;
-    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_coreservice_t cs = uvm_coreservice_t::get();
     uvm_factory factory=cs.get_factory();
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     if (!$cast(m_seq, factory.create_object_by_name(seq_name, get_full_name(), seq_name))) begin
-      uvm_report_fatal("FCTSEQ", 
+      uvm_report_fatal("FCTSEQ",
         $sformatf("Factory cannot produce a sequence of type %0s.", seq_name), UVM_NONE);
     end
     m_seq.set_use_sequence_info(1);
@@ -1390,7 +1413,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
     return -1;
   endfunction
-  
+
 
   // m_set_sqr_sequence_id
   // ---------------------
@@ -1400,5 +1423,4 @@ class uvm_sequence_base extends uvm_sequence_item;
     set_sequence_id(sequence_id);
   endfunction
 
-endclass                
-
+endclass

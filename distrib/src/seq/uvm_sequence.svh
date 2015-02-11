@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   Copyright 2013 Cisco Systems, Inc.
 //   All Rights Reserved Worldwide
@@ -68,7 +68,7 @@ virtual class uvm_sequence #(type REQ = uvm_sequence_item,
 
   function void send_request(uvm_sequence_item request, bit rerandomize = 0);
     REQ m_request;
-    
+
     if (m_sequencer == null) begin
       uvm_report_fatal("SSENDREQ", "Null m_sequencer reference", UVM_NONE);
     end
@@ -113,7 +113,7 @@ virtual class uvm_sequence #(type REQ = uvm_sequence_item,
   //
   // If a response is dropped in the response queue, an error will be reported
   // unless the error reporting is disabled via
-  // set_response_queue_error_report_disabled.
+  // set_response_queue_error_report_enabled.
 
   virtual task get_response(output RSP response, input int transaction_id = -1);
     uvm_sequence_item rsp;
