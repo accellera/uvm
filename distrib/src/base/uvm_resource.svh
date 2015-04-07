@@ -711,7 +711,13 @@ class uvm_resource_pool;
   // <set_override>, <set_name_override>, or <set_type_override>
   // functions.
   //
-  function void set (uvm_resource_base rsrc, 
+  // MDS new public API without override argument
+  function void set (uvm_resource_base rsrc);
+     set_internal(rsrc) ;
+  endfunction
+
+  // MDS - changed to set_internal to hide the override argument
+  function void set_internal (uvm_resource_base rsrc, 
                      uvm_resource_types::override_t override = 0);
 
     uvm_resource_types::rsrc_q_t rq;
@@ -766,7 +772,8 @@ class uvm_resource_pool;
   // and will override both by name and type.
 
   function void set_override(uvm_resource_base rsrc);
-    set(rsrc, (uvm_resource_types::NAME_OVERRIDE |
+     //MDS changed set to set_internal
+    set_internal(rsrc, (uvm_resource_types::NAME_OVERRIDE |
                uvm_resource_types::TYPE_OVERRIDE));
   endfunction
 
@@ -777,7 +784,8 @@ class uvm_resource_pool;
   // using normal precedence in the type map and will override the name.
 
   function void set_name_override(uvm_resource_base rsrc);
-    set(rsrc, uvm_resource_types::NAME_OVERRIDE);
+     //MDS changed set to set_internal
+    set_internal(rsrc, uvm_resource_types::NAME_OVERRIDE);
   endfunction
 
 
@@ -787,7 +795,8 @@ class uvm_resource_pool;
   // using normal precedence in the name map and will override the type.
 
   function void set_type_override(uvm_resource_base rsrc);
-    set(rsrc, uvm_resource_types::TYPE_OVERRIDE);
+     //MDS changed set to set_internal
+    set_internal(rsrc, uvm_resource_types::TYPE_OVERRIDE);
   endfunction
 
 
@@ -1481,7 +1490,8 @@ end
 
   function void set();
     uvm_resource_pool rp = uvm_resource_pool::get();
-    rp.set(this);
+     //MDS changed set to set_internal
+    rp.set_internal(this);
   endfunction
 
   
@@ -1496,7 +1506,8 @@ end
 
   function void set_override(uvm_resource_types::override_t override = 2'b11);
     uvm_resource_pool rp = uvm_resource_pool::get();
-    rp.set(this, override);
+     //MDS changed set to set_internal
+    rp.set_internal(this, override);
   endfunction
 
   // Function: get_by_name
