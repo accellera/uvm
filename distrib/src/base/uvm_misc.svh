@@ -434,7 +434,7 @@ endfunction
 function string uvm_object_value_str(uvm_object v);
   if (v == null)
     return "<null>";
-  uvm_object_value_str.itoa(v.get_inst_id());
+  uvm_object_value_str.itoa(v.get_inst_id_ieee());
   uvm_object_value_str = {"@",uvm_object_value_str};
 endfunction
 
@@ -631,13 +631,13 @@ typedef class uvm_root;
 typedef class uvm_report_object;
 
 //------------------------------------------------------------------------------
-// CLASS: uvm_utils #(TYPE,FIELD)
+// CLASS: uvm_utils_ieee #(TYPE,FIELD)
 //
 // This class contains useful template functions.
 //
 //------------------------------------------------------------------------------
         
-class uvm_utils #(type TYPE=int, string FIELD="config");
+class uvm_utils_ieee #(type TYPE=int, string FIELD="config");
 
   typedef TYPE types_t[$];
 

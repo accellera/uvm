@@ -24,8 +24,8 @@ const string s_connection_error_id = "Connection Error";
 const string s_connection_warning_id = "Connection Warning";
 const string s_spaces = "                       ";
 
-typedef class uvm_port_component_base;
-typedef uvm_port_component_base uvm_port_list[string];
+typedef class uvm_port_component_base_ieee;
+typedef uvm_port_component_base_ieee uvm_port_list[string];
 
 
 // TITLE: Port Base Classes
@@ -34,7 +34,7 @@ typedef uvm_port_component_base uvm_port_list[string];
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_port_component_base
+// CLASS: uvm_port_component_base_ieee
 //
 //------------------------------------------------------------------------------
 // This class defines an interface for obtaining a port's connectivity lists
@@ -48,7 +48,7 @@ typedef uvm_port_component_base uvm_port_list[string];
 // ~get_type_name~ methods inherited from <uvm_component>.
 //------------------------------------------------------------------------------
 
-virtual class uvm_port_component_base extends uvm_component;
+virtual class uvm_port_component_base_ieee extends uvm_component;
    
   function new (string name, uvm_component parent);
     super.new(name,parent);
@@ -102,11 +102,11 @@ endclass
 // CLASS: uvm_port_component #(PORT)
 //
 //------------------------------------------------------------------------------
-// See description of <uvm_port_component_base> for information about this class
+// See description of <uvm_port_component_base_ieee> for information about this class
 //------------------------------------------------------------------------------
 
 
-class uvm_port_component #(type PORT=uvm_object) extends uvm_port_component_base;
+class uvm_port_component #(type PORT=uvm_object) extends uvm_port_component_base_ieee;
   
   PORT m_port;
 
@@ -174,7 +174,7 @@ endclass
 //
 // The UVM provides a complete set of ports, exports, and imps for the OSCI-
 // standard TLM interfaces. They can be found in the ../src/tlm/ directory.
-// For the TLM interfaces, the IF parameter is always <uvm_tlm_if_base #(T1,T2)>.
+// For the TLM interfaces, the IF parameter is always <uvm_tlm_if_base_ieee #(T1,T2)>.
 //
 // Just before <uvm_component::end_of_elaboration_phase>, an internal
 // <uvm_component::resolve_bindings> process occurs, after which each port and
@@ -274,7 +274,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   endfunction
 
 
-  // Function: get_comp
+  // Function: get_comp_ieee
   //
   // Returns a handle to the internal proxy component representing this port.
   //
@@ -282,7 +282,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   // <uvm_component>. Instead, they contain an instance of
   // <uvm_port_component #(PORT)> that serves as a proxy to this port.
 
-  virtual function uvm_port_component_base get_comp();
+  virtual function uvm_port_component_base_ieee get_comp_ieee();
     return m_comp;
   endfunction
 
@@ -606,7 +606,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
     list.delete();
     foreach (m_provided_by[name]) begin
       port = m_provided_by[name];
-      list[name] = port.get_comp();
+      list[name] = port.get_comp_ieee();
     end
   endfunction
 
@@ -619,7 +619,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
     list.delete();
     foreach (m_provided_to[name]) begin
       port = m_provided_to[name];
-      list[name] = port.get_comp();
+      list[name] = port.get_comp_ieee();
     end
   endfunction
 

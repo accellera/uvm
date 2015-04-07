@@ -205,25 +205,25 @@ virtual class uvm_printer;
   extern virtual function string emit (); 
 
 
-  // Function: format_row
+  // Function: format_row_ieee
   //
   // Hook for producing custom output of a single field (row).
   //
-  extern virtual function string format_row (uvm_printer_row_info row);
+  extern virtual function string format_row_ieee (uvm_printer_row_info row);
 
 
-  // Function: format_header
+  // Function: format_header_ieee
   //
   // Hook to override base header with a custom header. 
-  virtual function string format_header();
+  virtual function string format_header_ieee();
     return "";
   endfunction
 
 
-  // Function: format_footer
+  // Function: format_footer_ieee
   //
   // Hook to override base footer with a custom footer. 
-  virtual function string format_footer();
+  virtual function string format_footer_ieee();
     return "";
   endfunction
 
@@ -417,7 +417,7 @@ class uvm_printer_knobs;
 
   // Variable: header
   //
-  // Indicates whether the <uvm_printer::format_header> function should be called when
+  // Indicates whether the <uvm_printer::format_header_ieee> function should be called when
   // printing an object.
 
   bit header = 1;
@@ -425,7 +425,7 @@ class uvm_printer_knobs;
 
   // Variable: footer
   //
-  // Indicates whether the <uvm_printer::format_footer> function should be called when
+  // Indicates whether the <uvm_printer::format_footer_ieee> function should be called when
   // printing an object. 
 
   bit footer = 1;
@@ -645,10 +645,10 @@ function string uvm_printer::emit ();
 endfunction
 
 
-// format_row
+// format_row_ieee
 // ----------
 
-function string uvm_printer::format_row (uvm_printer_row_info row);
+function string uvm_printer::format_row_ieee (uvm_printer_row_info row);
   return "";
 endfunction
 
@@ -1061,7 +1061,7 @@ function string uvm_table_printer::emit();
   
   if (knobs.header) begin
     string header;
-    user_format = format_header();
+    user_format = format_header_ieee();
     if (user_format == "") begin
       string dash_id, dash_typ, dash_sz;
       string head_id, head_typ, head_sz;
@@ -1089,7 +1089,7 @@ function string uvm_table_printer::emit();
 
   foreach (m_rows[i]) begin
     uvm_printer_row_info row = m_rows[i];
-    user_format = format_row(row);
+    user_format = format_row_ieee(row);
     if (user_format == "") begin
       string row_str;
       if (knobs.identifier)
@@ -1106,7 +1106,7 @@ function string uvm_table_printer::emit();
   end
  
   if (knobs.footer) begin
-    user_format = format_footer();
+    user_format = format_footer_ieee();
     if (user_format == "")
       s = {s, dashes};
     else
@@ -1149,14 +1149,14 @@ function string uvm_tree_printer::emit();
 
   // Header
   if (knobs.header) begin
-    user_format = format_header();
+    user_format = format_header_ieee();
     if (user_format != "")
       s = {s, user_format, linefeed};
   end
 
   foreach (m_rows[i]) begin
     uvm_printer_row_info row = m_rows[i];
-    user_format = format_row(row);
+    user_format = format_row_ieee(row);
     if (user_format == "") begin
       string indent_str;
       indent_str = space.substr(1,row.level * knobs.indent); 
@@ -1217,7 +1217,7 @@ function string uvm_tree_printer::emit();
  
   // Footer
   if (knobs.footer) begin
-    user_format = format_footer();
+    user_format = format_footer_ieee();
     if (user_format != "")
       s = {s, user_format, linefeed};
   end

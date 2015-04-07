@@ -26,7 +26,7 @@ typedef class uvm_component_name_check_visitor;
 typedef class uvm_component;
 
 typedef class uvm_tr_database;
-typedef class uvm_text_tr_database;
+typedef class uvm_text_tr_database_ieee;
    
 `ifndef UVM_CORESERVICE_TYPE
 `define UVM_CORESERVICE_TYPE uvm_default_coreservice_t
@@ -149,11 +149,11 @@ class uvm_default_coreservice_t extends uvm_coreservice_t;
         // returns the current default record database
         //
         // If no default record database has been set before this method
-        // is called, returns an instance of <uvm_text_tr_database>
+        // is called, returns an instance of <uvm_text_tr_database_ieee>
         virtual function uvm_tr_database get_default_tr_database();
            if (tr_database == null) begin
 	           process p = process::self();
-	           uvm_text_tr_database tx_db;
+	           uvm_text_tr_database_ieee tx_db;
 	           string s;
 	           if(p != null)
 	           	s = p.get_randstate();

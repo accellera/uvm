@@ -34,7 +34,7 @@ typedef class uvm_recorder;
 typedef class uvm_tr_stream;
 typedef class uvm_link_base;
 typedef class uvm_simple_lock_dap;
-typedef class uvm_text_tr_stream;
+typedef class uvm_text_tr_stream_ieee;
    
    
 //------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ typedef class uvm_text_tr_stream;
 //
 // The ~uvm_tr_database~ class is pure virtual, and must be extended with an
 // implementation.  A default text-based implementation is provided via the
-// <uvm_text_tr_database> class.
+// <uvm_text_tr_database_ieee> class.
 //
 
 virtual class uvm_tr_database extends uvm_object;
@@ -285,15 +285,15 @@ endclass : uvm_tr_database
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_text_tr_database
+// CLASS: uvm_text_tr_database_ieee
 //
-// The ~uvm_text_tr_database~ is the default implementation for the
+// The ~uvm_text_tr_database_ieee~ is the default implementation for the
 // <uvm_tr_database>.  It provides the ability to store recording information
 // into a textual log file.
 //
 //
    
-class uvm_text_tr_database extends uvm_tr_database;
+class uvm_text_tr_database_ieee extends uvm_tr_database;
 
    // Variable- m_filename_dap
    // Data Access Protected Filename
@@ -302,7 +302,7 @@ class uvm_text_tr_database extends uvm_tr_database;
    // Variable- m_file
    UVM_FILE m_file;
 
-   `uvm_object_utils_begin(uvm_text_tr_database)
+   `uvm_object_utils_begin(uvm_text_tr_database_ieee)
    `uvm_object_utils_end
 
    // Function: new
@@ -310,7 +310,7 @@ class uvm_text_tr_database extends uvm_tr_database;
    //
    // Parameters:
    // name - Instance name
-   function new(string name="unnamed-uvm_text_tr_database");
+   function new(string name="unnamed-uvm_text_tr_database_ieee");
       super.new(name);
 
       m_filename_dap = new("filename_dap");
@@ -365,7 +365,7 @@ class uvm_text_tr_database extends uvm_tr_database;
    protected virtual function uvm_tr_stream do_open_stream(string name,
                                                            string scope,
                                                            string type_name);
-      uvm_text_tr_stream m_stream = uvm_text_tr_stream::type_id::create(name);
+      uvm_text_tr_stream_ieee m_stream = uvm_text_tr_stream_ieee::type_id::create(name);
       return m_stream;
    endfunction : do_open_stream
 
@@ -429,4 +429,4 @@ class uvm_text_tr_database extends uvm_tr_database;
    endfunction : set_file_name
 
    
-endclass : uvm_text_tr_database
+endclass : uvm_text_tr_database_ieee

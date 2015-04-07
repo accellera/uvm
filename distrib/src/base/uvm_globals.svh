@@ -412,27 +412,27 @@ parameter UVM_LARGE_STRING = UVM_LINE_WIDTH*UVM_NUM_LINES*8-1;
 
 //----------------------------------------------------------------------------
 //
-// Function: uvm_string_to_bits
+// Function: uvm_string_to_bits_ieee
 //
 // Converts an input string to its bit-vector equivalent. Max bit-vector
 // length is approximately 14000 characters.
 //----------------------------------------------------------------------------
 
-function logic[UVM_LARGE_STRING:0] uvm_string_to_bits(string str);
-  $swrite(uvm_string_to_bits, "%0s", str);
+function logic[UVM_LARGE_STRING:0] uvm_string_to_bits_ieee(string str);
+  $swrite(uvm_string_to_bits_ieee, "%0s", str);
 endfunction
 
 
 //----------------------------------------------------------------------------
 //
-// Function: uvm_bits_to_string
+// Function: uvm_bits_to_string_ieee
 //
 // Converts an input bit-vector to its string equivalent. Max bit-vector
 // length is approximately 14000 characters.
 //----------------------------------------------------------------------------
 
-function string uvm_bits_to_string(logic [UVM_LARGE_STRING:0] str);
-  $swrite(uvm_bits_to_string, "%0s", str);
+function string uvm_bits_to_string_ieee(logic [UVM_LARGE_STRING:0] str);
+  $swrite(uvm_bits_to_string_ieee, "%0s", str);
 endfunction
 
 

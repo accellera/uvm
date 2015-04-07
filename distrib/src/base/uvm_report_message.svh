@@ -31,13 +31,13 @@ typedef class uvm_root;
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_report_message_element_base
+// CLASS: uvm_report_message_element_base_ieee
 //
 // Base class for report message element. Defines common interface.
 //
 //------------------------------------------------------------------------------
 
-virtual class uvm_report_message_element_base;
+virtual class uvm_report_message_element_base_ieee;
    protected uvm_action _action;
    protected string          _name;
 
@@ -84,31 +84,31 @@ virtual class uvm_report_message_element_base;
       if (_action & UVM_RM_RECORD)
         do_record(recorder);
    endfunction : record
-   function void copy(uvm_report_message_element_base rhs);
+   function void copy(uvm_report_message_element_base_ieee rhs);
       do_copy(rhs);
    endfunction : copy
-   function uvm_report_message_element_base clone();
+   function uvm_report_message_element_base_ieee clone();
       return do_clone();
    endfunction : clone
 
    pure virtual function void do_print(uvm_printer printer);
    pure virtual function void do_record(uvm_recorder recorder);
-   pure virtual function void do_copy(uvm_report_message_element_base rhs);
-   pure virtual function uvm_report_message_element_base do_clone();
+   pure virtual function void do_copy(uvm_report_message_element_base_ieee rhs);
+   pure virtual function uvm_report_message_element_base_ieee do_clone();
    
-endclass : uvm_report_message_element_base
+endclass : uvm_report_message_element_base_ieee
 
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_report_message_int_element
+// CLASS: uvm_report_message_int_element_ieee
 //
 // Message element class for integral type
 //
 //------------------------------------------------------------------------------
 
-class uvm_report_message_int_element extends uvm_report_message_element_base;
-   typedef uvm_report_message_int_element this_type;
+class uvm_report_message_int_element_ieee extends uvm_report_message_element_base_ieee;
+   typedef uvm_report_message_int_element_ieee this_type;
    
    protected uvm_bitstream_t _val;
    protected int             _size;
@@ -147,7 +147,7 @@ class uvm_report_message_int_element extends uvm_report_message_element_base;
       recorder.record_field(_name, _val, _size, _radix);
    endfunction : do_record
 
-   virtual function void do_copy(uvm_report_message_element_base rhs);
+   virtual function void do_copy(uvm_report_message_element_base_ieee rhs);
       this_type _rhs;
       $cast(_rhs, rhs);
       _name = _rhs._name;
@@ -157,24 +157,24 @@ class uvm_report_message_int_element extends uvm_report_message_element_base;
       _action = rhs._action;
    endfunction : do_copy
 
-   virtual function uvm_report_message_element_base do_clone(); 
+   virtual function uvm_report_message_element_base_ieee do_clone(); 
      this_type tmp = new; 
      tmp.copy(this); 
      return tmp; 
    endfunction : do_clone
-endclass : uvm_report_message_int_element
+endclass : uvm_report_message_int_element_ieee
 
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_report_message_string_element
+// CLASS: uvm_report_message_string_element_ieee
 //
 // Message element class for string type
 //
 //------------------------------------------------------------------------------
 
-class uvm_report_message_string_element extends uvm_report_message_element_base;
-   typedef uvm_report_message_string_element this_type;
+class uvm_report_message_string_element_ieee extends uvm_report_message_element_base_ieee;
+   typedef uvm_report_message_string_element_ieee this_type;
    protected string  _val;
 
 
@@ -203,7 +203,7 @@ class uvm_report_message_string_element extends uvm_report_message_element_base;
       recorder.record_string(_name, _val);
    endfunction : do_record
 
-   virtual function void do_copy(uvm_report_message_element_base rhs);
+   virtual function void do_copy(uvm_report_message_element_base_ieee rhs);
       this_type _rhs;
       $cast(_rhs, rhs);
       _name = _rhs._name;
@@ -211,24 +211,24 @@ class uvm_report_message_string_element extends uvm_report_message_element_base;
       _action = rhs._action;
    endfunction : do_copy
    
-   virtual function uvm_report_message_element_base do_clone(); 
+   virtual function uvm_report_message_element_base_ieee do_clone(); 
      this_type tmp = new; 
      tmp.copy(this); 
      return tmp; 
    endfunction : do_clone
-endclass : uvm_report_message_string_element
+endclass : uvm_report_message_string_element_ieee
 
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_report_message_object_element
+// CLASS: uvm_report_message_object_element_ieee
 //
 // Message element class for object type
 //
 //------------------------------------------------------------------------------
 
-class uvm_report_message_object_element extends uvm_report_message_element_base;
-   typedef uvm_report_message_object_element this_type;
+class uvm_report_message_object_element_ieee extends uvm_report_message_element_base_ieee;
+   typedef uvm_report_message_object_element_ieee this_type;
    protected uvm_object _val;
 
 
@@ -259,7 +259,7 @@ class uvm_report_message_object_element extends uvm_report_message_element_base;
       recorder.record_object(_name, _val);
    endfunction : do_record
 
-   virtual function void do_copy(uvm_report_message_element_base rhs);
+   virtual function void do_copy(uvm_report_message_element_base_ieee rhs);
       this_type _rhs;
       $cast(_rhs, rhs);
       _name = _rhs._name;
@@ -267,31 +267,31 @@ class uvm_report_message_object_element extends uvm_report_message_element_base;
       _action = rhs._action;
    endfunction : do_copy
    
-   virtual function uvm_report_message_element_base do_clone(); 
+   virtual function uvm_report_message_element_base_ieee do_clone(); 
      this_type tmp = new; 
      tmp.copy(this); 
      return tmp; 
    endfunction : do_clone
-endclass : uvm_report_message_object_element
+endclass : uvm_report_message_object_element_ieee
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_report_message_element_container
+// CLASS: uvm_report_message_element_container_ieee
 //
 // A container used by report message to contain the dynamically added elements,
 // with APIs to add and delete the elements.
 //
 //------------------------------------------------------------------------------
 
-class uvm_report_message_element_container extends uvm_object;
+class uvm_report_message_element_container_ieee extends uvm_object;
 
-  protected uvm_report_message_element_base elements[$];
+  protected uvm_report_message_element_base_ieee elements[$];
 
-  `uvm_object_utils(uvm_report_message_element_container)
+  `uvm_object_utils(uvm_report_message_element_container_ieee)
 
   // Function: new
   //
-  // Create a new uvm_report_message_element_container object
+  // Create a new uvm_report_message_element_container_ieee object
   //
 
   function new(string name = "element_container");
@@ -334,7 +334,7 @@ class uvm_report_message_element_container extends uvm_object;
   // Get all the elements from the container and put them in a queue
   //
 
-  typedef uvm_report_message_element_base queue_of_element[$];
+  typedef uvm_report_message_element_base_ieee queue_of_element[$];
   virtual function queue_of_element get_elements();
     return elements;
   endfunction
@@ -354,7 +354,7 @@ class uvm_report_message_element_container extends uvm_object;
 			        uvm_action action = (UVM_LOG|UVM_RM_RECORD));
      process p;
      string rand_state;
-     uvm_report_message_int_element urme;
+     uvm_report_message_int_element_ieee urme;
 
      p = process::self();
      if (p != null)
@@ -381,7 +381,7 @@ class uvm_report_message_element_container extends uvm_object;
                                    uvm_action action = (UVM_LOG|UVM_RM_RECORD));
      process p;
      string rand_state;
-     uvm_report_message_string_element urme;
+     uvm_report_message_string_element_ieee urme;
 
      p = process::self();
      if (p != null)
@@ -408,7 +408,7 @@ class uvm_report_message_element_container extends uvm_object;
                                    uvm_action action = (UVM_LOG|UVM_RM_RECORD));
      process p;
      string rand_state;
-     uvm_report_message_object_element urme;
+     uvm_report_message_object_element_ieee urme;
 
      p = process::self();
      if (p != null)
@@ -438,7 +438,7 @@ class uvm_report_message_element_container extends uvm_object;
   endfunction
 
   virtual function void do_copy(uvm_object rhs);
-    uvm_report_message_element_container urme_container;
+    uvm_report_message_element_container_ieee urme_container;
 
     super.do_copy(rhs);
 
@@ -488,7 +488,7 @@ class uvm_report_message extends uvm_object;
   protected UVM_FILE _file;
 
   // Not documented.
-  protected uvm_report_message_element_container _report_message_element_container;
+  protected uvm_report_message_element_container_ieee _report_message_element_container;
 
 
   // Function: new
@@ -817,7 +817,7 @@ class uvm_report_message extends uvm_object;
   //
   // Get the element_container of the message
 
-  virtual function uvm_report_message_element_container get_element_container();
+  virtual function uvm_report_message_element_container_ieee get_element_container();
     return _report_message_element_container;
   endfunction
 

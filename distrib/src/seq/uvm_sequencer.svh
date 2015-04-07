@@ -190,11 +190,11 @@ endfunction
 // have the correct value
 
 function int uvm_sequencer::m_find_number_driver_connections();
-  uvm_port_component_base provided_to_port_list[string];
-  uvm_port_component_base seq_port_base;
+  uvm_port_component_base_ieee provided_to_port_list[string];
+  uvm_port_component_base_ieee seq_port_base;
   
   // Check that the seq_item_pull_port is connected
-  seq_port_base = seq_item_export.get_comp();
+  seq_port_base = seq_item_export.get_comp_ieee();
   seq_port_base.get_provided_to(provided_to_port_list);
   return provided_to_port_list.num();
 endfunction

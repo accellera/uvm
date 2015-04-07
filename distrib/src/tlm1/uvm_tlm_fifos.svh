@@ -39,7 +39,7 @@ typedef class uvm_tlm_event;
 // transactions are fetched from the FIFO in the order they arrived via the
 // ~get_peek_export~. The ~put_export~ and ~get_peek_export~ are inherited from
 // the <uvm_tlm_fifo_base #(T)> super class, and the interface methods provided by
-// these exports are defined by the <uvm_tlm_if_base #(T1,T2)> class.
+// these exports are defined by the <uvm_tlm_if_base_ieee #(T1,T2)> class.
 //
 //------------------------------------------------------------------------------
 
@@ -208,7 +208,7 @@ class uvm_tlm_analysis_fifo #(type T = int) extends uvm_tlm_fifo #(T);
   //
   // Access via ports bound to this export is the normal mechanism for writing
   // to an analysis FIFO. 
-  // See write method of <uvm_tlm_if_base #(T1,T2)> for more information.
+  // See write method of <uvm_tlm_if_base_ieee #(T1,T2)> for more information.
 
   uvm_analysis_imp #(T, uvm_tlm_analysis_fifo #(T)) analysis_export;
 

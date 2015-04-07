@@ -28,17 +28,17 @@
 // interface type checking of port/export connections.
 //----------------------------------------------------------------------
 
-// MACRO: `UVM_TLM_NB_FW_MASK
+// MACRO: `UVM_TLM_NB_FW_MASK_ieee
 //
 // Define Non blocking Forward mask onehot assignment = 'b001
-`define UVM_TLM_NB_FW_MASK  (1<<0)
+`define UVM_TLM_NB_FW_MASK_ieee  (1<<0)
 
-// MACRO: `UVM_TLM_NB_BW_MASK
+// MACRO: `UVM_TLM_NB_BW_MASK_ieee
 //
 // Define Non blocking backward mask onehot assignment = 'b010
-`define UVM_TLM_NB_BW_MASK  (1<<1)
+`define UVM_TLM_NB_BW_MASK_ieee  (1<<1)
 
-// MACRO: `UVM_TLM_B_MASK
+// MACRO: `UVM_TLM_B_MASK_ieee
 //
 // Define blocking mask onehot assignment = 'b100
-`define UVM_TLM_B_MASK      (1<<2)
+`define UVM_TLM_B_MASK_ieee      (1<<2)

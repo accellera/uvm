@@ -759,7 +759,7 @@ class uvm_default_report_server extends uvm_report_server;
     string verbosity_str;
     string terminator_str;
     string msg_body_str;
-    uvm_report_message_element_container el_container;
+    uvm_report_message_element_container_ieee el_container;
     string prefix;
     uvm_report_handler l_report_handler;
 

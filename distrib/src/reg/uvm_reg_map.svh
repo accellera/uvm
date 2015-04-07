@@ -2152,16 +2152,16 @@ function void uvm_reg_map::do_print (uvm_printer printer);
              
    get_registers(regs,UVM_NO_HIER);
    foreach (regs[j]) 
-        printer.print_generic(regs[j].get_name(), regs[j].get_type_name(),-2,$sformatf("@%0d +'h%0x",regs[j].get_inst_id(),regs[j].get_address(this)));
+        printer.print_generic(regs[j].get_name(), regs[j].get_type_name(),-2,$sformatf("@%0d +'h%0x",regs[j].get_inst_id_ieee(),regs[j].get_address(this)));
    
    
    get_memories(mems);
    foreach (mems[j]) 
-        printer.print_generic(mems[j].get_name(), mems[j].get_type_name(),-2,$sformatf("@%0d +'h%0x",mems[j].get_inst_id(),mems[j].get_address(0,this)));
+        printer.print_generic(mems[j].get_name(), mems[j].get_type_name(),-2,$sformatf("@%0d +'h%0x",mems[j].get_inst_id_ieee(),mems[j].get_address(0,this)));
    
    get_virtual_registers(vregs);
    foreach (vregs[j]) 
-        printer.print_generic(vregs[j].get_name(), vregs[j].get_type_name(),-2,$sformatf("@%0d +'h%0x",vregs[j].get_inst_id(),vregs[j].get_address(0,this)));
+        printer.print_generic(vregs[j].get_name(), vregs[j].get_type_name(),-2,$sformatf("@%0d +'h%0x",vregs[j].get_inst_id_ieee(),vregs[j].get_address(0,this)));
     
    get_submaps(maps);
    foreach (maps[j]) 

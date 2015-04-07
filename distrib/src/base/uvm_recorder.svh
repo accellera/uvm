@@ -340,7 +340,7 @@ virtual class uvm_recorder extends uvm_object;
          return 0;
       end
       else begin
-         integer handle = get_inst_id();
+         integer handle = get_inst_id_ieee();
 
          // Check for the weird case where our handle changed.
          if (m_ids_by_recorder.exists(this) && m_ids_by_recorder[this] != handle)
@@ -720,20 +720,20 @@ endclass // uvm_recorder
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_text_recorder
+// CLASS: uvm_text_recorder_ieee
 //
-// The ~uvm_text_recorder~ is the default recorder implementation for the
-// <uvm_text_tr_database>.
+// The ~uvm_text_recorder_ieee~ is the default recorder implementation for the
+// <uvm_text_tr_database_ieee>.
 //
 
-class uvm_text_recorder extends uvm_recorder;
+class uvm_text_recorder_ieee extends uvm_recorder;
 
-   `uvm_object_utils(uvm_text_recorder)
+   `uvm_object_utils(uvm_text_recorder_ieee)
 
    // Variable- m_text_db
    //
    // Reference to the text database backend
-   uvm_text_tr_database m_text_db;
+   uvm_text_tr_database_ieee m_text_db;
 
    // Variable- scope
    // Imeplementation detail
@@ -744,7 +744,7 @@ class uvm_text_recorder extends uvm_recorder;
    //
    // Parameters:
    // name - Instance name
-   function new(string name="unnamed-uvm_text_recorder");
+   function new(string name="unnamed-uvm_text_recorder_ieee");
       super.new(name);
    endfunction : new
 
@@ -868,7 +868,7 @@ class uvm_text_recorder extends uvm_recorder;
       
       if(identifier) begin 
          if(value != null) begin
-            $swrite(str, "%0d", value.get_inst_id());
+            $swrite(str, "%0d", value.get_inst_id_ieee());
             v = str.atoi(); 
          end
          scope.set_arg(name);
@@ -931,7 +931,7 @@ class uvm_text_recorder extends uvm_recorder;
                                                      string type_name);
       scope.set_arg(name);
       write_attribute(scope.get(), 
-                      uvm_string_to_bits(value), 
+                      uvm_string_to_bits_ieee(value), 
                       UVM_STRING, 
                       8+value.len());
    endfunction : do_record_generic
@@ -1019,7 +1019,7 @@ class uvm_text_recorder extends uvm_recorder;
   virtual function integer create_stream (string name,
                                           string t,
                                           string scope);
-     uvm_text_tr_stream stream;
+     uvm_text_tr_stream_ieee stream;
      if (open_file()) begin
         $cast(stream,m_text_db.open_stream(name, scope, t));
         return stream.get_handle();
@@ -1134,7 +1134,7 @@ class uvm_text_recorder extends uvm_recorder;
      end
   endfunction // free_tr
 
-endclass : uvm_text_recorder
+endclass : uvm_text_recorder_ieee
 
   
    

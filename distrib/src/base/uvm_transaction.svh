@@ -406,7 +406,7 @@ virtual class uvm_transaction extends uvm_object;
   // The event pool instance for this transaction. This pool is used to track
   // various milestones: by default, begin, accept, and end
 
-  const uvm_event_pool events = new;
+  local const uvm_event_pool events = new;
 
 
   // Variable: begin_event
@@ -592,7 +592,7 @@ function void uvm_transaction::do_print (uvm_printer printer);
     printer.print_time("end_time", end_time);
   if(initiator != null) begin
     tmp_initiator = initiator;
-    $swrite(str,"@%0d", tmp_initiator.get_inst_id());
+    $swrite(str,"@%0d", tmp_initiator.get_inst_id_ieee());
     printer.print_generic("initiator", initiator.get_type_name(), -1, str);
   end
 endfunction

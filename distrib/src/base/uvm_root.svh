@@ -165,14 +165,14 @@ class uvm_root extends uvm_component;
   //----------------------------------------------------------------------------
 
 
-  // Variable: top_levels
+  // Variable: top_levels_ieee
   //
   // This variable is a list of all of the top level components in UVM. It
   // includes the uvm_test_top component that is created by <run_test> as
   // well as any other top level components that have been instantiated
   // anywhere in the hierarchy.
 
-  uvm_component top_levels[$];
+  uvm_component top_levels_ieee[$];
 
   
   // Function: find
@@ -624,9 +624,9 @@ endfunction
 function bit uvm_root::m_add_child (uvm_component child);
   if(super.m_add_child(child)) begin
     if(child.get_name() == "uvm_test_top")
-      top_levels.push_front(child);
+      top_levels_ieee.push_front(child);
     else
-      top_levels.push_back(child);
+      top_levels_ieee.push_back(child);
     return 1;
   end
   else

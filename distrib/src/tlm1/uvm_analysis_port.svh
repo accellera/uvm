@@ -54,7 +54,7 @@
 //------------------------------------------------------------------------------
 
 class uvm_analysis_port # (type T = int)
-  extends uvm_port_base # (uvm_tlm_if_base #(T,T));
+  extends uvm_port_base # (uvm_tlm_if_base_ieee #(T,T));
 
   function new (string name, uvm_component parent);
     super.new (name, parent, UVM_PORT, 0, UVM_UNBOUNDED_CONNECTIONS);
@@ -68,7 +68,7 @@ class uvm_analysis_port # (type T = int)
   // Method: write
   // Send specified value to all connected interface
   function void write (input T t);
-    uvm_tlm_if_base # (T, T) tif;
+    uvm_tlm_if_base_ieee # (T, T) tif;
     for (int i = 0; i < this.size(); i++) begin
       tif = this.get_if (i);
       if ( tif == null )
@@ -108,7 +108,7 @@ endclass
 //------------------------------------------------------------------------------
 
 class uvm_analysis_imp #(type T=int, type IMP=int)
-  extends uvm_port_base #(uvm_tlm_if_base #(T,T));
+  extends uvm_port_base #(uvm_tlm_if_base_ieee #(T,T));
   `UVM_IMP_COMMON(`UVM_TLM_ANALYSIS_MASK,"uvm_analysis_imp",IMP)
   function void write (input T t);
     m_imp.write (t);
@@ -124,7 +124,7 @@ endclass
 //------------------------------------------------------------------------------
 
 class uvm_analysis_export #(type T=int)
-  extends uvm_port_base #(uvm_tlm_if_base #(T,T));
+  extends uvm_port_base #(uvm_tlm_if_base_ieee #(T,T));
 
   // Function: new
   // Instantiate the export.
@@ -141,7 +141,7 @@ class uvm_analysis_export #(type T=int)
   // to all connected interfaces. Ports only send to the interface
   // at the index specified in a call to set_if (0 by default).
   function void write (input T t);
-    uvm_tlm_if_base #(T, T) tif;
+    uvm_tlm_if_base_ieee #(T, T) tif;
     for (int i = 0; i < this.size(); i++) begin
       tif = this.get_if (i);
       if (tif == null)

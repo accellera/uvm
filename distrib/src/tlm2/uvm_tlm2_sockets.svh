@@ -80,7 +80,7 @@ class uvm_tlm_b_initiator_socket #(type T=uvm_tlm_generic_payload)
        $cast(target_socket, provider))
       return;
 
-    c = get_comp();
+    c = get_comp_ieee();
     `uvm_error_context(get_type_name(),
        "type mismatch in connect -- connection cannot be completed", c)
 
@@ -130,7 +130,7 @@ class uvm_tlm_b_target_socket #(type IMP=int,
 
     super.connect(provider);
 
-    c = get_comp();
+    c = get_comp_ieee();
     `uvm_error_context(get_type_name(),
        "You cannot call connect() on a target termination socket", c)
   endfunction
@@ -199,7 +199,7 @@ class uvm_tlm_nb_initiator_socket #(type IMP=int,
       return;
     end
     
-    c = get_comp();
+    c = get_comp_ieee();
     `uvm_error_context(get_type_name(),
         "type mismatch in connect -- connection cannot be completed", c)
 
@@ -236,7 +236,7 @@ class uvm_tlm_nb_target_socket #(type IMP=int,
     super.new (name, parent);
     if (imp == null) $cast(m_imp, parent);
     else m_imp = imp;
-    bw_port = new("bw_port", get_comp());
+    bw_port = new("bw_port", get_comp_ieee());
     if (m_imp == null)
        `uvm_error("UVM/TLM2/NOIMP", {"nb_target socket ", name,
                                      " has no implementation"});
@@ -251,7 +251,7 @@ class uvm_tlm_nb_target_socket #(type IMP=int,
 
     super.connect(provider);
 
-    c = get_comp();
+    c = get_comp_ieee();
     `uvm_error_context(get_type_name(),
        "You cannot call connect() on a target termination socket", c)
   endfunction
@@ -292,7 +292,7 @@ class uvm_tlm_b_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload)
        $cast(target_socket, provider))
       return;
 
-    c = get_comp();
+    c = get_comp_ieee();
     `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
 
   endfunction
@@ -327,7 +327,7 @@ class uvm_tlm_b_passthrough_target_socket #(type T=uvm_tlm_generic_payload)
        $cast(target_socket, provider))
       return;
 
-    c = get_comp();
+    c = get_comp_ieee();
     `uvm_error_context(get_type_name(),
        "type mismatch in connect -- connection cannot be completed", c)
   endfunction
@@ -378,7 +378,7 @@ class uvm_tlm_nb_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload,
       return;
     end
 
-    c = get_comp();
+    c = get_comp_ieee();
     `uvm_error_context(get_type_name(),
        "type mismatch in connect -- connection cannot be completed", c)
 
@@ -422,7 +422,7 @@ class uvm_tlm_nb_passthrough_target_socket #(type T=uvm_tlm_generic_payload,
       return;
     end
 
-    c = get_comp();
+    c = get_comp_ieee();
     `uvm_error_context(get_type_name(),
        "type mismatch in connect -- connection cannot be completed", c)
 

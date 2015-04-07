@@ -117,21 +117,21 @@ virtual class uvm_object extends uvm_void;
   extern virtual function string get_full_name ();
 
 
-  // Function: get_inst_id
+  // Function: get_inst_id_ieee
   //
   // Returns the object's unique, numeric instance identifier.
 
-  extern virtual function int get_inst_id ();
+  extern virtual function int get_inst_id_ieee ();
 
 
-  // Function: get_inst_count
+  // Function: get_inst_count_ieee
   //
   // Returns the current value of the instance counter, which represents the
   // total number of uvm_object-based objects that have been allocated in
   // simulation. The instance counter is used to form a unique numeric instance
   // identifier.
 
-  extern static  function int get_inst_count();
+  extern static  function int get_inst_count_ieee();
 
 
   // Function: get_type
@@ -822,7 +822,7 @@ endfunction
 // get inst_id
 // -----------
 
-function int uvm_object::get_inst_id();
+function int uvm_object::get_inst_id_ieee();
   return m_inst_id;
 endfunction
 
@@ -841,7 +841,7 @@ endfunction
 // get inst_count
 // --------------
 
-function int uvm_object::get_inst_count();
+function int uvm_object::get_inst_count_ieee();
   return m_inst_count;
 endfunction
 
@@ -985,7 +985,7 @@ function void  uvm_object::set_string_local (string field_name,
   __m_uvm_field_automation(null, UVM_SETSTR, field_name);
 
   if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
-    uvm_report_error("NOMTC", $sformatf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id()), UVM_NONE);
+    uvm_report_error("NOMTC", $sformatf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id_ieee()), UVM_NONE);
   end
   __m_uvm_status_container.cycle_check.delete();
 endfunction
@@ -1076,7 +1076,7 @@ function bit  uvm_object::compare (uvm_object rhs,
            $sformatf("%0d Miscompare(s) for object %s@%0d vs. null", 
            comparer.result, 
            __m_uvm_status_container.scope.get(),
-            this.get_inst_id()),
+            this.get_inst_id_ieee()),
             __m_uvm_status_container.comparer.verbosity);
       done = 1;
     end

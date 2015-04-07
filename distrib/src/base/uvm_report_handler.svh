@@ -181,7 +181,7 @@ class uvm_report_handler extends uvm_object;
       do begin
         l_int = id_actions.get(idx);
         printer.print_generic($sformatf("[%s]", idx), "uvm_action", 32, 
-          format_action(l_int));
+          format_action_ieee(l_int));
       end while(id_actions.next(idx));
       printer.print_array_footer();
     end
@@ -191,7 +191,7 @@ class uvm_report_handler extends uvm_object;
       printer.print_array_header("severity_actions",4,"array");
       do begin
         printer.print_generic($sformatf("[%s]", l_severity.name()), "uvm_action", 32, 
-          format_action(severity_actions[l_severity]));
+          format_action_ieee(severity_actions[l_severity]));
       end while(severity_actions.next(l_severity));
       printer.print_array_footer();
     end
@@ -209,7 +209,7 @@ class uvm_report_handler extends uvm_object;
           if(id_a_ary.first(idx))
           do begin
             printer.print_generic($sformatf("[%s:%s]", l_severity.name(), idx), 
-				  "uvm_action", 32, format_action(id_a_ary.get(idx)));
+				  "uvm_action", 32, format_action_ieee(id_a_ary.get(idx)));
           end while(id_a_ary.next(idx));
         end while(severity_id_actions.next(l_severity));
       end
@@ -340,11 +340,11 @@ class uvm_report_handler extends uvm_object;
   //----------------------------------------------------------------------------
 
 
-  // Function: format_action
+  // Function: format_action_ieee
   //
   // Returns a string representation of the ~action~, e.g., "DISPLAY".
 
-  static function string format_action(uvm_action action);
+  static function string format_action_ieee(uvm_action action);
     string s;
 
     if(uvm_action_type'(action) == UVM_NO_ACTION) begin
@@ -724,14 +724,14 @@ class uvm_report_handler extends uvm_object;
     q.push_back("*** actions by severity\n");
     foreach( severity_actions[severity] ) begin
       uvm_severity sev = uvm_severity'(severity);
-      q.push_back($sformatf("%s = %s\n",sev.name(), format_action(severity_actions[severity])));
+      q.push_back($sformatf("%s = %s\n",sev.name(), format_action_ieee(severity_actions[severity])));
     end
 
     q.push_back("\n*** actions by id\n");
 
     if(id_actions.first(idx))
     do begin
-      q.push_back($sformatf("[%s] --> %s\n", idx, format_action(id_actions.get(idx))));
+      q.push_back($sformatf("[%s] --> %s\n", idx, format_action_ieee(id_actions.get(idx))));
     end while(id_actions.next(idx));
 
     // actions by id
@@ -742,7 +742,7 @@ class uvm_report_handler extends uvm_object;
       id_a_ary = severity_id_actions[severity];
       if(id_a_ary.first(idx))
       do begin
-        q.push_back($sformatf("%s:%s --> %s\n",sev.name(), idx, format_action(id_a_ary.get(idx))));   
+        q.push_back($sformatf("%s:%s --> %s\n",sev.name(), idx, format_action_ieee(id_a_ary.get(idx))));   
       end while(id_a_ary.next(idx));
     end
 

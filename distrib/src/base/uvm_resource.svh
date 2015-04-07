@@ -475,9 +475,9 @@ virtual class uvm_resource_base extends uvm_object;
   //
   // Auditing is controlled through the <uvm_resource_options> class.
 
-  // function: record_read_access
+  // function: record_read_access_ieee
 
-  function void record_read_access(uvm_object accessor = null);
+  function void record_read_access_ieee(uvm_object accessor = null);
 
     string str;
     uvm_resource_types::access_t access_record;
@@ -502,7 +502,7 @@ virtual class uvm_resource_base extends uvm_object;
     if(access.exists(str))
       access_record = access[str];
     else
-      init_access_record(access_record);
+      init_access_record_ieee(access_record);
 
     // Update the accessor record
     access_record.read_count++;
@@ -511,9 +511,9 @@ virtual class uvm_resource_base extends uvm_object;
 
   endfunction
 
-  // function: record_write_access
+  // function: record_write_access_ieee
 
-  function void record_write_access(uvm_object accessor = null);
+  function void record_write_access_ieee(uvm_object accessor = null);
 
     string str;
 
@@ -530,7 +530,7 @@ virtual class uvm_resource_base extends uvm_object;
         if(access.exists(str))
           access_record = access[str];
         else
-          init_access_record(access_record);
+          init_access_record_ieee(access_record);
         access_record.write_count++;
         access_record.write_time = $realtime;
         access[str] = access_record;
@@ -538,11 +538,11 @@ virtual class uvm_resource_base extends uvm_object;
     end
   endfunction
 
-  // Function: print_accessors
+  // Function: print_accessors_ieee
   //
   // Dump the access records for this resource
   //
-  virtual function void print_accessors();
+  virtual function void print_accessors_ieee();
 
     string str;
     uvm_component comp;
@@ -566,11 +566,11 @@ virtual class uvm_resource_base extends uvm_object;
   endfunction
 
 
-  // Function: init_access_record
+  // Function: init_access_record_ieee
   //
   // Initialize a new access record
   //
-  function void init_access_record (inout uvm_resource_types::access_t access_record);
+  function void init_access_record_ieee (inout uvm_resource_types::access_t access_record);
     access_record.read_time = 0;
     access_record.write_time = 0;
     access_record.read_count = 0;
@@ -1326,7 +1326,7 @@ class uvm_resource_pool;
       r = rq.get(i);
       r.print(printer);
       if(audit == 1)
-        r.print_accessors();
+        r.print_accessors_ieee();
     end
 
   endfunction
@@ -1585,7 +1585,7 @@ end
   // resource.
 
   function T read(uvm_object accessor = null);
-    record_read_access(accessor);
+    record_read_access_ieee(accessor);
     return val;
   endfunction
 
@@ -1614,7 +1614,7 @@ end
     if(val == t)
       return;
 
-    record_write_access(accessor);
+    record_write_access_ieee(accessor);
 
     // set the value and set the dirty bit
     val = t;

@@ -36,7 +36,7 @@ endclass
 // default implementations for each interface method provided by these exports.
 //
 // The interface methods provided by the <put_export> and the <get_peek_export>
-// are defined and described by <uvm_tlm_if_base #(T1,T2)>.  See the TLM Overview
+// are defined and described by <uvm_tlm_if_base_ieee #(T1,T2)>.  See the TLM Overview
 // section for a general discussion of TLM interface definition and usage.
 //
 // Parameter type
@@ -59,7 +59,7 @@ virtual class uvm_tlm_fifo_base #(type T=int) extends uvm_component;
   //|  function bit try_put (input T t)
   //
   // Any ~put~ port variant can connect and send transactions to the FIFO via this
-  // export, provided the transaction types match. See <uvm_tlm_if_base #(T1,T2)>
+  // export, provided the transaction types match. See <uvm_tlm_if_base_ieee #(T1,T2)>
   // for more information on each of the above interface methods.
 
   uvm_put_imp #(T, this_type) put_export;
@@ -79,7 +79,7 @@ virtual class uvm_tlm_fifo_base #(type T=int) extends uvm_component;
   //
   // Any ~get~ or ~peek~ port variant can connect to and retrieve transactions from
   // the FIFO via this export, provided the transaction types match. See
-  // <uvm_tlm_if_base #(T1,T2)> for more information on each of the above interface
+  // <uvm_tlm_if_base_ieee #(T1,T2)> for more information on each of the above interface
   // methods.
 
   uvm_get_peek_imp #(T, this_type) get_peek_export;  
@@ -93,7 +93,7 @@ virtual class uvm_tlm_fifo_base #(type T=int) extends uvm_component;
   //|  function void write (T t)
   //
   // All connected analysis exports and imps will receive put transactions.
-  // See <uvm_tlm_if_base #(T1,T2)> for more information on the ~write~ interface
+  // See <uvm_tlm_if_base_ieee #(T1,T2)> for more information on the ~write~ interface
   // method.
 
   uvm_analysis_port #(T) put_ap;
@@ -108,7 +108,7 @@ virtual class uvm_tlm_fifo_base #(type T=int) extends uvm_component;
   //|  function void write (T t)
   //
   // All connected analysis exports and imps will receive get transactions.
-  // See <uvm_tlm_if_base #(T1,T2)> for more information on the ~write~ method.
+  // See <uvm_tlm_if_base_ieee #(T1,T2)> for more information on the ~write~ method.
 
   uvm_analysis_port #(T) get_ap;
 

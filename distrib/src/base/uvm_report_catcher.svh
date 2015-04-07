@@ -248,7 +248,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   //
   // Returns the element container of the message.
 
-  function uvm_report_message_element_container get_element_container();
+  function uvm_report_message_element_container_ieee get_element_container();
     return this.m_modified_report_message.get_element_container();
   endfunction
 

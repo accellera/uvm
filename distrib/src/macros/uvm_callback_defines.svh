@@ -278,16 +278,16 @@
   begin \
     string msg; \
     msg = (OBJ == null) ? "null" : $sformatf("%s (%s@%0d)", \
-      OBJ.get_full_name(), OBJ.get_type_name(), OBJ.get_inst_id()); \
+      OBJ.get_full_name(), OBJ.get_type_name(), OBJ.get_inst_id_ieee()); \
     `uvm_info("UVMCB_TRC", $sformatf("%s: callback %s (%s@%0d) : to object %s",  \
-       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id(), msg), UVM_NONE) \
+       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id_ieee(), msg), UVM_NONE) \
   end
 
 `define uvm_cb_trace_noobj(CB,OPER) \
   begin \
     if(uvm_callbacks_base::m_tracing) \
       `uvm_info("UVMCB_TRC", $sformatf("%s : callback %s (%s@%0d)" ,  \
-       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id()), UVM_NONE) \
+       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id_ieee()), UVM_NONE) \
   end
 `else
 

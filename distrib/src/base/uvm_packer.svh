@@ -636,7 +636,7 @@ endfunction
 function void uvm_packer::pack_object(uvm_object value);
 
   if(value.__m_uvm_status_container.cycle_check.exists(value)) begin
-    uvm_report_warning("CYCFND", $sformatf("Cycle detected for object @%0d during pack", value.get_inst_id()), UVM_NONE);
+    uvm_report_warning("CYCFND", $sformatf("Cycle detected for object @%0d during pack", value.get_inst_id_ieee()), UVM_NONE);
     return;
   end
   value.__m_uvm_status_container.cycle_check[value] = 1;
@@ -833,7 +833,7 @@ function void uvm_packer::unpack_object(uvm_object value);
   byte is_non_null; is_non_null = 1;
 
   if(value.__m_uvm_status_container.cycle_check.exists(value)) begin
-    uvm_report_warning("CYCFND", $sformatf("Cycle detected for object @%0d during unpack", value.get_inst_id()), UVM_NONE);
+    uvm_report_warning("CYCFND", $sformatf("Cycle detected for object @%0d during unpack", value.get_inst_id_ieee()), UVM_NONE);
     return;
   end
   value.__m_uvm_status_container.cycle_check[value] = 1;

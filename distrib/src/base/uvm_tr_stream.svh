@@ -35,7 +35,7 @@ class m_uvm_tr_stream_cfg;
 endclass : m_uvm_tr_stream_cfg
 
 typedef class uvm_set_before_get_dap;
-typedef class uvm_text_recorder;
+typedef class uvm_text_recorder_ieee;
    
 //------------------------------------------------------------------------------
 //
@@ -49,7 +49,7 @@ typedef class uvm_text_recorder;
 //
 // The ~uvm_tr_stream~ class is pure virtual, and must be extended with an
 // implementation.  A default text-based implementation is provided via the
-// <uvm_text_tr_stream> class.
+// <uvm_text_tr_stream_ieee> class.
 //
 virtual class uvm_tr_stream extends uvm_object;
 
@@ -396,7 +396,7 @@ virtual class uvm_tr_stream extends uvm_object;
         return 0;
       end
       else begin
-         integer handle = get_inst_id();
+         integer handle = get_inst_id_ieee();
          
          // Check for the weird case where our handle changed.
          if (m_ids_by_stream.exists(this) && m_ids_by_stream[this] != handle)
@@ -501,20 +501,20 @@ endclass : uvm_tr_stream
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_text_tr_stream
+// CLASS: uvm_text_tr_stream_ieee
 //
-// The ~uvm_text_tr_stream~ is the default stream implementation for the
-// <uvm_text_tr_database>.  
+// The ~uvm_text_tr_stream_ieee~ is the default stream implementation for the
+// <uvm_text_tr_database_ieee>.  
 //
 //                     
 
-class uvm_text_tr_stream extends uvm_tr_stream;
+class uvm_text_tr_stream_ieee extends uvm_tr_stream;
 
    // Variable- m_text_db
    // Internal reference to the text-based backend
-   local uvm_text_tr_database m_text_db;
+   local uvm_text_tr_database_ieee m_text_db;
    
-   `uvm_object_utils_begin(uvm_text_tr_stream)
+   `uvm_object_utils_begin(uvm_text_tr_stream_ieee)
    `uvm_object_utils_end
 
    // Function: new
@@ -522,7 +522,7 @@ class uvm_text_tr_stream extends uvm_tr_stream;
    //
    // Parameters:
    // name - Instance name
-   function new(string name="unnamed-uvm_text_tr_stream");
+   function new(string name="unnamed-uvm_text_tr_stream_ieee");
       super.new(name);
    endfunction : new
 
@@ -582,10 +582,10 @@ class uvm_text_tr_stream extends uvm_tr_stream;
                                                            time   open_time,
                                                            string type_name);
       if (m_text_db.open_db()) begin
-         return uvm_text_recorder::type_id::create(name);
+         return uvm_text_recorder_ieee::type_id::create(name);
       end
 
       return null;
    endfunction : do_open_recorder
 
-endclass : uvm_text_tr_stream
+endclass : uvm_text_tr_stream_ieee

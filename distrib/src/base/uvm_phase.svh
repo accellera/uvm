@@ -774,7 +774,7 @@ typedef class uvm_cmdline_processor;
 
 `define UVM_PH_TRACE(ID,MSG,PH,VERB) \
    `uvm_info(ID, {$sformatf("Phase '%0s' (id=%0d) ", \
-       PH.get_full_name(), PH.get_inst_id()),MSG}, VERB);
+       PH.get_full_name(), PH.get_inst_id_ieee()),MSG}, VERB);
 
 //-----------------------------
 // Implementation - Construction
@@ -913,13 +913,13 @@ function void uvm_phase::add(uvm_phase phase,
     uvm_phase_type typ = phase.get_phase_type();
     `uvm_info("PH/TRC/ADD_PH",
       {get_name()," (",m_phase_type.name(),") ADD_PHASE: phase=",phase.get_full_name()," (",
-      typ.name(),", inst_id=",$sformatf("%0d",phase.get_inst_id()),")",
+      typ.name(),", inst_id=",$sformatf("%0d",phase.get_inst_id_ieee()),")",
       " with_phase=",   (with_phase == null)   ? "null" : with_phase.get_name(), 
       " after_phase=",  (after_phase == null)  ? "null" : after_phase.get_name(),
       " before_phase=", (before_phase == null) ? "null" : before_phase.get_name(), 
       " new_node=",     (new_node == null)     ? "null" : {new_node.get_name(),
                                                            " inst_id=",
-                                                           $sformatf("%0d",new_node.get_inst_id())},
+                                                           $sformatf("%0d",new_node.get_inst_id_ieee())},
       " begin_node=",   (begin_node == null)   ? "null" : begin_node.get_name(),
       " end_node=",     (end_node == null)     ? "null" : end_node.get_name()},UVM_DEBUG)
   end
@@ -1126,7 +1126,7 @@ function void uvm_phase::m_print_successors();
   static int level;
   if (m_phase_type == UVM_PHASE_DOMAIN)
     level = 0;
-  `uvm_info("UVM/PHASE/SUCC",$sformatf("%s%s (%s) id=%0d",spaces.substr(0,level*2),get_name(), m_phase_type.name(),get_inst_id()),UVM_NONE)
+  `uvm_info("UVM/PHASE/SUCC",$sformatf("%s%s (%s) id=%0d",spaces.substr(0,level*2),get_name(), m_phase_type.name(),get_inst_id_ieee()),UVM_NONE)
   level++;
   foreach (m_successors[succ]) begin
     succ.m_print_successors();
@@ -1140,7 +1140,7 @@ endfunction
 
 function uvm_phase uvm_phase::m_find_predecessor(uvm_phase phase, bit stay_in_scope=1, uvm_phase orig_phase=null);
   uvm_phase found;
-  //$display("  FIND PRED node '",phase.get_name(),"' (id=",$sformatf("%0d",phase.get_inst_id()),") - checking against ",get_name()," (",m_phase_type.name()," id=",$sformatf("%0d",get_inst_id()),(m_imp==null)?"":{"/",$sformatf("%0d",m_imp.get_inst_id())},")");
+  //$display("  FIND PRED node '",phase.get_name(),"' (id=",$sformatf("%0d",phase.get_inst_id_ieee()),") - checking against ",get_name()," (",m_phase_type.name()," id=",$sformatf("%0d",get_inst_id_ieee()),(m_imp==null)?"":{"/",$sformatf("%0d",m_imp.get_inst_id_ieee())},")");
   if (phase == null) begin
     return null ;
   end
@@ -1166,7 +1166,7 @@ endfunction
 
 function uvm_phase uvm_phase::m_find_predecessor_by_name(string name, bit stay_in_scope=1, uvm_phase orig_phase=null);
   uvm_phase found;
-  //$display("  FIND PRED node '",name,"' - checking against ",get_name()," (",m_phase_type.name()," id=",$sformatf("%0d",get_inst_id()),(m_imp==null)?"":{"/",$sformatf("%0d",m_imp.get_inst_id())},")");
+  //$display("  FIND PRED node '",name,"' - checking against ",get_name()," (",m_phase_type.name()," id=",$sformatf("%0d",get_inst_id_ieee()),(m_imp==null)?"":{"/",$sformatf("%0d",m_imp.get_inst_id_ieee())},")");
   if (get_name() == name)
     return this;
   foreach (m_predecessors[pred]) begin
@@ -1189,7 +1189,7 @@ endfunction
 
 function uvm_phase uvm_phase::m_find_successor(uvm_phase phase, bit stay_in_scope=1, uvm_phase orig_phase=null);
   uvm_phase found;
-  //$display("  FIND SUCC node '",phase.get_name(),"' (id=",$sformatf("%0d",phase.get_inst_id()),") - checking against ",get_name()," (",m_phase_type.name()," id=",$sformatf("%0d",get_inst_id()),(m_imp==null)?"":{"/",$sformatf("%0d",m_imp.get_inst_id())},")");
+  //$display("  FIND SUCC node '",phase.get_name(),"' (id=",$sformatf("%0d",phase.get_inst_id_ieee()),") - checking against ",get_name()," (",m_phase_type.name()," id=",$sformatf("%0d",get_inst_id_ieee()),(m_imp==null)?"":{"/",$sformatf("%0d",m_imp.get_inst_id_ieee())},")");
   if (phase == null) begin
     return null ;
   end
@@ -1217,7 +1217,7 @@ endfunction
 
 function uvm_phase uvm_phase::m_find_successor_by_name(string name, bit stay_in_scope=1, uvm_phase orig_phase=null);
   uvm_phase found;
-  //$display("  FIND SUCC node '",name,"' - checking against ",get_name()," (",m_phase_type.name()," id=",$sformatf("%0d",get_inst_id()),(m_imp==null)?"":{"/",$sformatf("%0d",m_imp.get_inst_id())},")");
+  //$display("  FIND SUCC node '",name,"' - checking against ",get_name()," (",m_phase_type.name()," id=",$sformatf("%0d",get_inst_id_ieee()),(m_imp==null)?"":{"/",$sformatf("%0d",m_imp.get_inst_id_ieee())},")");
   if (get_name() == name)
     return this;
   foreach (m_successors[succ]) begin
@@ -1765,7 +1765,7 @@ task uvm_phase::m_wait_for_pred();
       if (m_phase_trace) begin
         string s;
         s = $sformatf("Waiting for phase '%s' (%0d) to be READY_TO_END. Current state is %s",
-            sibling.get_name(),sibling.get_inst_id(),sibling.m_state.name());
+            sibling.get_name(),sibling.get_inst_id_ieee(),sibling.m_state.name());
         `UVM_PH_TRACE("PH/TRC/WAIT_PRED_OF_SUCC",s,this,UVM_HIGH)
       end
 
@@ -1774,7 +1774,7 @@ task uvm_phase::m_wait_for_pred();
       if (m_phase_trace) begin
         string s;
         s = $sformatf("Phase '%s' (%0d) is now READY_TO_END. Releasing phase",
-            sibling.get_name(),sibling.get_inst_id());
+            sibling.get_name(),sibling.get_inst_id_ieee());
         `UVM_PH_TRACE("PH/TRC/WAIT_PRED_OF_SUCC",s,this,UVM_HIGH)
       end
 

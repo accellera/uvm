@@ -25,7 +25,7 @@
 
 //-----------------------------------------------------------------------------
 //
-// CLASS: uvm_tlm_if_base #(T1,T2)
+// CLASS: uvm_tlm_if_base_ieee #(T1,T2)
 //
 // This class declares all of the methods of the TLM API.
 //
@@ -45,7 +45,7 @@
 // 
 //-----------------------------------------------------------------------------
 
-virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
+virtual class uvm_tlm_if_base_ieee #(type T1=int, type T2=int);
 
   // Group: Blocking put
 

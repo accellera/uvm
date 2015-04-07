@@ -1021,7 +1021,7 @@ function bit uvm_sequencer_base::is_child (uvm_sequence_base parent,
 
   child_parent = child.get_parent_sequence();
   while (child_parent != null) begin
-    if (child_parent.get_inst_id() == parent.get_inst_id()) begin
+    if (child_parent.get_inst_id_ieee() == parent.get_inst_id_ieee()) begin
       return 1;
     end
     child_parent = child_parent.get_parent_sequence();
@@ -1126,8 +1126,8 @@ function bit uvm_sequencer_base::is_blocked(uvm_sequence_base sequence_ptr);
                      "is_blocked passed null sequence_ptr", UVM_NONE);
 
     foreach (lock_list[i]) begin
-      if ((lock_list[i].get_inst_id() != 
-           sequence_ptr.get_inst_id()) &&
+      if ((lock_list[i].get_inst_id_ieee() != 
+           sequence_ptr.get_inst_id_ieee()) &&
           (is_child(lock_list[i], sequence_ptr) == 0)) begin
         return 1;
       end
@@ -1147,7 +1147,7 @@ function bit uvm_sequencer_base::has_lock(uvm_sequence_base sequence_ptr);
                      "has_lock passed null sequence_ptr", UVM_NONE);
   my_seq_id = m_register_sequence(sequence_ptr);
     foreach (lock_list[i]) begin
-      if (lock_list[i].get_inst_id() == sequence_ptr.get_inst_id()) begin
+      if (lock_list[i].get_inst_id_ieee() == sequence_ptr.get_inst_id_ieee()) begin
         return 1;
       end
     end 
@@ -1208,8 +1208,8 @@ function void uvm_sequencer_base::m_unlock_req(uvm_sequence_base sequence_ptr);
  
   begin
 	  int q[$];
-	  int seqid=sequence_ptr.get_inst_id();
-	  q=lock_list.find_first_index(item) with (item.get_inst_id() == seqid);
+	  int seqid=sequence_ptr.get_inst_id_ieee();
+	  q=lock_list.find_first_index(item) with (item.get_inst_id_ieee() == seqid);
 	  if(q.size()==1) begin
 	      lock_list.delete(q[0]);
 		  grant_queued_locks(); // grant lock requests 
@@ -1290,7 +1290,7 @@ function void uvm_sequencer_base::remove_sequence_from_queues(
   do
     begin
       if (lock_list.size() > i) begin
-        if ((lock_list[i].get_inst_id() == sequence_ptr.get_inst_id()) ||
+        if ((lock_list[i].get_inst_id_ieee() == sequence_ptr.get_inst_id_ieee()) ||
             (is_child(sequence_ptr, lock_list[i]))) begin
           if (sequence_ptr.get_sequence_state() == UVM_FINISHED)
             `uvm_error("SEQFINERR", $sformatf("Parent sequence '%s' should not finish before locks from itself and descedent sequences are removed.  The lock held by the child sequence '%s' is being removed.",sequence_ptr.get_full_name(), lock_list[i].get_full_name()))

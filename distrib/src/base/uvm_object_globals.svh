@@ -599,7 +599,7 @@ typedef class uvm_line_printer;
 typedef class uvm_comparer;
 typedef class uvm_packer;
 typedef class uvm_tr_database;
-typedef class uvm_text_tr_database;
+typedef class uvm_text_tr_database_ieee;
 typedef class uvm_recorder;
 
 // Variable: uvm_default_table_printer

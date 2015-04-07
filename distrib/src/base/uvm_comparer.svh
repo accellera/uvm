@@ -378,7 +378,7 @@ class uvm_comparer;
         end
 
         root.uvm_report(sev, "MISCMP", $sformatf("%s%s@%0d vs. %s@%0d", msg,
-                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()),
+                        lhs.get_name(), lhs.get_inst_id_ieee(), rhs.get_name(), rhs.get_inst_id_ieee()),
 			verbosity, `uvm_file, `uvm_line);
       end
     end
@@ -398,10 +398,10 @@ class uvm_comparer;
     if(result <= show_max) begin
        root.uvm_report(sev, "MISCMP",
          $sformatf("Miscompare for %0s: lhs = @%0d : rhs = @%0d",
-         uvm_object::__m_uvm_status_container.scope.get(), (lhs!=null ? lhs.get_inst_id() : 0), 	(rhs != null ? rhs.get_inst_id() : 0)), verbosity, `uvm_file, `uvm_line);
+         uvm_object::__m_uvm_status_container.scope.get(), (lhs!=null ? lhs.get_inst_id_ieee() : 0), 	(rhs != null ? rhs.get_inst_id_ieee() : 0)), verbosity, `uvm_file, `uvm_line);
     end
     $swrite(miscompares, "%s%s: lhs = @%0d : rhs = @%0d",
-        miscompares, uvm_object::__m_uvm_status_container.scope.get(), (lhs != null ? lhs.get_inst_id() : 0), (rhs != null ? rhs.get_inst_id() : 0));
+        miscompares, uvm_object::__m_uvm_status_container.scope.get(), (lhs != null ? lhs.get_inst_id_ieee() : 0), (rhs != null ? rhs.get_inst_id_ieee() : 0));
   endfunction
 
 
