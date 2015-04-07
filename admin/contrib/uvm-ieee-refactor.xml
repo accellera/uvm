@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refactor-script version="1" name="find deprecated UVM API which will not make it into UVM-IEEE and mark it ">
+<!-- written by uwes@cadence.com based on http://www.dvteclipse.com/documentation/sv/Refactoring_Scripts.html -->
+
+	<!-- Paths to files/folders to skip -->
+	<exception kind="path" path=".dvt/.vlog_ovm_project" />
+	<exception kind="path" path=".dvt/.vlog_uvm_project" />
+	<exception kind="path" path=".project" />
+	<exception kind="path" path="distrib/src" />
+
+	<item action="add-comment" element="uvm_pkg::uvm_top" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_utils" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_port_component_base" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_text_tr_stream" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_text_recorder" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_tlm_if_base" comment="FIXME: not part of UVM-IEEE"/>
+
+<!-- TODO: 5184 -->
+
+	<item action="add-comment" element="uvm_pkg::uvm_object.get_inst_id" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_object.get_inst_count" comment="FIXME: not part of UVM-IEEE"/>
+
+	<item action="add-comment" element="uvm_pkg::uvm_port_component_base.get_comp" comment="FIXME: not part of UVM-IEEE"/>
+
+	<item action="add-comment" element="uvm_pkg::uvm_printer.format_row" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_printer.adjust_name" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_printer.format_header" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_printer.format_footer" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_printer.format_action" comment="FIXME: not part of UVM-IEEE"/>
+
+	<item action="add-comment" element="uvm_pkg::UVM_TLM_NB_FW_MASK" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::UVM_TLM_NB_BW_MASK" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::UVM_TLM_B_MASK" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_string_to_bits" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_bits_to_string" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_object_string_pool" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_random_stimulus" comment="FIXME: not part of UVM-IEEE"/>
+
+	<item action="add-comment" element="uvm_pkg::uvm_report_message_element_base" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_report_message_int_element" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_report_message_string_element" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_report_message_object_element" comment="FIXME: not part of UVM-IEEE"/>
+	<item action="add-comment" element="uvm_pkg::uvm_report_message_object_element_container" comment="FIXME: not part of UVM-IEEE"/>
+
+	<item action="add-comment" element="uvm_pkg::uvm_resource_options" comment="FIXME: not part of UVM-IEEE"/>
+
+    <item action="add-comment" element="uvm_pkg::uvm_transaction.events" comment="FIXME: not part of UVM-IEEE"/>
+</refactor-script>
