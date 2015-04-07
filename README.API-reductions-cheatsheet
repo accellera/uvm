@@ -1,0 +1,41 @@
+This README file is intended to describe the utility created to automate the
+renaming of APIs in UVM which will hide them from the end users.  This script
+is called make_uvm_ieee.pl and is located in the ./admin/bin directory.  
+
+This specific package of UVM is not an official release.  In fact, in the
+distrib directory you will find both a ./src/ directory and a ./src_orig.  The
+src_orig is the original BCL of UVM and is here for reference.  The src
+directory contains the modified BCL where all the APIs are hidden.
+
+With the current changeset there are 34 failing tests.  My gold test run only
+had 27 failures. 
+
+Total of 475 tests ........................... FAILED 34 of 475 tests (0 skipped)
+
+I highly recommend you run all the tests prior to making any changes yourself
+so that you have a baseline/gold run to compare it against.  
+
+If you want to test out/hide addition APIs, here are the steps to run to automate the
+change.  
+
+1. Open the file -> emacs ./admin/bin/make_uvm_ieee.pl &
+
+2. Look for the array called -> @non_user_apis and add the name of the
+string/method or string/API that you want hidden.  
+
+3. cd into the ./distrib/src_orig directory
+
+4. run the script -> ../../admin/bin/make_uvm_ieee.pl
+
+What just happened?  All the UVM source files from your current directory
+"src_orig" were read in, parsed, and anywhere the strings in the array
+@non_user_apis was encountered a suffix of '_ieee' was added to the string and
+then all the collateral were written out to the ../src directory.  
+
+You should now be able to run your tests just like you normally do.
+
+
+
+
+
+
